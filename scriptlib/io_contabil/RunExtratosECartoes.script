@@ -395,6 +395,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				return variaveis.toString();
 		}
 
+
+
 		/////////////////////////////////BANCO DO BRASIL
 		
 
@@ -2346,7 +2348,24 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 		////// EXTRATO - UNIPRIME PDF //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Uniprime_PDF") && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
+			if (arquivoCompleto.contains("TAXA MAXIMA DE JUROS (A/M):") &&
+				arquivoCompleto.contains("CET-CUSTO EFETIVO TOTAL (A/A):") &&
+				arquivoCompleto.contains("CET-CUSTO EFETIVO TOTAL (A/M):") &&
+				arquivoCompleto.contains("DIAS NEGATIVOS CHEQUE ESPECIAL:") &&
+				arquivoCompleto.contains("TAXA MAXIMA DE JUROS (A/A):")) {
 
+				tipoPlanilha	= "EXTRATO-UNIPRIME";
+				JSONObject jDados = new JSONObject();
+				jDados.put("LINE", line);
+				jDados.put("NOMEPORTADOR", nomePortador);
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+
+				readExtratoECartao("readExtratoUniprime2PDF", memFile, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+			
 			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA CORRENTE:") && memFile.getStringFieldRemoveEspCharsUpper(2).contains("DATA ATUAL:") && nomePortador2.equals("")){
 				logger.logInfo("Entra na validacao do Uniprime Pdf");
 				nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("[^0-9]", "").trim();
