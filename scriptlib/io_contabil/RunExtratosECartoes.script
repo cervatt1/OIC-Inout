@@ -329,7 +329,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 	}
 
 	// PROCPDF
-	logger.logInfo("CONDICAOES IF PDF: "+ nomeArquivo.toUpperCase().contains("ANCORA") + " || " + nomeArquivo.toUpperCase().contains(".PDF"));
 
 	if(nomeArquivo.toUpperCase().contains("ANCORA") || nomeArquivo.toUpperCase().contains(".PDF")){
 
@@ -1463,22 +1462,41 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		//2312-025172
 		//if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ContaSimples_PDF") && nomeArquivo.toUpperCase().contains("ANCORA")) {
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ContaSimples_PDF")){
-			if (arquivoCompleto.toUpperCase().contains("EXTRATO EMITIDO PELA CONTA SIMPLES - A CONTA FEITA PARA EMPREENDER") && line.contains("CONTA NUMERO")) {
+			if (arquivoCompleto.toUpperCase().contains("EXTRATO EMITIDO PELA CONTA SIMPLES - A CONTA FEITA PARA EMPREENDER")){
 
-				logger.logInfo("Entra na validacao do Conta Simples Pdf");
-
-				if (line.contains("CONTA NUMERO")){
+				if (line.contains("CONTA NUMERO")){ 
 					nomePortador2 = "CONTA SIMPLES " + cutString(memFile.getStringFieldRemoveEspCharsUpper(0), "CONTA NUMERO");
+
+					variaveis.put("nomePortador2", nomePortador2);
+					variaveis.put("tipoRetorno",   "continue");
+					return variaveis.toString();
 				}
 
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("LINE", line);
+				if( line.contains("DATA") && line.contains("HISTORICO") && line.contains("CREDITO") && 
+					line.contains("DEBITO") && line.contains("SALDO") && line.contains("SITUACAO")) {
+												
+					JSONObject jDados = new JSONObject();
+					jDados.put("CODEMPRESA", codEmpresa);
+					jDados.put("NOMEARQUIVO", nomeArquivo);
+					jDados.put("LINE", line);
+						
+					readExtratoECartao("readExtratoContaSimplesPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+					variaveis.put("tipoRetorno", "break");
+					return variaveis.toString();
+				}
 
-				readExtratoECartao("readExtratoContaSimplesPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno", "break");
-				return variaveis.toString();
+				if( line.contains("TIPO DE TRANSACAO E CARTAO") && line.contains("ESTABELECIMENTO") && 
+					line.contains("DATA") && line.contains("ENTRADAS") && line.contains("SAIDAS")) {
+												
+					JSONObject jDados = new JSONObject();
+					jDados.put("CODEMPRESA", codEmpresa);
+					jDados.put("NOMEARQUIVO", nomeArquivo);
+					jDados.put("LINE", line);
+						
+					readExtratoECartao("readExtratoContaSimples2PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+					variaveis.put("tipoRetorno", "break");
+					return variaveis.toString();
+				}
 			}
 		}
 
@@ -3667,7 +3685,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		}
 
 	}
-	logger.logInfo("CONDICAOES IF XLSX: "+!nomeArquivo.toUpperCase().contains("ANCORA") + " && " + !nomeArquivo.toUpperCase().contains(".PDF"));
 
 	// PROCXLSX
 
