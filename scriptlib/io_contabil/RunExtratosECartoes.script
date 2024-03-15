@@ -6182,7 +6182,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		////// EXTRATO - UNIPRIME //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Uniprime_Excel")) {
 			// logger.logDebug("Entrou UniPrime - line -> "+line);
-			if (line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && (line.contains("UNIPRIME") || line.contains("SISPRIME")) &&
+			if (line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && (line.contains("UNIPRIME") || line.contains("SISPRIME")) && 
 				(nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV"))) {
 
 

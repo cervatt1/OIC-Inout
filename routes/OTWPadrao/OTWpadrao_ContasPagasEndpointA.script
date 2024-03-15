@@ -18142,6 +18142,7 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
     double valorDesconto     = 0.0;
     double valorMulta        = 0.0;
     double valorPagamento    = 0.0;
+	double saldo			 = 0.0;
 
     int idataMovimento	= 0;
     int idocumento      = 1;
@@ -18168,34 +18169,40 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
         line = StringUtil.removeSpecialCharsToUC(line);
 
 		if( !nomePortadorAchado && memFile.getStringFieldRemoveEspCharsUpper(inomePortador).contains("CONTA:") ){
-			nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "CONTA:");
+			nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "CONTA:").trim();
 			nomePortadorAchado = true;
 		}
 
 		dataMovimento = getCampoDate( memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) );
-		if( dataMovimento.equals("") ) continue;
-        
-		nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem); 
-
-		complemento04 = nomeOrigem; 
-
-		complemento01 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento01);
-
-		complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
-
+		        
 		documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento);
+
+		nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem); 
 
 		try{
 			valorDocumento = memFile.getDoubleField(ivalorDocumento);
 		}catch(Exception e){ }
-        
 
-        debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento);
-        if (debitoCreditoAux.contains("-")) {
-            debitoCredito = "EXTRATO-DEBITO";
-        } else {
-            debitoCredito = "EXTRATO-CREDITO";
-        }
+		try{
+			if(saldo < memFile.getDoubleField(icomplemento01)){
+				debitoCredito = "EXTRATO-DEBITO";
+			}else{
+				debitoCredito = "EXTRATO-CREDITO";
+			}
+		}catch(Exception e){ logger.logInfo("Erro de getDoubleField: " + e); }
+
+		if (memFile.getStringFieldRemoveEspCharsUpper(0).trim().contains("LANCAMENTOS") &&
+			memFile.getStringFieldRemoveEspCharsUpper(1).trim().contains("SALDO ANTERIOR") ) {
+			try{
+				saldo = memFile.getDoubleField(2);
+			}catch(Exception e){ logger.logInfo("Erro de getDoubleField: " + e); }
+		}else{
+			try{
+				saldo = memFile.getDoubleField(icomplemento01);
+			}catch(Exception e){ logger.logInfo("Erro de getDoubleField: " + e); }
+		}
+
+		if( dataMovimento.equals("") ) continue;
 
 		if( valorDocumento == 0 ) continue;
 		valorDocumento = Math.abs(valorDocumento);
@@ -18203,11 +18210,6 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
 		
         contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
         chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
-
-        if(nomeOrigem.equals("") || dataMovimento.equals("") || nomeOrigem.contains("DATA DO SALDO")) continue;
-		
-		logger.logInfo(nomePortador + " | " + dataMovimento + " | " + valorDocumento + " | " + nomeOrigem + " | " + debitoCredito + " | DADO A MOSTRA");
-		logger.logInfo(complemento01 + " | " + complemento02 + " | " + complemento04 + " | COMPLEMENTOS");
 
         try {
 			// Buscar Extrato por Chave na Tabela IO_EXTRATO.
@@ -18218,6 +18220,9 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
 
             // Inserir caso Chave nao encontrada.
             if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+		
+				logger.logInfo(debitoCredito + " | nomePortador:" + nomePortador + " | dataMovimento:" + dataMovimento + " | nomeOrigem:" + nomeOrigem + " | valorDocumento:" +  valorDocumento );	
+
                 try {
                     dbIOCont.insert("IO_EXTRATO")
                     .fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
@@ -18254,6 +18259,8 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
     }
     return true;
 }
+
+
 
 
 
