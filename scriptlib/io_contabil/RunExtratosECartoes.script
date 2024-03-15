@@ -328,7 +328,9 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		nomeArquivoAuxiliar = cutString(nomeArquivoAuxiliar.toUpperCase(), "_");
 	}
 
-  	// logger.logDebug("CP -> "+cabecalhoPlanilha + " | " + tipoPlanilha + " | " + extensao);
+	// PROCPDF
+	logger.logInfo("CONDICAOES IF PDF: "+ nomeArquivo.toUpperCase().contains("ANCORA") + " || " + nomeArquivo.toUpperCase().contains(".PDF"));
+
 	if(nomeArquivo.toUpperCase().contains("ANCORA") || nomeArquivo.toUpperCase().contains(".PDF")){
 
 		////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
@@ -3665,8 +3667,31 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		}
 
 	}
+	logger.logInfo("CONDICAOES IF XLSX: "+!nomeArquivo.toUpperCase().contains("ANCORA") + " && " + !nomeArquivo.toUpperCase().contains(".PDF"));
+
+	// PROCXLSX
 
 	if(!nomeArquivo.toUpperCase().contains("ANCORA") && !nomeArquivo.toUpperCase().contains(".PDF")){
+	logger.logInfo(nomeArquivo);
+
+		////// EXTRATO - UNIPRIME //////////////////////////////////////////////////////////////////
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Uniprime_Excel")) {
+			logger.logDebug("Entrou UniPrime - line -> "+line);
+			if (line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && (line.contains("UNIPRIME") || line.contains("SISPRIME")) && 
+				(nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV"))) {
+
+
+				tipoPlanilha = "EXTRATO-UNIPRIME";
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+
+				readExtratoECartao("readExtratoUniprimeExcel", memFile, nomePortador, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
 
 		////// EXTRATO - OTERO BANK EXCEL ////////////////////////////////////////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_OTEROBANK_Excel")){
@@ -6174,25 +6199,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
 
 				readExtratoECartao("readExtratoUniprimeTxt", memFile, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno",   "break");
-				return variaveis.toString();
-			}
-		}
-
-		////// EXTRATO - UNIPRIME //////////////////////////////////////////////////////////////////
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Uniprime_Excel")) {
-			// logger.logDebug("Entrou UniPrime - line -> "+line);
-			if (line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && (line.contains("UNIPRIME") || line.contains("SISPRIME")) && 
-				(nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV"))) {
-
-
-				tipoPlanilha = "EXTRATO-UNIPRIME";
-
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-
-				readExtratoECartao("readExtratoUniprime", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
