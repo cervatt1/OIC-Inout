@@ -18783,12 +18783,6 @@ public boolean readExtratoUniprimeExcel(MemoryFile memFile, String nomePortador,
 }
 
 
-
-
-
-
-
-
 /*#############################################@ EXTRATO-CEF-TXT @##############################################*/
 public boolean readExtratoCEFDefault(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 
