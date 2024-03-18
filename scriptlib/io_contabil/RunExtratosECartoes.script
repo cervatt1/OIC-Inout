@@ -939,8 +939,11 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			}
 			
 			// Nome Portador  ->  "BANCO DO BRASIL {AGENCIA} {CONTA}"
+			// logger.logInfo("cabecalho == "+cabecalhoPlanilha);
 			if ((cabecalhoPlanilha.contains("CLIENTE - CONTA ATUAL") || cabecalhoPlanilha.contains("CLIENTE - CONTA ANTERIOR")) && 
-				((cabecalhoPlanilha.contains("DT. BALANCETE") || cabecalhoPlanilha.contains("BALANCETE")) || cabecalhoPlanilha.contains("BALANCETE MOVIMENTO"))) {
+				(cabecalhoPlanilha.contains("DT. BALANCETE") || cabecalhoPlanilha.contains("BALANCETE MOVIMENTO") || 
+				 cabecalhoPlanilha.contains("BALANCETE;MOVIMENTO") || cabecalhoPlanilha.contains("BALANCETE|MOVIMENTO"))) {// 2403-030954 - Nicholas - 12/03/2024
+				//logger.logInfo("CP - " + cabecalhoPlanilha);
 				
 				String cabecalhoPlanilhaAux = "";
 				
