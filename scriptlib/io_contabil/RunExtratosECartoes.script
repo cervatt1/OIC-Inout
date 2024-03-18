@@ -828,19 +828,36 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			cabecalhoPlanilha.toUpperCase().contains("AG") && cabecalhoPlanilha.toUpperCase().contains("CC")&&
 			cabecalhoPlanilha.toUpperCase().contains("MINHA CONTA")) {
 
-			logger.logInfo("Entra na validacao do Itau Consolidado Pdf");
+			// logger.logInfo("Entra na validacao do Itau Consolidado Pdf");
 
 			nomePortador = cutString(cabecalhoPlanilha, "CC ", cabecalhoPlanilha.indexOf("CC ")+11);
 			tipoPlanilha = "EXTRATO-ITAUCONSOLIDADO-PDF";
 			String anoDataExtrato = "";
+			String tipo = "";
 			//anoDataExtrato = cutString(memFile.getStringFieldRemoveEspCharsUpper(3), " ");
-			anoDataExtrato = cutString(cabecalhoPlanilha, cabecalhoPlanilha.lastIndexOf("202"), "MINHA CONTA");
+			//adicionar o if
+			int indexSet = cabecalhoPlanilha.lastIndexOf("SET");
+			if (indexSet != -1 && indexSet + 4 < cabecalhoPlanilha.length()) {
+				anoDataExtrato = cabecalhoPlanilha.substring(indexSet + 4, indexSet + 8).trim();
+				tipo = "002";
+			}else{
+				anoDataExtrato = cutString(cabecalhoPlanilha, cabecalhoPlanilha.lastIndexOf("202"), "MINHA CONTA");
+				tipo = "001";
+			}
+			 
+			//2403-030950 - Estava pegando o ano errado
+			if(!anoDataExtrato.contains("202") || anoDataExtrato.length() != 4){
+				anoDataExtrato = cutString(cabecalhoPlanilha, 0, "MINHA CONTA");
+				anoDataExtrato = cutString(anoDataExtrato, anoDataExtrato.lastIndexOf("202"), "|");
+			}
+				
 			JSONObject jDados = new JSONObject();
 			jDados.put("ANO", 			 anoDataExtrato);
 			jDados.put("CODEMPRESA", 	 codEmpresa);
 			jDados.put("NOMEARQUIVO", 	 nomeArquivo);
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			jDados.put("TIPOEXTRATO", tipo);
 			// logger.logInfo("NOME PORTADOR E ANO ITAU CONSOLIDADO -> "+ nomePortador +" | "+ anoDataExtrato);
 
 			readExtratoECartao("readExtratoItauConsolidadoPDF", memFile, nomePortador, jDados, dbIOCont, logger);

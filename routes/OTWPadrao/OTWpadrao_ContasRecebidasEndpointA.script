@@ -20800,6 +20800,7 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
     String cpfCnpj           = "";
     String historico         = "";
     String debitoCreditoAux  = "";
+	String tipoExtrato       = "";
 
     String strValorDocumento = "";
     String contLinhaExtrato  = "";
@@ -20825,22 +20826,25 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
     if(jDados.has("TIPOLANCAMENTO"))  tipoLancamento  = jDados.optString("TIPOLANCAMENTO");
+    if(jDados.has("TIPOEXTRATO"))  tipoExtrato  = jDados.optString("TIPOEXTRATO");
 	
 	int contLinhaExtratoInt = 0;
 	int contLinhaExtratoIntFora = 0;
 	
 	memFile.setFieldSeparator("\\|");
 	
-	logger.logInfo("ADE " + anoDataExtrato);
+	//logger.logInfo("ADE " + anoDataExtrato);
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
+		
+		
 		//2311-021540
 		if (anoDataExtrato.length() > 4) {
 			anoDataExtrato = cutString(anoDataExtrato, 0, "|").trim();
-			logger.logInfo("TEMPIPE " + anoDataExtrato);
+			//logger.logInfo("TEMPIPE " + anoDataExtrato);
 		}
 		
 		// logger.logDebug("Line -> "+line);
@@ -20849,22 +20853,22 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		inomeOrigem		= 0;
 		ivalorDocumento	= 1;
 		
-		logger.logInfo("LINHACOMNLM " + line + " | " + memFile.getStringFieldRemoveEspCharsUpper(0) + " | " + naoLeMais);
+		//logger.logInfo("LINHACOMNLM " + line + " | " + memFile.getStringFieldRemoveEspCharsUpper(0) + " | " + naoLeMais);
 		
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("EXTRATO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("MENSAL")) {
-			logger.logInfo("CONTINUE2 " + line);
+			//logger.logInfo("CONTINUE2 " + line);
 			continue;
 		}
 		
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("NA") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA") 
 			&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("CORRENTE")) {
-			logger.logInfo("CONTINUE3 " + line);
+			//logger.logInfo("CONTINUE3 " + line);
 			naoLeMais = true;
 		}
 		
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("COMPOSICAO") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("SALDO") 
 			&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DEVEDOR")) {
-			logger.logInfo("CONTINUE4 " + line);
+			//logger.logInfo("CONTINUE4 " + line);
 			naoLeMais = true;
 		}
 		
@@ -20884,8 +20888,8 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		if (memFile.getStringFieldRemoveEspCharsUpper(1).contains("CREDITOS") 
 			&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("DEBITOS")
 			&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("ACOES MOVIMENTADAS") && naoLeMais) {
-			logger.logInfo("ENTROU NLM " + naoLeMais);
-			logger.logDebug("CONTINUE5 " + line);
+			//logger.logInfo("ENTROU NLM " + naoLeMais);
+			//logger.logDebug("CONTINUE5 " + line);
 			naoLeMais = false;
 			continue;
 		}
@@ -20899,6 +20903,10 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 			continue;
 		}
 		if (line.contains("APLICACOES") && line.contains("VALOR") && line.contains("PRINCIPAL")) {
+			continue;
+		}		
+		
+		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("DIA DE PAGAMENTO")) {
 			continue;
 		}
 		
@@ -20914,10 +20922,12 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 			if(dataMovimento.length() != 10)
 				dataMovimento = cutString(dataMovimento, 10);
 			
+			//logger.logInfo("Data mov: "+dataMovimento);
+			
 			try {
 				Date dts = DateUtil.stringToDate(dataMovimento, "dd/MM/yyyy");
 			} catch (Exception dt1) {
-				logger.logInfo("Catch DM");
+				//logger.logInfo("Catch DM");
 				continue;
 			}
 			
@@ -20927,7 +20937,7 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 					rotuloColuna = rotuloArray[iv];
 				} 
 				catch (Exception xx) {
-					logger.logInfo("Catch Rotulo");
+					//logger.logInfo("Catch Rotulo");
 					continue;
 				}
 				iv ++;
@@ -20962,8 +20972,6 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 
 				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
-				logger.logInfo("BD " + dataMovimento);
-				
 				try {
 					dbIOCont.insert("IO_EXTRATO")
 					.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
@@ -20996,21 +21004,34 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		if (line.contains("/")) {
 			for (int i = 0; i < memFile.getFieldsSize(); i++) {
 				String dataAuxiliar = memFile.getStringFieldRemoveEspCharsUpper(i);
-				if (dataAuxiliar.contains("/") && (dataAuxiliar.replaceAll("[a-zA-Z]", "").length() == dataAuxiliar.length())) {
-					idataMovimento = i;
-					
-					try{
-						dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, "", memFile, logger);
-					}catch(Exception e){
+				if (tipoExtrato.equals("001")){
+					if (dataAuxiliar.contains("/") && (dataAuxiliar.replaceAll("[a-zA-Z]", "").length() == dataAuxiliar.length())) {
+						idataMovimento = i;
+						
+						try{
+							dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, "", memFile, logger);
+						}catch(Exception e){
+						}
+						linhaComData = true;
+						dataMovimento = dataAuxiliar+"/"+anoDataExtrato;
+						//logger.logInfo("MDEEEE " + dataMovimento + " | " + dataMovimento.length());
+					}				
+				}
+				if(tipoExtrato.equals("002")){
+					if (dataAuxiliar.contains("/")) {
+						String[] parts = dataAuxiliar.split(" ");
+						if (parts.length > 0 && parts[0].replaceAll("[a-zA-Z]", "").length() == 5) { // Verifica se a primeira parte é uma data no formato 'dd/mm'
+							dataAuxiliar = parts[0];
+							//logger.logInfo("TesteData2"+ dataAuxiliar + "-" + anoDataExtrato);
+							if (anoDataExtrato.matches("\\d{4}")) { // Verifica se anoDataExtrato é um ano no formato 'yyyy'
+								dataMovimento = dataAuxiliar + "/" + anoDataExtrato;	
+						
+							}
+						}
 					}
-					linhaComData = true;
-					dataMovimento = dataAuxiliar+"/"+anoDataExtrato;
-					logger.logInfo("MDEEEE " + dataMovimento + " | " + dataMovimento.length());
 				}
 			}
 		}
-		
-		//logger.logInfo("Data: "+dataMovimento);
 		
 		if (dataMovimento.equals("")) continue;
 		if (dataMovimento.length() < 10) continue;
@@ -21057,9 +21078,6 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 				}
 			}
 			
-			logger.logInfo("Valor: "+valorDocumento);
-			
-			
 			nomeOrigem = "";
 			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
 			// nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(2);
@@ -21068,8 +21086,6 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 			if (memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains("-")) debitoCredito = "EXTRATO-DEBITO";
 			else debitoCredito = "EXTRATO-CREDITO";
 			
-			logger.logInfo("StringValor: "+memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento));
-			logger.logInfo("DC: "+debitoCredito);
 
 			contLinhaExtrato = StringUtil.leftPad(String.valueOf(contLinhaExtratoInt), 05, "0");
 
