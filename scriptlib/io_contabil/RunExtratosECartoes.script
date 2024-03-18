@@ -825,8 +825,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		////// Extrato - ITAUCONSOLIDADO PDF ///////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ItauConsolidado_PDF") &&
 			/*nomeArquivo.toUpperCase().contains("ITAU") &&*/ cabecalhoPlanilha.toUpperCase().contains("MENSAL") &&
-			cabecalhoPlanilha.toUpperCase().contains("AG") && cabecalhoPlanilha.toUpperCase().contains("CC")&&
-			cabecalhoPlanilha.toUpperCase().contains("MINHA CONTA")) {
+			cabecalhoPlanilha.toUpperCase().contains("AG") && cabecalhoPlanilha.toUpperCase().contains("CC") &&
+			(cabecalhoPlanilha.toUpperCase().contains("MINHA CONTA") || cabecalhoPlanilha.toUpperCase().contains("CONTA CORRENTE E APLICACOES AUTOMATICAS")) ) {
 
 			// logger.logInfo("Entra na validacao do Itau Consolidado Pdf");
 
