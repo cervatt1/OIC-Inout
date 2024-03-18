@@ -11522,9 +11522,13 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
 
             debitoCredito = "EXTRATO-CREDITO";
 
+			if(tipo.equals("002")) ivalorJuros = 7;
+
             try{valorJuros = memFile.getDoubleField(ivalorJuros);}
             catch (Exception vlrJr) { valorJuros = 0; }
 
+			if(tipo.equals("002")) valorJuros = valorJuros - valorDocumento;
+				
             try{valorDesconto = memFile.getDoubleField(ivalorDesconto);}
             catch (Exception vlrDesc) { valorDesconto = 0; }
 

@@ -17779,6 +17779,9 @@ public HashMap readExtratoItauPdfFrancesinha3(MemoryFile memFile, JSONObject jDa
 				key	= chave  + "-CTB";
 
 				
+            logger.logInfo("O Juuuuros:  " + valorJuros + " VD: " + valorDocumento);
+
+				
 
 				ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
 				if (ttMov2 == null) {
