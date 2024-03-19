@@ -18546,7 +18546,7 @@ public boolean readExtratoUniprime2PDF(MemoryFile memFile, JSONObject jDados, Da
 		}catch(Exception e){ }
 
 		try{
-			if(saldo < memFile.getDoubleField(icomplemento01)){
+			if(saldo > memFile.getDoubleField(icomplemento01)){
 				debitoCredito = "EXTRATO-DEBITO";
 			}else{
 				debitoCredito = "EXTRATO-CREDITO";
