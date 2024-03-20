@@ -3232,6 +3232,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 				jDados.put("nomePortador2", nomePortador2);
+				logger.logInfo("Itau1");
 				readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -3249,12 +3250,12 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			if (memFile.getFieldsSize() > 1 &&
 				memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).contains("CONTA") && !cabecalhoPlanilha.contains("SICOOB") &&
 				memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).contains("CORRENTE") &&
-				!memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("TIPO") && !memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).contains("EXTRATO DE") || (memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("CONTA")) &&
+				!memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("TIPO") && (!memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).contains("EXTRATO DE") || memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("CONTA")) &&
 				memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("AGENCIA") &&
 				nomePortador2.equals("") /*&&
 				nomeArquivo.toUpperCase().contains(".PDF")*/) {
 				nomePortador2 = "ITAU-PDF-PROXIMO";
-				//logger.logInfo("ITAU PDF 3 -> "+nomePortador2+" - LIN -> "+line);
+				logger.logInfo("ITAU PDF 3 -> "+nomePortador2+" - LIN -> "+line);
 				variaveis.put("nomePortador2",   nomePortador2);
 				variaveis.put("tipoRetorno",     "continue");
 				return variaveis.toString();
@@ -3269,6 +3270,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 				jDados.put("TIPO", "001");
 				// jDados.put("TESTE", nomePortador2);
+				logger.logInfo("Itau2");
 				readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -3299,6 +3301,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				
 				//logger.logInfo("ITAU PDF 5 -> "+nomePortador2+" - LIN -> "+line);
 				if ((jDados.optString("TIPO").equals("002") && nomeArquivo.toUpperCase().contains("ANCORA")) || !jDados.optString("TIPO").equals("002")) {
+					logger.logInfo("Itau3");
 					readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 				}	
 				variaveis.put("tipoRetorno",   "break");
@@ -3342,7 +3345,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 				jDados.put("TIPO", "999");
-
+				logger.logInfo("Itau4");
 				readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
