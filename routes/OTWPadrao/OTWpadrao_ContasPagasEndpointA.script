@@ -17363,7 +17363,7 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		}
 		
 		if (dataMovimento.equals("")) continue;
-		if (dataMovimento.length() < 10) continue;
+		if (dataMovimento.length() != 10) continue;
 		
 		try {
 			contLinhaExtratoInt ++;
