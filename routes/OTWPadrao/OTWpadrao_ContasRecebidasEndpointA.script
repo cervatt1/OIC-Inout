@@ -10863,10 +10863,14 @@ public HashMap readExtratoItauPdfFrancesinha4(MemoryFile memFile, JSONObject jDa
 				naoLeMais = true;
 			}
 
-            try{
-				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
-                dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
-            }catch(Exception e){}
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("MOVIMENTACAO DETALHADA")){
+				dataMovimento = cutString(memFile.getStringFieldRemoveEspCharsUpper(0), "(");
+				dataMovimento = cutString(dataMovimento, 0, ")");
+			}
+
+	        dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
+	
+			if(memFile.getFieldsSize() <= 3) continue;
 
 			if(dataMovimento.equals("")) continue;
 
