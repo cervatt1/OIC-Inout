@@ -18,3 +18,4 @@ scriptlib/__tarefa-robo__io_contabil/
 scriptlib/__tareffa-tarquivo__io_contabil/
 scriptlib/io_contabil/*
 !scriptlib/io_contabil/RunExtratosECartoes.script
+!scriptlib/io_contabil/RegrasSemCartoes.script
