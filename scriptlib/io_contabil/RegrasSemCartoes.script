@@ -4099,6 +4099,8 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 			line = stringNormalizer(line, true);
 			// logger.logDebug("Line -> "+line);
 
+            if(line.length() > 150) return readOFXOneLine(line, jDados, dbIOCont, logger);
+
             // Limpa todas as variaveis
             if (line.contains("<STMTTRN>")) {
                 complemento02   = "";
@@ -4267,6 +4269,285 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 
             // Inserir caso Chave nao encontrada.
             if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+                try {
+					// logger.logDebug("IO_EXTRATO PASSOU");
+                    dbIOCont.insert("IO_EXTRATO")
+                    .fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
+                    .param(chaveExtrato)
+                    .param(codEmpresa)
+                    .param(dataMovimento)
+					.param(documento)
+                    .param(nomePortador)
+                    .param(nomeOrigem)
+                    .param(nomeArquivo.toUpperCase())
+                    .param(complemento01)
+                    .param(valorDocumento)
+                    .param(debitoCredito)
+                    .param(0)
+                    .execute();
+                } catch(Exception e) {
+                    logger.logError("Error inserting to IO_EXTRATO", e);
+                    continue;
+                }
+                // Atualizar Chave caso encontrada.
+            } else {
+                try {
+                    dbIOCont.update("IO_EXTRATO")
+                    .fields("EXTRATOLIDO")
+                    .where("CHAVE = ? ")
+                    .param(0)
+                    .param(chaveExtrato)
+                    .execute();
+                } catch(Exception e1) {	
+                    logger.logError("Error updating IO_EXTRATO", e1);
+                    continue;
+                }
+            }
+			valorDocumento = 0;
+        } catch(Exception e) {
+            logger.logError("ERRO: ", e);
+        }
+    }
+
+    return true;
+}
+
+public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,  InoutLogger logger) throws Exception {
+
+    JSONObject extratoEmpresa = new JSONObject();
+
+    // Inicializacao de Variaveis
+    String codEmpresa        = "";
+    String nomeArquivo       = "";
+    String chaveExtrato      = "";
+    String nomeEmpresa       = "";
+
+    String documento         = "";
+    String nomeOrigem        = "";
+    String nomePortador      = "";
+    String dataMovimento     = "";
+    String dataLote          = "";
+    String complemento01     = "";
+    String complemento02     = "";
+    String complemento03     = "";
+    String complemento04     = "";
+    String complemento05     = "";
+    String complemento06     = "";
+    String complemento07     = "";
+    String complemento08     = "";
+    String complemento09     = "";
+    String complemento10     = "";
+    String debitoCredito     = "";
+    String cpfCnpj           = "";
+    String historico         = "";
+
+    String strValorDocumento = "";
+    String contLinhaExtrato  = "";
+	String auxDebitoCredito  = "";
+
+    double valorDocumento    = 0.0;
+    double valorJuros        = 0.0;
+    double valorDesconto     = 0.0;
+    double valorMulta        = 0.0;
+    double valorPagamento    = 0.0;
+
+	boolean leDocumento = false;
+	boolean leDocumentoFitId = false;
+    int contadorDelinhas = 0;
+    if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA").trim();
+    if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO").trim();
+	if(jDados.has("NOMEEMPRESA"))  nomeEmpresa  = jDados.optString("NOMEEMPRESA").trim();
+    if(jDados.has("CHECKNUM"))     leDocumento = true;
+    if(jDados.has("FITID"))     leDocumentoFitId = true;
+
+    String[] ofxInLine = line.split("><");
+
+    for(String line : ofxInLine){
+
+        contadorDelinhas++;
+
+        line = "<"+line+">";
+        logger.logInfo("RESS: " + line);
+
+        try {
+			// logger.logInfo("LINHA 1 | = "+line);
+			line = line.replace("&#234;", "E").replace("&#202;", "E").replace("&#201;", "E").replace("&#243;", "O");
+            line = StringUtil.removeSpecialCharsToUC(line);
+			// logger.logInfo("LINHA 2 | = "+line);
+			line = stringNormalizer(line, true);
+            
+
+            // Limpa todas as variaveis
+            if (line.contains("<STMTTRN>")) {
+                complemento02   = "";
+                complemento03   = "";
+                complemento04   = "";
+                complemento05   = "";
+
+                complemento06   = "";
+                complemento07   = "";
+                complemento08   = "";
+                complemento09   = "";
+                complemento10   = "";
+
+                cpfCnpj         = "";
+
+                nomeOrigem      = "";
+                documento       = "";
+                historico       = "";
+
+                valorDocumento  = 0;
+                valorJuros      = 0;
+                valorDesconto   = 0;
+                valorMulta      = 0;
+                valorPagamento  = 0;
+            }
+
+            // Retorna nomePortador
+            //     complemento01 = nomePortador
+            if (line.contains("<ACCTID>")) {
+                nomePortador  = line.substring(line.indexOf("<ACCTID>")+8);
+                nomePortador  = nomePortador.replaceAll("</ACCTID>","");
+                complemento01 = nomePortador;
+            }
+
+            // Retorna String data -> "dd/MM/yyyy|MM-yyyy".
+            //     Pega dataMovimento e dataLote
+            if (line.contains("<DTPOSTED>")) {
+                String dtPosted = line.substring(line.indexOf("<DTPOSTED>")+10);
+                dataMovimento   = dtPosted.substring(6,8) + "/" +  dtPosted.substring(4,6) + "/" + dtPosted.substring(0,4);
+
+                try {
+                    Date dt       = DateUtil.stringToDate(dataMovimento, "dd/MM/yyyy");
+                    dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+                    dataLote      = DateUtil.dateToString(dt, "yyyy-MM");
+                } catch (Exception dt1) {
+                    dataMovimento = "";
+                }
+            }
+			// logger.logDebug("OTT -> " + " |DM=" + dataMovimento);
+            // Retorna String ValorDocumento -> "1234.56|EXTRATO-????" -> ???? = Credito/Debito.
+            //     Pega Valor Documento e debitoCredito
+            //     complemento02 = debitoCredito
+			if(line.contains("<TRNTYPE>")){
+				auxDebitoCredito = line.substring(line.indexOf("<TRNTYPE>")+9);
+				auxDebitoCredito = auxDebitoCredito.replaceAll("<TRNTYPE>", "");
+			}
+			
+			
+			
+            if (line.contains("<TRNAMT>")) {
+                strValorDocumento = line.substring(line.indexOf("<TRNAMT>")+8);
+                strValorDocumento = strValorDocumento.replaceAll("</TRNAMT>","");
+                try {
+                    valorDocumento = DecimalUtil.toDecimal(strValorDocumento);
+                } catch(Exception e) {
+                    valorDocumento = 0;
+                }
+
+                // if(valorDocumento < 0) debitoCredito = "EXTRATO-DEBITO";
+                // if(valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
+				// if(valorDocumento > 0 && auxDebitoCredito.contains("DEBIT")) debitoCredito = "EXTRATO-DEBITO";
+				
+				if(valorDocumento < 0) debitoCredito = "EXTRATO-DEBITO";
+                if(valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
+				if(valorDocumento > 0 && auxDebitoCredito.contains("DEBIT") ||
+                valorDocumento > 0 && auxDebitoCredito.contains("PAYMENT")) debitoCredito = "EXTRATO-DEBITO";
+				
+
+                valorDocumento = Math.abs(valorDocumento);
+            }
+			// logger.logInfo("OTTVD -> " + line + " |VD=" + valorDocumento + " | " + debitoCredito);
+			
+			try {
+				if(line.contains("<REFNUM>")){
+					String documentoAux 		= line.substring(line.indexOf("<REFNUM>")+8);
+					documentoAux       = documentoAux.replaceAll("</REFNUM>", "");
+					documentoAux      = cutString(documentoAux, 0, 80);
+					if(!documentoAux.trim().equals(""))documento = documentoAux;
+				}
+				
+				if(line.contains("<CHECKNUM>")){
+					String documentoAux 		= line.substring(line.indexOf("<CHECKNUM>")+10);
+					documentoAux       = documentoAux.replaceAll("</CHECKNUM>", "");
+					documentoAux       = cutString(documentoAux, 0, 80);
+					if(!documentoAux.trim().equals(""))documento = documentoAux;
+				}
+				line = line.replaceAll("REFNUM", "CHECKNUM");
+
+			} catch (Exception xx) {}
+			
+			
+			
+			 if (leDocumento && line.contains("<CHECKNUM>")) {
+				complemento01   = line.substring(line.indexOf("<CHECKNUM>")+10);
+                complemento01   = complemento01.replaceAll("</CHECKNUM>","");
+			}else if (leDocumento && line.contains("<REFNUM>")) {
+				complemento01   = line.substring(line.indexOf("<REFNUM>")+8);
+                complemento01   = complemento01.replaceAll("</REFNUM>","");
+			}
+
+			if (leDocumentoFitId && line.contains("<FITID>")) {
+				//complemento01   = line.substring(line.indexOf("<FITID>")+7);
+				complemento01   = cutString(line, "<FITID>");
+                complemento01   = complemento01.replaceAll("</FITID>","");
+			}			
+			
+			 // Retorna Nome Origem
+            if (line.contains("<MEMO>")) {
+                nomeOrigem   = nomeOrigem + " " + line.substring(line.indexOf("<MEMO>")+6);
+                nomeOrigem   = nomeOrigem.replaceAll("</MEMO>","");
+            }
+			
+			// logger.logDebug("OTT -> " + line);
+			if (line.contains("<MEMO>") && line.contains("</MEMO>")) {
+				// gera ofx
+			}			
+			
+            if(line.contains("<NAME>") && nomeOrigem.trim().equals("")){
+				nomeOrigem = nomeOrigem + " " + cutString(line, "<NAME>", "</NAME>");
+			} 
+			else if (!line.contains("</STMTTRN>")) continue;
+						
+			if(valorDocumento == 0){continue;}
+			
+			if(codEmpresa.equals("8") && nomeEmpresa.contains("Institutoelo") &&
+			(nomeOrigem.contains("CHEQUE")||nomeOrigem.contains("PAG") && nomeOrigem.contains("BOLETO")))
+				nomeOrigem = nomeOrigem + " " + complemento01;
+            
+            contLinhaExtrato = StringUtil.leftPad(String.valueOf(contadorDelinhas), 05, "0");
+			
+			nomeOrigem = nomeOrigem.trim();
+			nomeOrigem = nomeOrigem.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").replaceAll("AMP","").trim();
+			nomeOrigem = stringNormalizer(nomeOrigem, true);
+			nomeOrigem = StringUtil.removeSpecialCharsToUC(nomeOrigem);
+
+            //#2312-024085 By Leal - Looping feito pois replace/replaceAll nao removiam todos os pipes
+			try{
+				for (int j = 0; j < nomeOrigem.length(); j++) {
+					if (nomeOrigem.contains("|")) nomeOrigem = nomeOrigem.replaceAll("\\|", "");
+					else break;
+				}
+			}catch (Exception e) {logger.logInfo("Problema nomeOrigem " + e.getMessage());}
+			
+			//#2312-024085 By Leal
+			nomeOrigem = nomeOrigem.trim().replace("  ", " ");
+
+            // Gerar Chave Extrato;
+            chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+			logger.logDebug("DATA E VALOR EXTRATO " + valorDocumento + " | " + dataMovimento + " | " + chaveExtrato);
+
+            // Buscar Extrato por Chave na Tabela IO_EXTRATO.
+            extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
+            .fields("CHAVE")
+            .param(chaveExtrato)
+            .queryUnique();
+
+            // Inserir caso Chave nao encontrada.
+            if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+
+                logger.logInfo("complemento01:"+ complemento01 + " | debitoCredito:"+debitoCredito + " | nomePortador:" + nomePortador + " | dataMovimento:" + dataMovimento + " | nomeOrigem:" + nomeOrigem + " | documento:" + documento + " | valorDocumento:" +  valorDocumento);	
+
                 try {
 					// logger.logDebug("IO_EXTRATO PASSOU");
                     dbIOCont.insert("IO_EXTRATO")
