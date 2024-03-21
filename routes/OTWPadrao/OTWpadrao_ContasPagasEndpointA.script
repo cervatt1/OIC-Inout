@@ -11233,6 +11233,8 @@ public boolean readExtratoContaSimples2PDF(MemoryFile memFile, String nomePortad
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 
+		inomeOrigem = memFile.getFieldsSize()-3;
+
 		if (line.toUpperCase().contains("EXTRATO EMITIDO PELA CONTA SIMPLES - A CONTA FEITA PARA EMPREENDER")) continue;
 		if (naoLeMais || memFile.getStringFieldRemoveEspCharsUpper(0).contains("OS DADOS ACIMA")) break;
 			
@@ -11263,7 +11265,7 @@ public boolean readExtratoContaSimples2PDF(MemoryFile memFile, String nomePortad
 			if (dataMovimento.equals("")) continue;
 
 			nomeOrigem = "";
-			nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+			nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").replaceAll("\\s+", " ").trim();
 			
 			try{
 				valorDocumento = memFile.getDoubleField(memFile.getFieldsSize()-1);
