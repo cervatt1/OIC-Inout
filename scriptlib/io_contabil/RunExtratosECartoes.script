@@ -330,6 +330,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 	// PROCPDF
 
+
 	if(nomeArquivo.toUpperCase().contains("ANCORA") || nomeArquivo.toUpperCase().contains(".PDF")){
 
 		////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
@@ -1011,60 +1012,59 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		}
 
 		////// Extrato - UNICRED PDF ///////////////////////////////////////////////////////////
-		if ((roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred_PDF")              &&
-			cabecalhoPlanilha.contains("COOPERATIVA") && cabecalhoPlanilha.contains("AGENCIA")      &&
-			cabecalhoPlanilha.contains("COOPERADO")   && cabecalhoPlanilha.contains("USUARIO")      &&
-			(cabecalhoPlanilha.contains("NO DOC") || cabecalhoPlanilha.contains("N DOC"))			&&
-			cabecalhoPlanilha.contains("LANCAMENTOS")) ||
-			(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred_PDF")              &&
-			(cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")) && cabecalhoPlanilha.contains("POSTO")       &&
-			cabecalhoPlanilha.contains("NR. DOCUM."))) {
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred_PDF")){
+			if ((cabecalhoPlanilha.contains("COOPERATIVA") && cabecalhoPlanilha.contains("AGENCIA") &&
+					cabecalhoPlanilha.contains("COOPERADO")   && cabecalhoPlanilha.contains("USUARIO") &&
+					(cabecalhoPlanilha.contains("NO DOC") || cabecalhoPlanilha.contains("N DOC")) &&
+					cabecalhoPlanilha.contains("LANCAMENTOS")) ||
+					((cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || 
+					cabecalhoPlanilha.contains("UNICRED PREMIUM")) && cabecalhoPlanilha.contains("POSTO") &&
+					cabecalhoPlanilha.contains("NR. DOCUM.")) || cabecalhoPlanilha.contains("SISTEMA DE AUTOMACAO UNICRED")) {
+					//DENTRO IF
+					
+					if(cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
+						nomePortador = "UNICRED-" + cutString(cutString(cabecalhoPlanilha, "CORRENTE", "AGENCIA"),"CONTA","PERIODO");
+						tipoPlanilha	= "EXTRATO-UNICRED";
+					}
+					else{
+						nomePortador  = "UNICRED-" + cutString(cutString(cabecalhoPlanilha, "AGENCIA", "USUARIO"), "CONTA", "COOPERADO");
+						tipoPlanilha	= "EXTRATO-UNICRED";
+					}
 
-			logger.logInfo("Entra na validacao do Unicred Pdf");
+					JSONObject jDados = new JSONObject();
+					jDados.put("LINE", line);
+					jDados.put("NOMEPORTADOR", nomePortador);
+					jDados.put("CODEMPRESA", codEmpresa);
+					jDados.put("NOMEARQUIVO", nomeArquivo);
 
-			if(cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
-				nomePortador = "UNICRED-" + cutString(cutString(cabecalhoPlanilha, "CORRENTE", "AGENCIA"),"CONTA","PERIODO");
-				tipoPlanilha	= "EXTRATO-UNICRED";
-			}
-			else{
-				nomePortador  = "UNICRED-" + cutString(cutString(cabecalhoPlanilha, "AGENCIA", "USUARIO"), "CONTA", "COOPERADO");
-				tipoPlanilha	= "EXTRATO-UNICRED";
-			}
+					// logger.logInfo("NOME PORTADOR UNICRED -> "+ nomePortador);
+					if(arquivoCompleto.contains("SISTEMA DE AUTOMACAO UNICRED") || cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
+						readExtratoECartao("readExtratoUnicred3PDF", memFile, jDados, dbIOCont, logger);
+						variaveis.put("tipoRetorno",   "break");
+						return variaveis.toString();
+					}
 
-			JSONObject jDados = new JSONObject();
-			jDados.put("LINE", line);
-			jDados.put("NOMEPORTADOR", nomePortador);
-			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("NOMEARQUIVO", nomeArquivo);
-
-			// logger.logInfo("NOME PORTADOR UNICRED -> "+ nomePortador);
-			if(cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
-				readExtratoECartao("readExtratoUnicred3PDF", memFile, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno",   "break");
-				return variaveis.toString();
-			}
-
-			readExtratoECartao("readExtratoUnicredPDF", memFile, jDados, dbIOCont, logger);
-			variaveis.put("tipoRetorno",   "break");
-			return variaveis.toString();
+					readExtratoECartao("readExtratoUnicredPDF", memFile, jDados, dbIOCont, logger);
+					variaveis.put("tipoRetorno",   "break");
+					return variaveis.toString();
+				}
 		}
 
 		////// EXTRATO - UNICRED2 PDF //////////////////////////////////////////////////////////////////
 		// if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred2_PDF") && nomeArquivo.toUpperCase().contains(".PDF")) {
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred2_PDF")) {
-			logger.logInfo("CABECAS " + memFile.getStringFieldRemoveEspCharsUpper(0) + " | " + memFile.getStringFieldRemoveEspCharsUpper(1) + " | "
-									  + memFile.getStringFieldRemoveEspCharsUpper(2) + " | " +  cabecalhoPlanilha);
-
+			// logger.logInfo("CABECAS " + memFile.getStringFieldRemoveEspCharsUpper(0) + " | " + memFile.getStringFieldRemoveEspCharsUpper(1) + " | " 
+									  // + memFile.getStringFieldRemoveEspCharsUpper(2) + " | " +  cabecalhoPlanilha);
+			
 			// XAVIER 003749 - Colocado negacao cabecalho planilha pois quem tem SICOOB e UNICRED2 da conflito na coluna A contendo CONTA:
 			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:") && cabecalhoPlanilha.contains("COOPERATIVA DE CREDITO UNICRED") /*&& !cabecalhoPlanilha.contains("SICOOB")*/) {
-				logger.logInfo("AGUI UNI");
-				logger.logInfo("Entra na validacao do Unicred2 Pdf");
+				// logger.logInfo("AGUI UNI");
 				nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("[^0-9]", "").trim();
 				variaveis.put("nomePortador2",   nomePortador2);
 				variaveis.put("tipoRetorno",     "continue");
 				return variaveis.toString();
 			}
-
+													
 			/*if (memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\"","").replace("\"","").replace("'","").contains("DATA MOV.") &&
 				memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\"","").replaceAll(" ","").contains("ID.DOC") &&
 				memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("\"","").contains("HISTORICO") &&
@@ -1075,7 +1075,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				line.replaceAll("\"","").contains("HISTORICO") &&
 				line.replaceAll("\"","").contains("LANCAMENTOS") &&
 				line.replaceAll("\"","").contains("SALDO")) {
-				logger.logInfo("AGUI UNI");
+				// logger.logInfo("AGUI UNI");
 
 				nomePortador  = "UNICRED-" + nomePortador2;
 				complemento02	= nomePortador;
@@ -1086,7 +1086,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("LINHA", line);
-
+				
 				readExtratoECartao("readExtratoUnicred2PDF", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -3719,7 +3719,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 	// PROCXLSX
 
 	if(!nomeArquivo.toUpperCase().contains("ANCORA") && !nomeArquivo.toUpperCase().contains(".PDF")){
-	logger.logInfo(nomeArquivo);
+
+		//if(roteiroCRM.optString("Planilhas_Padroes").contains("ERP_FOLHAWK_RADAR")){
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("ERP_ITAU")){
+
+			if(memFile.getLines().toString().contains("F O L H A   D E  P A G A M E N T O") && memFile.getFieldsSize() == 1 && isCNPJ(line.replaceAll("[^0-9]*", ""))){
+				JSONObject jDados = new JSONObject();
+
+				// logger.logInfo("FOLHA WK");
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "FOLHA-WK");
+				jDados.put("NOMEEMPRESA", nomeEmpresa);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("COMPLEMENTO04", memFile.getStringFieldRemoveEspCharsUpper(0));
+				jDados.put("LINE",            line);
+				// jDados.put("TESTE", nomePortador2);
+				mapaVariavel = readExtratoECartao("readErpFolhaWk", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
 
 		////// EXTRATO - UNIPRIME //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Uniprime_Excel")) {
@@ -3772,6 +3792,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				return variaveis.toString();
 			}
 		}
+
+		logger.logInfo(memFile.getStringFieldRemoveEspCharsUpper(0));
 
 		////// EXTRATO - BMG EXCEL //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BMG_Excel")) {
