@@ -2970,6 +2970,28 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			}
 		}
 
+		////// Cartao Bradesco PDF //////////////////////////////////////////////////////////////////
+		/*if (roteiroCRM.optString("Planilhas_Padroes").contains("Cartao_Bradesco_PDF")) {
+
+			if (arquivoCompleto.contains("0800 727 9933") && arquivoCompleto.contains("0800 704 8383") && 
+				arquivoCompleto.contains("SOBRE AS OPERACOES DE CREDITO INCIDIRAO O IOF DIARIO") &&
+				arquivoCompleto.contains("BRADESCO") && arquivoCompleto.contains("SITUACAO DA FATURA")) {
+
+				logger.logInfo("Cartao_Bradesco_PDF HEHEEEEE");
+
+				tipoPlanilha = "CARTAO-BRADESCO";
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("NOMEPORTADOR",   nomePortador);
+				jDados.put("TIPOPLANILHA",   tipoPlanilha);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				mapaVariavel = readExtratoECartao("readCartaoBradescoPdf", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}*/
 		////// ERP - FOLHA PROGRESSO //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("ERP_FolhaAlterdata_Progresso")) {
 			// logger.logDebug("ENTROU FOLHA PROG");
@@ -3098,7 +3120,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
-
+			//2311-022659 - ITAU FRANCESINHA 4
+			// logger.logInfo("ACC " + arquivoCompleto.contains("CART") + " | " + arquivoCompleto.contains("PAGADOR"));
 			if( arquivoCompleto.contains("CART") && arquivoCompleto.contains("PAGADOR") && arquivoCompleto.contains("TIPO") && arquivoCompleto.contains("NOSSO NUMERO") && 
 				arquivoCompleto.contains("SEU NUMERO") && arquivoCompleto.contains("VENC.") && arquivoCompleto.contains("AGENCIA RECEB") && arquivoCompleto.contains("INICIAL") && 
 				arquivoCompleto.contains("VALOR") && arquivoCompleto.contains("DESCRICAO DE OPERACOES") && arquivoCompleto.contains("OPERACOES VALOR") && 
@@ -3614,6 +3637,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
                 jDados.put("TIPOPLANILHA", "FATURACARTAOCREDITOBRADESCO");
                 jDados.put("NOMEEMPRESA", nomeEmpresa);
 				jDados.put("NOMEPORTADOR", nomePortador);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_BradescoPDF", memFile, jDados, mapaVariavel, logger);
                 variaveis.put("tipoRetorno",   "break");
