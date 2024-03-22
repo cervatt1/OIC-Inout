@@ -11240,7 +11240,10 @@ public HashMap readExtratoItauPdfFrancesinha4(MemoryFile memFile, JSONObject jDa
 			complemento02 = complemento02.replaceAll("\\*","").trim();
 
             try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
-            catch (Exception vlrd) { valorDocumento = 0; }			
+            catch (Exception vlrd) { valorDocumento = 0; }	
+
+			documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
+			if(documento.equals("")) documento = "EM BRANCO";	
             
             // Este padrão roda somente recebimentos
             debitoCredito = "EXTRATO-CREDITO";
