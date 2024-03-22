@@ -19470,6 +19470,21 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 				valorDocumento = Math.abs(valorDocumento);
 			}
 			
+			if(tipo.equals("001")){
+				ivalorDocumento = memFile.getFieldsSize()-1;
+
+				debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).trim(); 
+				
+				try{
+					valorDocumento = memFile.getDoubleField(ivalorDocumento);
+					}
+				catch (Exception vlrd){ valorDocumento = 0; }
+
+				if(debitoCreditoAux.contains("-"))  debitoCredito = "EXTRATO-DEBITO";
+				if(!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
+				valorDocumento = Math.abs(valorDocumento);
+			}
+			
 			if (valorDocumento == 0) continue;
 
             contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
