@@ -14534,7 +14534,7 @@ public HashMap readFaturaCartaoCredito_BradescoPDF(MemoryFile memFile, JSONObjec
 
 	boolean naoLeMais = false;
 
-	int idataMovimento	= 0;
+	int idataMovimento	= 1;
 	int inomeOrigem		= 1;
 	int ivalorDocumento	= 4;
 
@@ -14556,19 +14556,25 @@ public HashMap readFaturaCartaoCredito_BradescoPDF(MemoryFile memFile, JSONObjec
 		cont++;
 		try {
 
-			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("MES:")){
-				anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(1), "/");
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("MES:")) anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(1), "/");
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).trim().contains("DATA DE VENCIMENTO:")){
+				try{
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
+                	dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
+            	} catch(Exception e){dataMovimento = "";}
 			}
 
 			if(memFile.getFieldsSize() < 3) continue;
 
-            try{
-				String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) + "/" + anoData;
-				dataMovimento = getCampoDate(dataString);
-                dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
-            } catch(Exception e){dataMovimento = "";}
 
-            if (dataMovimento.equals("")) continue;
+			// ####### LOGICA PARA DAR CONTINUE EM TUDO O QUE NAO FOR LANÇAMENTO
+            try{
+				String dataString = memFile.getStringFieldRemoveEspCharsUpper(0) + "/" + anoData;
+				dataAux = getCampoDate(dataString);
+            } catch(Exception e){dataAux = "";}
+            if (dataAux.equals("")) continue;
+			// ###################################################################
 
 			try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 			catch (Exception vlrd) { valorDocumento = 0; }
