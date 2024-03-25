@@ -410,43 +410,42 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Stone_PDF") && (/*nomeArquivo.toUpperCase().contains("PDF") || */nomeArquivo.toUpperCase().contains("ANCORA"))){
 			logger.logDebug("AQQRUN " + line);
 			if (line.contains("DOCUMENTO") && line.contains("AGENCIA")) {
-				logger.logInfo("Entra na validacao do Stone Pdf");
 				JSONObject jDados = new JSONObject();
-
+				
 				nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(3).trim();
-
+				
 				variaveis.put("nomePortador2", nomePortador2);
 				variaveis.put("tipoRetorno",   "continue");
 				return variaveis.toString();
 			}
 			if (line.contains("PERIODO") && line.contains("CONTA")) {
 				JSONObject jDados = new JSONObject();
-
+				
 				nomePortador2 += " " + memFile.getStringFieldRemoveEspCharsUpper(3).trim();
-
+				
 				variaveis.put("nomePortador2", nomePortador2);
 				variaveis.put("tipoRetorno",   "continue");
 				return variaveis.toString();
 			}
-
+				
 			if (line.contains("DATA") && line.contains("TIPO") && line.contains("LANCAMENTO") && line.contains("VALOR") && line.contains("SALDO")
 				&& line.contains("CONTRAPARTE")) {
 				JSONObject jDados = new JSONObject();
-
+				
 				tipoPlanilha = "EXTRATO-STONE";
-
+				
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
 				jDados.put("LINE",   		 line);
-
+				
 				readExtratoECartao("readExtratoStonePDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
-
+			
 		}
 
 			//////////////////////////////////////////////////////////////////////
