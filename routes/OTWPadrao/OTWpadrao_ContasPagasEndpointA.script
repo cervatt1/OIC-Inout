@@ -585,6 +585,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					// =======================  ========================   =======================
 					// =======================  VARIAVEIS PERSONALIZADAS   =======================
 					// =======================  ========================   =======================
+					String dataAuxiliar = "";
 
 
 					JSONObject objetoParametro = new JSONObject();
@@ -1131,13 +1132,45 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									if (!tipoPlanilha.contains("OTTCARTAO")) {
 										// #Fabrica(2019-05-20)
-										try{
-											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											 
-											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
-										}catch(Exception e){
-											// dataMovimento   = "";
-											// dataLote        = "";
+										if(tipoPlanilha.equals("MOVIMENTO")){
+											if(memFile.getFieldsSize() == 1 && (memFile.getStringFieldRemoveEspCharsUpper(0).contains("/202") || memFile.getStringFieldRemoveEspCharsUpper(0).length() == 5) && memFile.getStringFieldRemoveEspCharsUpper(0).length() < 11){
+												dataAuxiliar = memFile.getStringFieldRemoveEspCharsUpper(0);
+												// logger.logDebug("DT A == "+dataAuxiliar);
+											}else{
+												if(dataAuxiliar.length() == 5) {
+													try{
+														Date dt  = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+														int datanum = Integer.parseInt(dataAuxiliar);
+														Calendar calSerial = Calendar.getInstance();
+														calSerial.setTime(dt);
+														calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+														dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+														 
+														dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+													}catch(Exception e){
+														// dataMovimento   = "";
+														// dataLote        = "";
+													}													
+												}else{
+													try{
+														 dataMovimento     = getCampoDate(dataAuxiliar);
+														 
+														dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+													}catch(Exception e){
+														// dataMovimento   = "";
+														// dataLote        = "";
+													}
+												}
+											} 
+										}else{											
+											try{
+												dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
+												 
+												dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+											}catch(Exception e){
+												// dataMovimento   = "";
+												// dataLote        = "";
+											}
 										}
 									}
 									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
@@ -1147,7 +1180,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										break;
 									}
 									
-									// logger.logInfo("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
+									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
 									
  								   
@@ -1280,7 +1313,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
 									
-									// logger.logInfo("TP -> "+ ivalorDocumento + " | " + idataMovimento + " TREM " + 
+									// logger.logDebug("TP -> "+ ivalorDocumento + " | " + idataMovimento + " TREM " + 
 													// tipoPlanilha+" - Empresa -> "+valorDocumento+" - DM -> "+dataMovimento + " | " + memFile.getStringFieldRemoveEspCharsUpper(0));
 									
 									
@@ -1306,23 +1339,23 @@ public JSONArray run(InoutLogger logger) throws Exception {
 																	
 									}
 
-									// logger.logInfo("ROTEIRO coluna Extra => " + roteiroCRM.optString("Colunas_de_Valores_Extras") + " |TP => " + tipoPlanilha);
+									// logger.logDebug("ROTEIRO coluna Extra => " + roteiroCRM.optString("Colunas_de_Valores_Extras") + " |TP => " + tipoPlanilha);
 									if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
 										String [] indiceValores = roteiroCRM.optString("Colunas_de_Valores_Extras").split(";");
 										valorSomaArray = 0;
 										for(int iv = 0; iv < indiceValores.length; iv++) {
 											// try{
-												// logger.logInfo("IDValores -> " + indiceValores[iv].toString());
+												// logger.logDebug("IDValores -> " + indiceValores[iv].toString());
 												// if(!indiceValores[iv].contains("*") && !indiceValores[iv].contains("/") && !indiceValores[iv].contains("+") && !indiceValores[iv].contains("-") && !indiceValores[iv].contains("#")){
-													// logger.logInfo("ENTROU IF");
+													// logger.logDebug("ENTROU IF");
 													// String rotuloColuna = "";
 													// String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";");
-													// logger.logInfo("ROTULO ARRAY => " +rotuloArray[iv].toString());
+													// logger.logDebug("ROTULO ARRAY => " +rotuloArray[iv].toString());
 													// indiceValores[iv]	= getIndiceCabecalhoExtra(rotuloArray[iv], memFile);
-													// logger.logInfo("INDICE dps => " +indiceValores[iv].toString());
+													// logger.logDebug("INDICE dps => " +indiceValores[iv].toString());
 												// }
 											// }catch(Exception xx){
-												// logger.logInfo("CAIU CATCH");
+												// logger.logDebug("CAIU CATCH");
 											// }
 												
 											//ssss
@@ -6728,19 +6761,19 @@ public JSONObject getRoteiro() {
     js.put("idContabilidade", "a096R0000361GKE");
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
-    js.put("fornecedor", "-1");
-    js.put("dataMovimento", "-1");
-    js.put("portador", "-1");
-    js.put("documentoNF", "");
-    js.put("valorDocumento", "-1");
+    js.put("fornecedor", "@1");
+    js.put("dataMovimento", "#COLUNA A CONTEM(/202) COLUNA A");
+    js.put("portador", "22");
+    js.put("documentoNF", "@0");
+    js.put("valorDocumento", "15");
     js.put("valorJuros", "");
     js.put("valorDesconto", "");
     js.put("valorMulta", "");
     js.put("valorPagamento", "");
-    js.put("complemento01", "");
-    js.put("complemento02", "");
-    js.put("complemento03", "");
-    js.put("complemento04", "");
+    js.put("complemento01", "@16");
+    js.put("complemento02", "@1");
+    js.put("complemento03", "11");
+    js.put("complemento04", "@0");
     js.put("complemento05", "");
     js.put("complemento06", "");
     js.put("centroCusto", "");
