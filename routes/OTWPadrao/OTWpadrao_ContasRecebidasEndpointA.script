@@ -11619,19 +11619,19 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 	// logger.logInfo("Viacredi Teste");
 
     while (memFile.hasNextLine()) {
-
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		// 2402-029712 - Nicholas - 11/03/2024
 		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGADOR:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
 			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
 			continue;
 		}
-		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("CPF/CNPJ:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
-			nomeOrigem = nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
-			continue;
-		}
+		
+		// if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("CPF/CNPJ:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
+			// nomeOrigem = nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
+			// continue;
+		// }
+		
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("TOTAL")) continue;
 		if (memFile.getFieldsSize() < 2) continue;
 		if (line.contains("QUANTIDADE") && line.contains("VALOR NOMINAL") && line.contains("DIFERENCA") && line.contains("VALOR LIQUIDADO")) continue;
@@ -11639,16 +11639,16 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
         
 		if(line.contains("NOSSO NUMERO") && line.contains("DOCUMENTO") && line.contains("EMISSAO") && line.contains("PAGTO/BAIXA")){
 			for (int i = 0; i < memFile.getFieldsSize(); i++) {
-				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("EMISSAO") && idocumento == -1) idocumento = i;
-				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("SITUACAO")) icomplemento02 = i;
 				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("VENCIMENTO")) idataMovimento = i;
-				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("VALOR NOMINAL")) ivalorDocumento = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("PAGTO/BAIXA")) ivalorDocumento = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("SITUACAO")) icomplemento02 = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOCUMENTO") && idocumento == -1) idocumento = i;
 			}
 			if(idataMovimento == -1 || ivalorDocumento == -1 || idocumento == -1){
-				idocumento = 5;
-				idataMovimento = 6;
-				icomplemento02	= 1;
-				ivalorDocumento = 9; 
+				idocumento = 1;
+				idataMovimento = 5;
+				icomplemento02	= 2;
+				ivalorDocumento = 8; 
 			}
 			continue;
 		}
@@ -11751,7 +11751,6 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 							}
 						}
 					}
-
 					if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")){
 						try {
 							String dataString = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento)," ").replaceAll("\"","");
@@ -11808,7 +11807,7 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 
 				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
-
+				//logger.logInfo("Lancamento: "+nomeOrigem+" - "+ dataMovimento+" - "+debitoCredito+" - "+valorDocumento+" - "+contLinhaExtrato);
 
 				// Buscar Extrato por Chave na Tabela IO_EXTRATO.
 				extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
@@ -11818,10 +11817,8 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 
 				// Inserir caso Chave nao encontrada.
 				
+
 				if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
-
-				logger.logInfo(debitoCredito + " | nomePortador:" + nomePortador + " | dataMovimento:" + dataMovimento + " | nomeOrigem:" + nomeOrigem + " | valorDocumento:" +  valorDocumento + " | " + complemento01);	
-
 					try {
 						dbIOCont.insert("IO_EXTRATO")
 						.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
