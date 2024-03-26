@@ -397,6 +397,26 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				return variaveis.toString();
 		}
 
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinkPay_PDF") &&
+			arquivoCompleto.contains("EXTRATO CONTA DE PAGAMENTO/LANCAMENTOS") &&
+			arquivoCompleto.contains("ACESSOACONTA.COM.BR") &&
+			arquivoCompleto.contains("PINKPAY") ) {
+
+				tipoPlanilha = "EXTRATO-PINKPAY";
+				JSONObject jDados = new JSONObject();
+
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("TIPOPLANILHA",   tipoPlanilha);
+				jDados.put("LINE",   		 line);
+
+				readExtratoECartao("readExtratoPinkPayPDF", memFile, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno", "break");
+				return variaveis.toString();
+		}
+
 
 
 		/////////////////////////////////BANCO DO BRASIL
@@ -2129,26 +2149,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		}
 
 
-		////// EXTRATO - AILOS FRANCESINHA PDF //////////////////////////////////////////////////////////////////
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhagrupoAilos_PDF") || (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
-			if (nomePortador2.equals("") && arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("CARTEIRA DE COBRANCA COM REGISTRO")
-				&& arquivoCompleto.contains("PERIODO DE") && arquivoCompleto.contains("BENEFICIARIO") && arquivoCompleto.contains("SITUACAO")
-				&& arquivoCompleto.contains("PAGADOR") && arquivoCompleto.contains("CPF/CNPJ")){
-
-				logger.logInfo("Entra na validacao do Ailos Francesinha Pdf");
-
-				nomePortador2 = cutString("FRANCESINHAAILOS -" + nomeArquivo.toUpperCase(), 0, 99);
-
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOPLANILHA", "EXTRATO-FRANCESINHAAILOS -" + nomeArquivo.toUpperCase());
-
-				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno",   "break");
-				return variaveis.toString();
-			}
-		}
+		
 
 		////// EXTRATO - SICREDI FRANCESINHA PDF //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhaSicredi_PDF")) {
