@@ -17854,6 +17854,7 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 	int inomeOrigem		= 0;
 	int ivalorDocumento	= 1;
     nomePortador = nomePortador.replaceAll("\\?","");
+    complemento01 = nomePortador.replaceAll("\\?","");
 	
 	boolean naoLeMais = true;
 	boolean fazExtra = false;
@@ -18070,7 +18071,7 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		}
 		
 		if (dataMovimento.equals("")) continue;
-		if (dataMovimento.length() != 10) continue;
+		if (dataMovimento.length() < 10) continue;
 		
 		try {
 			contLinhaExtratoInt ++;
