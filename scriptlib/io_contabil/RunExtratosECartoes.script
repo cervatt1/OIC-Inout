@@ -2240,6 +2240,24 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
+
+			if (arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("MOVIMENTACAO DE COBRANCA COM REGISTRO") && 
+				arquivoCompleto.contains("PERIODO DE") && arquivoCompleto.contains("BENEFICIARIO") && arquivoCompleto.contains("CONVENIO") && 
+				arquivoCompleto.contains("OCORRENCIA") && arquivoCompleto.contains("VLR.BOLETO") && arquivoCompleto.contains("ABATIM.JUROS/MULTA") && 
+				arquivoCompleto.contains("OUT.CRE") && arquivoCompleto.contains("VLR.PAGO")){
+				
+				nomePortador2 = cutString("FRANCESINHAAILOS -" + nomeArquivo.toUpperCase(), 0, 99);
+				
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "EXTRATO-FRANCESINHAAILOS -" + nomeArquivo.toUpperCase());
+				jDados.put("SEGMENTOAILOS", "VIACRED");
+			
+				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
 		}
 
 		//#2307-009642 - Leal

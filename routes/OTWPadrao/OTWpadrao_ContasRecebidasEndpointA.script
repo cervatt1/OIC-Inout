@@ -11225,311 +11225,293 @@ public boolean readExtratoBtgPDF(MemoryFile memFile, String nomePortador, JSONOb
 
 
 public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
-    JSONObject extratoEmpresa = new JSONObject();
+	JSONObject extratoEmpresa = new JSONObject();
 
     // Inicializacao de Variaveis
-    String codEmpresa = "";
-    String nomeArquivo = "";
-    String chaveExtrato = "";
+    String codEmpresa        = "";
+    String nomeArquivo       = "";
+    String chaveExtrato      = "";
 
-    String documento = "";
-    String nomeOrigem = "";
-    String dataMovimento = "";
-    String dataLote = "";
-    String complemento01 = "";
-    String complemento02 = "";
-    String complemento03 = "";
-    String complemento04 = "";
-    String complemento05 = "";
-    String complemento06 = "";
-    String complemento07 = "";
-    String complemento08 = "";
-    String complemento09 = "";
-    String complemento10 = "";
-    String debitoCredito = "";
-    String cpfCnpj = "";
-    String historico = "";
-    String debitoCreditoAux = "";
+    String documento         = "";
+    String nomeOrigem        = "";
+    String dataMovimento     = "";
+    String dataLote          = "";
+    String complemento01     = "";
+    String complemento02     = "";
+    String complemento03     = "";
+    String complemento04     = "";
+    String complemento05     = "";
+    String complemento06     = "";
+    String complemento07     = "";
+    String complemento08     = "";
+    String complemento09     = "";
+    String complemento10     = "";
+    String debitoCredito     = "";
+    String cpfCnpj           = "";
+    String historico         = "";
+    String debitoCreditoAux  = "";
 
     String strValorDocumento = "";
-    String contLinhaExtrato = "";
-    String segmentoAilos = "";
+    String contLinhaExtrato  = "";
 
-    double valorDocumento = 0.0;
-    double valorJuros = 0.0;
-    double valorDesconto = 0.0;
-    double valorMulta = 0.0;
-    double valorPagamento = 0.0;
-
-    int inomeOrigem = -1;
-    int idataMovimento = -1;
-    int idocumento = -1;
-    int ivalorDocumento = -1; //(VALOR POSITIVO RC, NEGATIVO PG) 
-    int icomplemento02 = -1; //(VALOR POSITIVO RC, NEGATIVO PG) 
-
+    double valorDocumento    = 0.0;
+    double valorJuros        = 0.0;
+    double valorDesconto     = 0.0;
+    double valorMulta        = 0.0;
+    double valorPagamento    = 0.0;
+    
+	int inomeOrigem		= -1;
+	int idataMovimento	= -1;
+	int idocumento      = -1;
+	int ivalorDocumento	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
+	int icomplemento02	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
+	
     complemento01 = nomePortador;
 
-    if (jDados.has("CODEMPRESA")) codEmpresa = jDados.optString("CODEMPRESA");
-    if (jDados.has("NOMEARQUIVO")) nomeArquivo = jDados.optString("NOMEARQUIVO");
-    if (jDados.has("SEGMENTOAILOS")) segmentoAilos = jDados.optString("SEGMENTOAILOS");
-
-    // logger.logInfo("Viacredi Teste");
+    if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
+    if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
+	
+	// logger.logInfo("Viacredi Teste");
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+		
+		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGADOR:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
+			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
+			continue;
+		}
+		
+		// if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("CPF/CNPJ:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
+			// nomeOrigem = nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
+			// continue;
+		// }
+		
+		if (memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("TOTAL")) continue;
+		if (memFile.getFieldsSize() < 2) continue;
+		if (line.contains("QUANTIDADE") && line.contains("VALOR NOMINAL") && line.contains("DIFERENCA") && line.contains("VALOR LIQUIDADO")) continue;
+		if (line.contains("TOTAL") && line.contains("GERAL") && line.contains("PAGOS")) continue;
+        
+		if(line.contains("NOSSO NUMERO") && line.contains("DOCUMENTO") && line.contains("EMISSAO") && line.contains("PAGTO/BAIXA")){
+			for (int i = 0; i < memFile.getFieldsSize(); i++) {
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("VENCIMENTO")) idataMovimento = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("PAGTO/BAIXA")) ivalorDocumento = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("SITUACAO")) icomplemento02 = i;
+				if(memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOCUMENTO") && idocumento == -1) idocumento = i;
+			}
+			if(idataMovimento == -1 || ivalorDocumento == -1 || idocumento == -1){
+				idocumento = 1;
+				idataMovimento = 5;
+				icomplemento02	= 2;
+				ivalorDocumento = 8; 
+			}
+			continue;
+		}
+		//Criado For para ler 2 blocos de lçtos
+		for(int y = 0; y < 2; y++){	
+			try {
+				// logger.logInfo("y ->>" + y);
+				if(y == 0){
+					if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")){
+						try {
+							Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt1) {
+							try {
+								Date dt = memFile.getDateField(idataMovimento);
+								dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+								dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+							} catch (Exception dt2) {
+								try {
+									String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
+									Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+									dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+									dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+								} catch (Exception dt2) { continue; }
+							}
+						}
+					}
+					if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")){
+						try {
+							String dataString = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, " ").replaceAll("\"","");
+							Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt2) { continue; }	
+						
+					}
 
-        if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGADOR:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")) {
-            nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
-            continue;
-        }
+					valorDocumento	= 0;
+					// nomeOrigem		= "";
+					if(!memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
+						complemento02		= memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).trim();
+					if(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
+						complemento02		= cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02), 0, " ").trim();
+					
+					//Feita a tratativa de 2 padroes de documentos sendo NF001 Nf002 e 123/1  -1/2 123/2  -2/2
+					if(!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")){
+						if(!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
+							documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
+						if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
+							documento		= cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ").trim();
+					}
+					if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")){
+						if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" ") && memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("  "))
+							documento		= cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ");
+							documento = documento + "  -" +cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento, " ");
+					}
+					
+					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
+						catch (Exception vlrd) { valorDocumento = 0; }
+					}
+					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+						//try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", ""))/1000;}
+						try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", ""))/100;}
+						catch (Exception vlrd) { valorDocumento = 0; }
+						//logger.logInfo("Linha: "+line+" Valor: "+valorDocumento);
+					}
 
-        // if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("CPF/CNPJ:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
-        // nomeOrigem = nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
-        // continue;
-        // }
+					if (valorDocumento == 0) continue;
+					
+					if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
+					if (valorDocumento < 0) {
+						debitoCredito = "EXTRATO-DEBITO";
+						valorDocumento = Math.abs(valorDocumento);
+					}
+				}
+				
+				
+				if(y == 1){
+					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) break;
+					
+					if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")){
+						try {
+							Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt1) {
+							try {
+								Date dt = memFile.getDateField(idataMovimento);
+								dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+								dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+							} catch (Exception dt2) {
+								try {
+									String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
+									Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+									dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+									dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+								} catch (Exception dt2) { continue; }
+							}
+						}
+					}
+					if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")){
+						try {
+							String dataString = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento)," ").replaceAll("\"","");
+							Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt2) { continue; }	
+						
+					}
 
-        if (memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("TOTAL")) continue;
-        if (memFile.getFieldsSize() < 2) continue;
-        if (line.contains("QUANTIDADE") && line.contains("VALOR NOMINAL") && line.contains("DIFERENCA") && line.contains("VALOR LIQUIDADO")) continue;
-        if (line.contains("TOTAL") && line.contains("GERAL") && line.contains("PAGOS")) continue;
+					valorDocumento	= 0;
+					// nomeOrigem		= "";
+					if(!memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
+						complemento02		= memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).trim();
+					if(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
+						complemento02		= cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02), " ").trim();
+					
+					if(!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")){
+						if(!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
+							documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
+						if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
+							documento		= cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), " ").trim();
+					}
+					
+					if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")){
+						if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" ") && memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("  "))
+							documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ");
+							documento = documento + "  -" +cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento, " ");
+							documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento);
+					}
+					
+					
+					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
+						catch (Exception vlrd) { valorDocumento = 0; }
+					}
+					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+						//try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento)," ").replaceAll("\\.", "").replaceAll(",", ""))/1000;}
+						try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento)," ").replaceAll("\\.", "").replaceAll(",", ""))/100;}
+						catch (Exception vlrd) { valorDocumento = 0; }
+						//logger.logInfo("Linha: "+line+" Valor: "+valorDocumento);
+					}
 
-        if (line.contains("NOSSO NUMERO") && line.contains("DOCUMENTO") && line.contains("EMISSAO") && line.contains("PAGTO/BAIXA")) {
-            for (int i = 0; i < memFile.getFieldsSize(); i++) {
-                if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("VENCIMENTO")) idataMovimento = i;
-                if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("PAGTO/BAIXA")) ivalorDocumento = i;
-                if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("SITUACAO")) icomplemento02 = i;
-                if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOCUMENTO") && idocumento == -1) idocumento = i;
-            }
-            if (idataMovimento == -1 || ivalorDocumento == -1 || idocumento == -1) {
-                idocumento = 1;
-                idataMovimento = 5;
-                icomplemento02 = 2;
-                ivalorDocumento = 8;
-            }
-            continue;
-        }
-        //Criado For para ler 2 blocos de lçtos
-        for (int y = 0; y < 2; y++) {
-            try {
-                // logger.logInfo("y ->>" + y);
-                if (y == 0) {
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")) {
-                        try {
-                            Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
-                            dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                            dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                        } catch (Exception dt1) {
-                            try {
-                                Date dt = memFile.getDateField(idataMovimento);
-                                dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                                dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                            } catch (Exception dt2) {
-                                try {
-                                    String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"", "");
-                                    Date dt = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
-                                    dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                                    dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                                } catch (Exception dt2) {
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-                    if (memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")) {
-                        try {
-                            String dataString = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, " ").replaceAll("\"", "");
-                            Date dt = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
-                            dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                            dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                        } catch (Exception dt2) {
-                            continue;
-                        }
+					if (valorDocumento == 0) continue;
+					
+					if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
+					if (valorDocumento < 0) {
+						debitoCredito = "EXTRATO-DEBITO";
+						valorDocumento = Math.abs(valorDocumento);
+					}
+				}
 
-                    }
+				contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 
-                    valorDocumento = 0;
-                    // nomeOrigem		= "";
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
-                        complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).trim();
-                    if (memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
-                        complemento02 = cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02), 0, " ").trim();
+				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+				
+				//logger.logInfo("Lancamento: "+nomeOrigem+" - "+ dataMovimento+" - "+debitoCredito+" - "+valorDocumento+" - "+contLinhaExtrato);
 
-                    //Feita a tratativa de 2 padroes de documentos sendo NF001 Nf002 e 123/1  -1/2 123/2  -2/2
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")) {
-                        if (!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
-                            documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
-                        if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
-                            documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ").trim();
-                    }
-                    if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")) {
-                        if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" ") && memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("  "))
-                            documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ");
-                        documento = documento + "  -" + cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento, " ");
-                    }
+				// Buscar Extrato por Chave na Tabela IO_EXTRATO.
+				extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
+				.fields("CHAVE")
+				.param(chaveExtrato)
+				.queryUnique();
 
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) {
-                        try {
-                            valorDocumento = memFile.getDoubleField(ivalorDocumento);
-                        } catch (Exception vlrd) {
-                            valorDocumento = 0;
-                        }
-                    }
-                    if (memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) {
-                        //try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", ""))/1000;}
-                        try {
-                            valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", "")) / 100;
-                        } catch (Exception vlrd) {
-                            valorDocumento = 0;
-                        }
-                        //logger.logInfo("Linha: "+line+" Valor: "+valorDocumento);
-                    }
+				// Inserir caso Chave nao encontrada.
+				
 
-                    if (valorDocumento == 0) continue;
-
-                    if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
-                    if (valorDocumento < 0) {
-                        debitoCredito = "EXTRATO-DEBITO";
-                        valorDocumento = Math.abs(valorDocumento);
-                    }
-                }
-
-                if (y == 1) {
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) break;
-
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")) {
-                        try {
-                            Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
-                            dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                            dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                        } catch (Exception dt1) {
-                            try {
-                                Date dt = memFile.getDateField(idataMovimento);
-                                dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                                dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                            } catch (Exception dt2) {
-                                try {
-                                    String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"", "");
-                                    Date dt = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
-                                    dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                                    dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                                } catch (Exception dt2) {
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-                    if (memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(" ")) {
-                        try {
-                            String dataString = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), " ").replaceAll("\"", "");
-                            Date dt = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
-                            dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                            dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                        } catch (Exception dt2) {
-                            continue;
-                        }
-
-                    }
-
-                    valorDocumento = 0;
-                    // nomeOrigem		= "";
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
-                        complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).trim();
-                    if (memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).contains(" "))
-                        complemento02 = cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento02), " ").trim();
-
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")) {
-                        if (!memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
-                            documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
-                        if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" "))
-                            documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), " ").trim();
-                    }
-
-                    if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("-")) {
-                        if (memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains(" ") && memFile.getStringFieldRemoveEspCharsUpper(idocumento).contains("  "))
-                            documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), 0, " ");
-                        documento = documento + "  -" + cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento, " ");
-                        documento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento);
-                    }
-
-                    if (!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) {
-                        try {
-                            valorDocumento = memFile.getDoubleField(ivalorDocumento);
-                        } catch (Exception vlrd) {
-                            valorDocumento = 0;
-                        }
-                    }
-                    if (memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")) {
-                        //try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento)," ").replaceAll("\\.", "").replaceAll(",", ""))/1000;}
-                        try {
-                            valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), " ").replaceAll("\\.", "").replaceAll(",", "")) / 100;
-                        } catch (Exception vlrd) {
-                            valorDocumento = 0;
-                        }
-                        //logger.logInfo("Linha: "+line+" Valor: "+valorDocumento);
-                    }
-
-                    if (valorDocumento == 0) continue;
-
-                    if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
-                    if (valorDocumento < 0) {
-                        debitoCredito = "EXTRATO-DEBITO";
-                        valorDocumento = Math.abs(valorDocumento);
-                    }
-                }
-
-                contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
-
-                chaveExtrato = codEmpresa + "-" + dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
-
-                //logger.logInfo("Lancamento: "+nomeOrigem+" - "+ dataMovimento+" - "+debitoCredito+" - "+valorDocumento+" - "+contLinhaExtrato);
-
-                // Buscar Extrato por Chave na Tabela IO_EXTRATO.
-                extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
-                    .fields("CHAVE")
-                    .param(chaveExtrato)
-                    .queryUnique();
-
-                // Inserir caso Chave nao encontrada.
-
-                if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
-                    try {
-                        dbIOCont.insert("IO_EXTRATO")
-                            .fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
-                            .param(chaveExtrato)
-                            .param(codEmpresa)
-                            .param(dataMovimento)
-                            .param(documento)
-                            .param(nomePortador)
-                            .param(nomeOrigem)
-                            .param(nomeArquivo.toUpperCase())
-                            .param(complemento02)
-                            .param(valorDocumento)
-                            .param(debitoCredito)
-                            .param(0)
-                            .execute();
-                    } catch (Exception sqlInsertException) {
-                        logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
-                        continue;
-                    }
-                } else {
-                    try {
-                        dbIOCont.update("IO_EXTRATO")
-                            .fields("EXTRATOLIDO")
-                            .where("CHAVE = ? ")
-                            .param(0)
-                            .param(chaveExtrato)
-                            .execute();
-                    } catch (Exception sqlUpdateException) {
-                        logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
-                        continue;
-                    }
-                }
-            } catch (Exception ex) {}
-        }
+				if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+					try {
+						dbIOCont.insert("IO_EXTRATO")
+						.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
+						.param(chaveExtrato)
+						.param(codEmpresa)
+						.param(dataMovimento)
+						.param(documento)
+						.param(nomePortador)
+						.param(nomeOrigem)
+						.param(nomeArquivo.toUpperCase())
+						.param(complemento02)
+						.param(valorDocumento)
+						.param(debitoCredito)
+						.param(0)
+						.execute();
+					} catch (Exception sqlInsertException) {
+						logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
+						continue;
+					}
+				} else {
+					try {
+						dbIOCont.update("IO_EXTRATO")
+						.fields("EXTRATOLIDO")
+						.where("CHAVE = ? ")
+						.param(0)
+						.param(chaveExtrato)
+						.execute();
+					} catch (Exception sqlUpdateException) {
+						logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
+						continue;
+					}
+				}
+			} catch (Exception ex) { }
+		}
     }
     return true;
 }
+
 
 public HashMap readExtratoItauPdfFrancesinha4(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
 	JSONObject extratoEmpresa = new JSONObject();
