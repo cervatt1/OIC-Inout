@@ -431,7 +431,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					double valorTotalJuros	= 0.0;
 					double valorTotalDesc	= 0.0;
 					
-					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0};  
+					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0,0,0};  
 
 					String classJur			= "";
 					String classDes			= "";
@@ -587,6 +587,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					// =======================  VARIAVEIS PERSONALIZADAS   =======================
 					// =======================  ========================   =======================
 					String dataAuxiliar = "";
+					String valuesDataMovimento = "";
 
 
 					JSONObject objetoParametro = new JSONObject();
@@ -1154,6 +1155,17 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataMovimento   = "";
 											// dataLote        = "";
 										}
+
+										if(tipoPlanilha.contains("MOVIMENTO") && valuesDataMovimento.equals("") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DATA")){
+											for(int idata = 2; idata < memFile.getFieldsSize(); idata++){
+												valuesDataMovimento += (memFile.getStringFieldRemoveEspCharsUpper(idata).trim().equals("")?"000000000":(getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idata))+";"));
+											}
+											String[] dddttt = valuesDataMovimento.split(";");
+											for(String yout : dddttt){
+												logger.logInfo("DATAMOVER:> " + yout);
+											}
+											continue;
+										}
 									}
 									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
 										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
@@ -1262,6 +1274,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorDocumentoArray[7] = 0;
 									valorDocumentoArray[8] = 0;
 									valorDocumentoArray[9] = 0;
+									valorDocumentoArray[10] = 0;
+									valorDocumentoArray[11] = 0;
 									
 									valorJuros		= 0;
 									valorDesconto	= 0;
@@ -1279,6 +1293,12 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									if(ivalorDesconto >=0){
 										try{valorDesconto = Math.abs(memFile.getDoubleField(ivalorDesconto));}
 										catch(Exception vlrd) {valorDesconto = 0;}
+									}
+
+									for(int ivalor = 2; ivalor < memFile.getFieldsSize(); ivalor++){
+										try{
+											valorDocumentoArray[ivalor-2] = memFile.getDoubleField(ivalor);
+										}catch(Exception e){ valorDocumentoArray[ivalor-2] = 0; }
 									}
 									
 									// quando no CRM colocarmos que a coluna de juros eh a mesma de valor desconto 
@@ -2084,12 +2104,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								
 								if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
 
-									for (int iv =0; iv < 10; iv++) { 
+									for (int iv =0; iv < 12; iv++) { 
 										
 										if (valorDocumentoArray[iv] == 0) continue;
 										
 										String rotuloColuna = "";
-										String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";"); 
+										String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";");
+										String [] valuesDataMovimentoArr = valuesDataMovimento.split(";");
+										dataMovimento = valuesDataMovimentoArr[iv];
 										
 										try {
 											rotuloColuna = rotuloArray[iv];
@@ -2135,6 +2157,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											ttTemp.complemento01 = tipoPlanilha;
 											ttTemp.complemento02 = rotuloColuna;
 										}
+										logger.logInfo("dataMovimento:"+dataMovimento + " |valorDocumento:"+valorDocumento);
 										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, rotuloColuna, classificacao);
 									}
 								}
@@ -6315,7 +6338,7 @@ public JSONObject getRoteiro() {
     js.put("idContabilidade", "a096R0000361GKE");
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
-    js.put("fornecedor", "2");
+    js.put("fornecedor", "1");
 	js.put("dataMovimento", "@0");
 	js.put("portador", "NOME DO ARQUIVO");
 	js.put("documentoNF", "1");
@@ -6381,7 +6404,7 @@ public JSONObject getRoteiro() {
     js.put("usarComplementoParcela", "NAO USAR");
     js.put("especiaisBaixaFiscal", "");
     js.put("Arredonda", "false");
-    js.put("Colunas_de_Valores_Extras", "");
+    js.put("Colunas_de_Valores_Extras", "2;3;4;5;6;7;8;9;10;11;12;13");
     js.put("Rotulos_Para_Valores_Extras", "");
     js.put("Colunas_de_Portadores_Extras", "");
     js.put("Coluna_Valor_Duplicata_Dominio", "9");

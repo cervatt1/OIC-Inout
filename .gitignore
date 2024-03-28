@@ -11,7 +11,6 @@ tomcat/
 winservice/
 *.zip
 *.bat
-*.txt
 
 # Ignora todos os arquivos em scriptlib, exceto o especificado
 scriptlib/__tarefa-robo__io_contabil/
