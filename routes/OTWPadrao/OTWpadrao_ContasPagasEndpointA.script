@@ -431,7 +431,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					double valorTotalJuros	= 0.0;
 					double valorTotalDesc	= 0.0;
 					
-					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0,0,0};  
+					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0,0};  
 
 					String classJur			= "";
 					String classDes			= "";
@@ -1166,6 +1166,9 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											}
 											continue;
 										}
+										String[] primeiraDataMV = valuesDataMovimento.split(";");
+										if(tipoPlanilha.contains("MOVIMENTO")) dataMovimento = primeiraDataMV[0];
+
 									}
 									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
 										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
@@ -1275,7 +1278,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorDocumentoArray[8] = 0;
 									valorDocumentoArray[9] = 0;
 									valorDocumentoArray[10] = 0;
-									valorDocumentoArray[11] = 0;
 									
 									valorJuros		= 0;
 									valorDesconto	= 0;
@@ -1295,11 +1297,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										catch(Exception vlrd) {valorDesconto = 0;}
 									}
 
-									for(int ivalor = 2; ivalor < memFile.getFieldsSize(); ivalor++){
+									/*for(int ivalor = 3; ivalor < memFile.getFieldsSize(); ivalor++){
 										try{
-											valorDocumentoArray[ivalor-2] = memFile.getDoubleField(ivalor);
+											valorDocumentoArray[ivalor-3] = memFile.getDoubleField(ivalor);
 										}catch(Exception e){ valorDocumentoArray[ivalor-2] = 0; }
-									}
+									}*/
 									
 									// quando no CRM colocarmos que a coluna de juros eh a mesma de valor desconto 
 									// no caso do valor ser negativo, jogaremos zero para juros, ficando o valor absoluto da coluna como desconto
@@ -1321,6 +1323,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
+
+									logger.logInfo("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
 									
 									// if(codEmpresa.contains("191")) logger.logDebug("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
 									
@@ -2104,14 +2108,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								
 								if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
 
-									for (int iv =0; iv < 12; iv++) { 
+									for (int iv = 0; iv < 11; iv++) { 
 										
 										if (valorDocumentoArray[iv] == 0) continue;
 										
 										String rotuloColuna = "";
 										String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";");
 										String [] valuesDataMovimentoArr = valuesDataMovimento.split(";");
-										dataMovimento = valuesDataMovimentoArr[iv];
+										dataMovimento = valuesDataMovimentoArr[iv+1];
 										
 										try {
 											rotuloColuna = rotuloArray[iv];
@@ -6339,10 +6343,10 @@ public JSONObject getRoteiro() {
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
     js.put("fornecedor", "1");
-	js.put("dataMovimento", "@0");
+	js.put("dataMovimento", "2");
 	js.put("portador", "NOME DO ARQUIVO");
-	js.put("documentoNF", "1");
-	js.put("valorDocumento", "10");
+	js.put("documentoNF", "");
+	js.put("valorDocumento", "2");
 	js.put("valorJuros", "");
 	js.put("valorDesconto", "");
 	js.put("valorMulta", "");
@@ -6404,8 +6408,8 @@ public JSONObject getRoteiro() {
     js.put("usarComplementoParcela", "NAO USAR");
     js.put("especiaisBaixaFiscal", "");
     js.put("Arredonda", "false");
-    js.put("Colunas_de_Valores_Extras", "2;3;4;5;6;7;8;9;10;11;12;13");
-    js.put("Rotulos_Para_Valores_Extras", "");
+    js.put("Colunas_de_Valores_Extras", "3;4;5;6;7;8;9;10;11;12;13");
+    js.put("Rotulos_Para_Valores_Extras", "3;4;5;6;7;8;9;10;11;12;13");
     js.put("Colunas_de_Portadores_Extras", "");
     js.put("Coluna_Valor_Duplicata_Dominio", "9");
     js.put("delimitadorDoArquivo", "");

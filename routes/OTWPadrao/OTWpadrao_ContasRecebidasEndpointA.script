@@ -11042,7 +11042,8 @@ public boolean readExtratoStonePDF(MemoryFile memFile, String nomePortador, JSON
     String complemento02     = "";
     String debitoCredito     = "";
     String contLinhaExtrato  = "";
-    String nomeOrigemAux  = "";
+    String nomeOrigemAux  	 = "";
+	String nomeOrigemRef	 = "";
 	
 	
 	// Data Movimento = DATA
@@ -11076,31 +11077,33 @@ public boolean readExtratoStonePDF(MemoryFile memFile, String nomePortador, JSON
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		// if (memFile.getFieldsSize() < 3) continue;
 		if (line.contains("DATA") && line.contains("TIPO") && line.contains("LANCAMENTO") && line.contains("VALOR")) continue;
-		// if (memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && memFile.getStringFieldRemoveEspCharsUpper(2).equals("")) continue;
-		if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("")  && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("LTD") && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("PIX")){
-			// nomeOrigem = "";
-			// logger.logInfo(" MF 0 -> " + memFile.getStringFieldRemoveEspCharsUpper(0));
-			nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(0);
-			continue;
-		}
 		
-		if(memFile.getFieldsSize() <= 2){
+		if( memFile.getFieldsSize() <= 2 ){
+
+			logger.logInfo("AS INFO ANTEXX MEO: " + line );
 			
 			if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("") 
-				&& (memFile.getStringFieldRemoveEspCharsUpper(0).contains("LTD") || memFile.getStringFieldRemoveEspCharsUpper(0).contains("PIX"))){
+				&& (line.contains("LTD") || line.contains("PIX") || line.contains("TRANSFERENCIA") || line.contains("PAGAMENTO"))){
+
+				if( line.contains("PAGAMENTO")){
+					nomeOrigemRef = cutString(line.replaceAll("\\|", "").replaceAll(";", " ").replace("  ", " "), 0, "PAGAMENTO") + " PAGAMENTO";
+				}else{
+					nomeOrigemRef = line.replaceAll("\\|", "").replaceAll(";", " ").replace("  ", " ");
+				}
+
 				try {
 					dbIOCont.update("IO_EXTRATO")
 					.fields("HISTORICO")
 					.where("CHAVE = ? ")
-					.param(nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\\|", "").replace("  ", " "))
+					.param(nomeOrigem + " " + nomeOrigemRef)
 					.param(chaveExtrato)
 					.execute();
-				} catch (Exception sqlUpdateException) {
-				}
-				// chaveExtrato = "";
+				} catch (Exception sqlUpdateException) { }
 				nomeOrigemAux = "";
+			}else if( !line.contains("STONE INSTITUICAO") && !(line.contains("LTD") || line.contains("PIX") || line.contains("TRANSFERENCIA") || line.contains("PAGAMENTO")) ){
+				nomeOrigemAux = line.replaceAll("\\|", " ").replace("  ", " ");
+				continue;
 			}
 		}else{
 		// logger.logInfo("DTS " + dataString);
@@ -11128,15 +11131,22 @@ public boolean readExtratoStonePDF(MemoryFile memFile, String nomePortador, JSON
 				if (dataMovimento.equals("")) continue;
 
 				valorDocumento  = 0;
-				try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
-				catch (Exception vlrd) { valorDocumento = 0; }
+					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).matches(".*[a-zA-Z].*")){
+						try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento+1));}
+						catch (Exception vlrd) { valorDocumento = 0; }
+					}else{
+						try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
+						catch (Exception vlrd) { valorDocumento = 0; }
+					}
 				
 				if (valorDocumento == 0) continue;
 				
 				// logger.logInfo("NOMESS " + inomeOrigem + " | " + line);
 
 				nomeOrigem      = "";
-				nomeOrigem		= nomeOrigemAux + " " +  memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+				nomeOrigem		= (nomeOrigemAux + " " + memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","")).trim();
+				nomeOrigemAux	= "";
+
 				if (nomeOrigem.contains("SALDO C/C")) continue;
 				documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
 				complemento02 = documento;
@@ -11152,6 +11162,8 @@ public boolean readExtratoStonePDF(MemoryFile memFile, String nomePortador, JSON
 					}
 				} catch (Exception e) {logger.logInfo("Problema nomeOrigem " + e.getMessage());}
 				nomeOrigem = nomeOrigem.trim().replace("  ", " ");
+				if(memFile.getFieldsSize() >= 6 && !memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).matches(".*[a-zA-Z].*")) nomeOrigem += memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem+1);
+				
 				// logger.logInfo("BTL -> 5565|  -> " + dataMovimento  + "|  -> " + valorDocumento  + "|  -> " + debitoCredito  );
 				contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
