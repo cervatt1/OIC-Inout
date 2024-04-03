@@ -2,8 +2,8 @@
 -- CAMPOS OBRIGATÓRIOS ---------------------
 --------------------------------------------
 CONTABILIDADE 	= Imersao
-PASTA_INICIAL 	= C:/clientes
-NIVEIS_SUBPASTA = 5
+PASTA_INICIAL 	= C:/Contabilidade Fiscal Folha
+NIVEIS_SUBPASTA = 6
 --------------------------------------------
 -- CAMPOS OPCIONAIS ------------------------
 --------------------------------------------

@@ -24330,7 +24330,7 @@ public boolean readExtratoUnicred3PDF(MemoryFile memFile, JSONObject jDados, Dat
 			valorDocumento = Math.abs(valorDocumento);
 
 			nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).trim();
-			complemento02	= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
+			complemento02	= nomeOrigem;
 			documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","");
 
 
@@ -24341,8 +24341,6 @@ public boolean readExtratoUnicred3PDF(MemoryFile memFile, JSONObject jDados, Dat
 				debitoCredito = "EXTRATO-DEBITO";
 				logger.logInfo(debitoCredito + " - " + line);
 			}
-			nomeOrigem = cutString(nomeOrigem, "-");
-			nomeOrigem = cutString(nomeOrigem, "-");
 
 
 

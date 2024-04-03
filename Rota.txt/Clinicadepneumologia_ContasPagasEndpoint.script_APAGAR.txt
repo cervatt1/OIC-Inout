@@ -443,7 +443,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					double valorTotalJuros	= 0.0;
 					double valorTotalDesc	= 0.0;
 					
-					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0};  
+					double [] valorDocumentoArray = {0,0,0,0,0,0,0,0,0,0,0};  
 
 					String classJur			= "";
 					String classDes			= "";
@@ -602,6 +602,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 
 					JSONObject objetoParametro = new JSONObject();
+					String valuesDataMovimento = "";
 
 					// #DOCUMENTACAO
 					// busca de indices da planilha principal
@@ -1164,6 +1165,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataLote        = "";
 										}
 									}
+									logger.logInfo("TIPO PLANILHAAA" + tipoPlanilha );
 									
 									if (!tipoPlanilha.contains("OTTCARTAO")) {
 										// #Fabrica(2019-05-20)
@@ -1175,7 +1177,21 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataMovimento   = "";
 											// dataLote        = "";
 										}
+
+										if(tipoPlanilha.contains("MOVIMENTO") && valuesDataMovimento.equals("") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DATA")){
+											for(int idata = 2; idata < memFile.getFieldsSize(); idata++){
+												valuesDataMovimento += (memFile.getStringFieldRemoveEspCharsUpper(idata).trim().equals("")?"000000000":(getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idata))+";"));
+											}
+											String[] dddttt = valuesDataMovimento.split(";");
+											for(String yout : dddttt){
+												logger.logInfo("DATAMOVER:> " + yout);
+											}
+											continue;
+										}
+										String[] primeiraDataMV = valuesDataMovimento.split(";");
+										if(tipoPlanilha.contains("MOVIMENTO")) dataMovimento = primeiraDataMV[0];
 									}
+
 									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
 										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
 										&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR ORIGINAL") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("VALOR RECEBIDO")
@@ -1283,6 +1299,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorDocumentoArray[7] = 0;
 									valorDocumentoArray[8] = 0;
 									valorDocumentoArray[9] = 0;
+									valorDocumentoArray[10] = 0;
 									
 									valorJuros		= 0;
 									valorDesconto	= 0;
@@ -2107,12 +2124,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								
 								if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
 
-									for (int iv =0; iv < 10; iv++) { 
+									for (int iv =0; iv < 11; iv++) { 
 										
 										if (valorDocumentoArray[iv] == 0) continue;
 										
 										String rotuloColuna = "";
 										String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";"); 
+										String [] valuesDataMovimentoArr = valuesDataMovimento.split(";");
+										dataMovimento = valuesDataMovimentoArr[iv+1]; 
 										
 										try {
 											rotuloColuna = rotuloArray[iv];

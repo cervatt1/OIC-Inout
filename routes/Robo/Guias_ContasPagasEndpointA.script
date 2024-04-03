@@ -515,68 +515,129 @@ public String dirWalk(String path, InoutLogger logger, int targetDepth, int curr
                                                                         .toInstant())
                                                                         , "yyyy");
 
+    logger.logInfo("pastaAtual: "+pastaAtual + " |path: " + path);
+
+    /*if (currentDepth == 0){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 1){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 2){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 3){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 4){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 5){ 
+        pastaCerta = true;
+    }
+    if (currentDepth == 6){ 
+        pastaCerta = true;
+    }*/
+
     if (currentDepth == 0 && 
-        pastaAtual.contains("CLIENTES")) pastaCerta = true;
-
-    if (currentDepth == 1) pastaCerta = true;
-
-
-    if (currentDepth == 2 && 
-        (pastaAtual.contains("DP") || pastaAtual.contains("FISCAL")) ){
-        targetDepth = 5;  
-        pastaCerta = true;
-    }
-    if (currentDepth == 2 && 
-        pastaAtual.contains("OBRIGACOES") ){
-        targetDepth = 6;      
+        pastaAtual.contains("CONTABILIDADE FISCAL FOLHA")
+    ){ 
         pastaCerta = true;
     }
 
-
-    if (currentDepth == 3 &&
-        (path.toUpperCase().contains("DP")) &&
-        pastaAtual.contains("FOLHAS") ) pastaCerta = true;
-    
-    if (currentDepth == 4 && 
-        (path.toUpperCase().contains("DP") && path.toUpperCase().contains("FOLHAS")) && 
-        (pastaAtual.contains(anoAtual)) ) pastaCerta = true;
-
-    if (currentDepth == 5 && 
-        (path.toUpperCase().contains("DP") && path.toUpperCase().contains("FOLHAS")) && 
-        (path.toUpperCase().contains(anoAtual)) ) pastaCerta = true;
-
+    if (currentDepth == 1 && 
+        (
+            pastaAtual.contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA")
+        )){ 
+            pastaCerta = true;
+    }
     
 
-    if (currentDepth == 3 &&
-        (path.toUpperCase().contains("FISCAL")) && 
-        (pastaAtual.contains("FECHAMENTO") || pastaAtual.contains("TRIBUTOS") || pastaAtual.contains("PARCELAMENTO")) ) pastaCerta = true;
+    if (currentDepth == 2 && 
+        (
+            pastaAtual.contains("- AUT - 13 SAL INTEGRAL") || 
+            pastaAtual.contains("- AUT - 13 SAL ADIANT") || 
+            pastaAtual.contains("- AUT - PR-LABORE") ||
+            pastaAtual.contains("- AUT - DOMSTICA") || 
+            pastaAtual.contains("FOLHA DE PGTO - COM MOVIMENTO") ||
+            pastaAtual.contains("- AUT - SEM MOVIMENTO - ESOCIAL - BPO") || 
+            pastaAtual.contains("FOLHA - SEM MOVIMENTO") ||
+            pastaAtual.contains("FOLHA DE PGTO - ADIANTAMENTO")
+        ) && (
+            path.toUpperCase().contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA")
+        )){
+            pastaCerta = true;
+    }
 
-    if (currentDepth == 4 &&
-        (path.toUpperCase().contains("FISCAL") && 
-        (path.toUpperCase().contains("FECHAMENTO") || path.toUpperCase().contains("TRIBUTOS") || path.toUpperCase().contains("PARCELAMENTO"))) &&
-        pastaAtual.contains(anoAtual)) pastaCerta = true;
+    if(currentDepth == 3  &&
+        pastaAtual.contains("AUTOMATIZAO FOLHA") &&
+        (
+            path.toUpperCase().contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA") &&
+        (
+            (path.toUpperCase().contains("- AUT - 13") && (path.toUpperCase().contains("SAL INTEGRAL") || path.toUpperCase().contains("SAL ADIANT"))) || 
+            (path.toUpperCase().contains("- AUT - PR") && (path.toUpperCase().contains("-LABORE"))) ||
+            (path.toUpperCase().contains("- AUT - DOM") && (path.toUpperCase().contains("STICA")) || 
+            path.toUpperCase().contains("FOLHA DE PGTO - COM MOVIMENTO") ||
+            path.toUpperCase().contains("- AUT - SEM MOVIMENTO - ESOCIAL - BPO") || 
+            path.toUpperCase().contains("FOLHA - SEM MOVIMENTO") ||            
+            path.toUpperCase().contains("FOLHA DE PGTO - ADIANTAMENTO"))
+        ))){
+            pastaCerta = true;
+    }
 
-    if (currentDepth == 5 &&
-        (path.toUpperCase().contains("FISCAL") && path.toUpperCase().contains(anoAtual) &&
-        (path.toUpperCase().contains("FECHAMENTO") || path.toUpperCase().contains("TRIBUTOS") || path.toUpperCase().contains("PARCELAMENTO")))) pastaCerta = true;
-    
-    
-    if (currentDepth == 3 &&
-        (path.toUpperCase().contains("OBRIGACOES")) && 
-        pastaAtual.contains("DCTF") ) pastaCerta = true;
+    if(currentDepth == 4  &&
+        (   
+            (path.toUpperCase().contains("AUTOMATIZA") && path.toUpperCase().contains("O FOLHA")) &&
+            path.toUpperCase().contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA") 
+        && (
+            (path.toUpperCase().contains("- AUT - 13") && (path.toUpperCase().contains("SAL INTEGRAL") || path.toUpperCase().contains("SAL ADIANT"))) ||
+            (path.toUpperCase().contains("- AUT - PR") && (path.toUpperCase().contains("-LABORE"))) ||
+            (path.toUpperCase().contains("- AUT - DOM") && (path.toUpperCase().contains("STICA")) || 
+            path.toUpperCase().contains("FOLHA DE PGTO - COM MOVIMENTO") ||
+            path.toUpperCase().contains("- AUT - SEM MOVIMENTO - ESOCIAL - BPO") || 
+            path.toUpperCase().contains("FOLHA - SEM MOVIMENTO") ||            
+            path.toUpperCase().contains("FOLHA DE PGTO - ADIANTAMENTO"))
+        ))){
+            pastaCerta = true;
+    }
 
-    if (currentDepth == 4 &&
-        (path.toUpperCase().contains("OBRIGACOES")) && 
-        path.toUpperCase().contains("DCTF") && pastaAtual.contains("PRINCIPAL") ) pastaCerta = true; 
+    if(currentDepth == 5  &&
+        (   
+            (path.toUpperCase().contains("AUTOMATIZA") && path.toUpperCase().contains("O FOLHA")) &&
+            path.toUpperCase().contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA") 
+        && (
+            (path.toUpperCase().contains("- AUT - 13") && (path.toUpperCase().contains("SAL INTEGRAL") || path.toUpperCase().contains("SAL ADIANT"))) ||
+            (path.toUpperCase().contains("- AUT - PR") && (path.toUpperCase().contains("-LABORE"))) ||
+            (path.toUpperCase().contains("- AUT - DOM") && (path.toUpperCase().contains("STICA")) || 
+            path.toUpperCase().contains("FOLHA DE PGTO - COM MOVIMENTO") ||
+            path.toUpperCase().contains("- AUT - SEM MOVIMENTO - ESOCIAL - BPO") || 
+            path.toUpperCase().contains("FOLHA - SEM MOVIMENTO") ||            
+            path.toUpperCase().contains("FOLHA DE PGTO - ADIANTAMENTO"))
+        ))){
+            pastaCerta = true;
+    }
 
-    if (currentDepth == 5 &&
-        (path.toUpperCase().contains("OBRIGACOES")) && 
-        path.toUpperCase().contains("DCTF") && path.toUpperCase().contains("PRINCIPAL") &&
-        pastaAtual.contains(anoAtual)) pastaCerta = true;    
-
-    if (currentDepth == 6 &&
-        (path.toUpperCase().contains("OBRIGACOES")) && path.toUpperCase().contains(anoAtual) && 
-        path.toUpperCase().contains("DCTF") && path.toUpperCase().contains("PRINCIPAL") ) pastaCerta = true;  
+    if(currentDepth == 6  &&
+        (   
+            (path.toUpperCase().contains("AUTOMATIZA") && path.toUpperCase().contains("O FOLHA")) &&
+            path.toUpperCase().contains("- QUESTOR - AUTOMATIZA") &&
+            path.toUpperCase().contains("CONTABILIDADE FISCAL FOLHA") 
+        && (
+            (path.toUpperCase().contains("- AUT - 13") && (path.toUpperCase().contains("SAL INTEGRAL") || path.toUpperCase().contains("SAL ADIANT"))) ||
+            (path.toUpperCase().contains("- AUT - PR") && (path.toUpperCase().contains("-LABORE"))) ||
+            (path.toUpperCase().contains("- AUT - DOM") && (path.toUpperCase().contains("STICA")) || 
+            path.toUpperCase().contains("FOLHA DE PGTO - COM MOVIMENTO") ||
+            path.toUpperCase().contains("- AUT - SEM MOVIMENTO - ESOCIAL - BPO") || 
+            path.toUpperCase().contains("FOLHA - SEM MOVIMENTO") ||            
+            path.toUpperCase().contains("FOLHA DE PGTO - ADIANTAMENTO"))
+        ))){
+            pastaCerta = true;
+    }
 
     // primeiro robo!( •̀ .̫ •́ )✧
 
