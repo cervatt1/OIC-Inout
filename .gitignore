@@ -15,6 +15,7 @@ winservice/
 # Ignora todos os arquivos em scriptlib, exceto o especificado
 scriptlib/__tarefa-robo__io_contabil/
 scriptlib/__tareffa-tarquivo__io_contabil/
+scriptlib/__OIC__io_contabil/
 scriptlib/io_contabil/*
 !scriptlib/io_contabil/RunExtratosECartoes.script
 !scriptlib/io_contabil/RegrasSemCartoes.script

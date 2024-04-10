@@ -18926,12 +18926,12 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		ivalorDocumento	= 3;
-
 		if(line.startsWith("ABOUT:BLANK") || line.contains("PRE-VISUALIZACAO DE IMPRESSAO")) continue;
 		
 		// logger.logInfo("LINHA NO COMECO " + memFile.getFieldsSize() + " | " +  tipo + " | " + line);
 		logger.logInfo("TPItAU " + tipo);
+		if(tipo.equals("003") || tipo.equals("002") || tipo.equals("001")) ivalorDocumento	= 3;
+		
 		
 		if (tipo.equals("002") && line.contains("LIS") && line.contains("CONTRATADO") && line.contains("UTILIZADO") && line.contains("DISPONIVEL")/* || (tipo.equals("002") && line.contains("SALDO DISPONIVEL EM CONTA") && memFile.getFieldsSize() == 1)*/) tipo = "003";
 		
@@ -19172,24 +19172,9 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 				if(!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
 				valorDocumento = Math.abs(valorDocumento);
 			}
-
-			if(tipo.equals("003")){
-				if(memFile.getFieldsSize()-1 < ivalorDocumento ) ivalorDocumento -= 1;
-
-				debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).trim(); 
-				
-				try{
-					valorDocumento = memFile.getDoubleField(ivalorDocumento);
-					}
-				catch (Exception vlrd){ valorDocumento = 0; }
-
-				if(debitoCreditoAux.contains("-"))  debitoCredito = "EXTRATO-DEBITO";
-				if(!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
-				valorDocumento = Math.abs(valorDocumento);
-			}
 			
-			if(tipo.equals("001")){
-				ivalorDocumento = memFile.getFieldsSize()-1;
+			if(tipo.equals("003") || tipo.equals("002") || tipo.equals("001")){
+				if(memFile.getFieldsSize()-1 < ivalorDocumento ) ivalorDocumento -= 1;
 
 				debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).trim(); 
 				
