@@ -2241,6 +2241,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
+
+			if( arquivoCompleto.contains("EXTRATO DE MOVIMENTACAO DA CARTEIRA DE COBRANCA") &&
+				arquivoCompleto.contains("ULTIM/MOVIM") &&
+				arquivoCompleto.contains("NOSSO NUMERO|SEU NUMERO|NOME DO PAGADOR|VENCIMENTO|DATA PAGTO|VALOR DO TITULO|OSCILACAO/DESPESA|VALOR COBRADO|CL") &&
+				arquivoCompleto.contains("OSCILACAO/DESPESA")
+			){
+				tipoPlanilha = "EXTRATO-MOVIMENTACAO-CARTEIRA-BRADESCO-PDF";
+				JSONObject jDados = new JSONObject();
+
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("TIPOPLANILHA",   "BRADESCO-FRANCESINHA");
+				jDados.put("LINHA",   line);
+				jDados.put("tipoFrancesinha",   "002");
+
+				mapaVariavel = readExtratoECartao("readFrancesinhaBradescoPDF", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
 		}
 		
 		////// EXTRATO - Santander FRANCESINHA PDF //////////////////////////////////////////////////////////////////
