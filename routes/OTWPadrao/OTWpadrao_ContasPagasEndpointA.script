@@ -17838,7 +17838,7 @@ public boolean readExtratoAilosCiviaPDF(MemoryFile memFile, String nomePortador,
 					nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(0),"CONTA:");
 				}
 				
-				if(line.contains("DATA") && line.contains("HISTORICO") && line.contains("DOCUMENTO") && line.contains("DEBITO")){
+				if(line.contains("DATA") && (line.contains("HISTORICO") || line.contains("DESCRICAO") ) && line.contains("DOCUMENTO") && line.contains("DEBITO")){
 					leuIndice = true;
 					continue;
 				}
