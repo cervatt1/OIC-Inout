@@ -19292,27 +19292,69 @@ public boolean readExtratoItauPdf2(MemoryFile memFile, String nomePortador, JSON
     nomePortador = nomePortador.replaceAll("\\?","");
     complemento01 = nomePortador.replaceAll("\\?","");
 	String linha = "";
+	String anoAuxiliar = "";
+	String diaAuxiliar = "";
+	String mesAuxiliar = "";
+	String tpItau = "";
 
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
 	if(jDados.has("LINHA")) 	   linha 		= jDados.optString("LINHA");
 	if(jDados.has("TIPO"))		   tipo 		= jDados.optString("TIPO");
+	if(jDados.has("TP-ITAU"))	   tpItau 		= jDados.optString("TP-ITAU");
 
 	
 	while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+
+		if(tpItau.equals("002")){
+			idataMovimento	= 0;
+			inomeOrigem		= 1;
+			ivalorDocumento	= 2;
+		}
+
+		if(tpItau.equals("002") 
+				&& (
+				line.contains("AVISO:") &&
+				line.contains("OS SALDOS ACIMA SAO BASEADOS NAS INFORMACOES"))
+			) break; 
 		
 		if(line.contains("SALDO")) continue;
         
         try {
             
-            try{
-				dataMovimento     = getDate(dataMovimento, idataMovimento, line, false,"", memFile, logger);
-				dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
-			}catch(Exception e){
-				continue;
-			}
+            if(tpItau.equals("")){
+                try{
+                    dataMovimento     = getDate(dataMovimento, idataMovimento, line, false,"", memFile, logger);
+                    dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+                }catch(Exception e){
+                    continue;
+                }
+            }
+			
+            if(line.contains("PERIODO:") && anoAuxiliar.equals("")){
+                anoAuxiliar = cutString(line, "PERIODO: ", " ");
+                anoAuxiliar = cutString(anoAuxiliar, anoAuxiliar.lastIndexOf("/"), "");
+            }
+			
+            if( (tpItau.equals("002") && anoAuxiliar.equals("")) || (line.contains("DATA") && line.contains("LANCAMENTOS") && line.contains("SALDO")) ) continue;
+
+            if(tpItau.equals("002") && !anoAuxiliar.equals("")){
+                try{
+                    diaAuxiliar = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, " ");
+					mesAuxiliar = getMonth(cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), "/ ", ""));
+					dataMovimento = diaAuxiliar+"/"+mesAuxiliar+"/"+anoAuxiliar;
+                    dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+                }catch(Exception e){
+                    continue;
+                }
+            }
+
+			if(tpItau.equals("002") 
+				&& (
+				line.contains("LANCAMENTOS PERIODO"))
+			) continue; 
             
             nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
 

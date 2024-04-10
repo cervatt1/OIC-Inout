@@ -3214,6 +3214,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			//  jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			//  jDados.put("TIPO", "004");
 			//  jDados.put("nomePortador2", nomePortador2);
+			if (arquivoCompleto.contains("AGENCIA") && arquivoCompleto.contains("CONTA CORRENTE") &&
+				arquivoCompleto.contains("UTILIZADO") && arquivoCompleto.contains("INFORMACOES E CANCELAMENTOS") &&
+				arquivoCompleto.contains("MULTILIMITE") && arquivoCompleto.contains("CONTRATADO") &&
+				arquivoCompleto.contains("CAPITAIS E REGIOES METROPOLITANAS") && 
+				nomePortador2.equals("") && arquivoCompleto.contains("ITAU.COM.BR")
+			) {
+				JSONObject jDados = new JSONObject();
+
+				nomePortador2 = cutString(arquivoCompleto, "CONTA CORRENTE", "SALDO");
+				nomePortador2 = "ITAU-PDF-" + cutString(nomePortador2, nomePortador2.lastIndexOf("|"), "");
+
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
+				jDados.put("TP-ITAU", "002");
+				
+				readExtratoECartao("readExtratoItauPdf2", memFile, nomePortador2, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+
 			if ((cabecalhoPlanilha.contains("POSICAO DA CONTA CORRENTE -") && arquivoCompleto.toUpperCase().contains("ITAU")) ||
 				(cabecalhoPlanilha.contains("LOGOTIPO ITAU") && cabecalhoPlanilha.contains("LANCAMENTO")) ||
 				(cabecalhoPlanilha.contains("SALDO RESUMIDO") && cabecalhoPlanilha.contains("BANCO ITAU S/A")) &&
