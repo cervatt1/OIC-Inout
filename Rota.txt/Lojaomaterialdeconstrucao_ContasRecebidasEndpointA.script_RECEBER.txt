@@ -6644,8 +6644,8 @@ public String atualizaStatusProtocoloOic(LancamentosApi apiWeb, File fl,  String
 //## NAO ALTERAR DAQUI ATE O FINAL DO SCRIPT!!!!     ##
 public JSONObject getRoteiro() {
     JSONObject js = new JSONObject();
-    js.put("codigo", "ROT-2023-0989219");
-    js.put("idRoteiro", "a0A6R000019E6Ft");
+    js.put("codigo", "ROT-2023-0989220");
+    js.put("idRoteiro", "a0A6R000019E6Fy");
     js.put("idEmpresa", "a0q6R000009I4GgQAK");
     js.put("idContabilidade", "a096R00002vYhB1");
     js.put("CnpjContabilidade", "03.454.102/0001-75");
@@ -6705,7 +6705,7 @@ public JSONObject getRoteiro() {
     js.put("Planilhas_Padroes", "Extratos OFX");
     js.put("statusRoteiro", "EM DESENVOLVIMENTO");
     js.put("tipoArquivo", ".XLSX - EXCEL");
-    js.put("tipoIntegracao", "CONTAS PAGAS");
+    js.put("tipoIntegracao", "CONTAS RECEBIDAS");
     js.put("fazerShrink", "FALSE");
     js.put("colunaShrink", "0");
     js.put("dupliNaoEncontContabil", "FALSE");
@@ -6869,23 +6869,23 @@ public String getContaMovimento(String contaMovimento, String tipoLancamento, St
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("5") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("3") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("4") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
@@ -7242,23 +7242,23 @@ public String getContaMovimento(String contaMovimento, String tipoLancamento, St
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("5") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("3") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("4") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989219
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) { //ROT-2023-0989220
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
@@ -7818,22 +7818,22 @@ public String getRegraContaMovimento(String contaMovimento, String tipoLancament
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("5") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '5', Complemento (01) contem 'DEPOSITO', Complemento (01) contem 'RESGATE', CONTA MOVIMENTO SERA = 'IGNORAR'";
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '5', Complemento (01) nao contem 'DEPOSITO', Complemento (01) nao contem 'RESGATE', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("3") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '3', Complemento (01) contem 'RECEB. DPL', CONTA MOVIMENTO SERA = 'IGNORAR'";
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB. DPL")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '3', Complemento (01) nao contem 'RECEB. DPL', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
         StringUtil.removeSpecialCharsToUC(nomePortador).equals("4") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '4', Complemento (01) contem 'DEPOSITO', Complemento (01) contem 'RESGATE', CONTA MOVIMENTO SERA = 'IGNORAR'";
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("DEPOSITO") &&
+        !StringUtil.removeSpecialCharsToUC(complemento01).contains("RESGATE")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Portador igual a '4', Complemento (01) nao contem 'DEPOSITO', Complemento (01) nao contem 'RESGATE', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
@@ -8818,10 +8818,6 @@ public String getCodigoClassificacao(String nomeOrigem, JSONObject objHistorico)
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        !StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REGRA DE CLASSIFICACAO")) {
-        retornoClassificacao = "2.1.3.01";
-    }
     return retornoClassificacao;
 }
 public String getModificaData(JSONObject objHistorico) {
@@ -9692,8 +9688,6 @@ public String  getLimpaCamposAvancado(String parametro, String parametro2, JSONO
     double valorDocumento  = objHistorico.optDouble("valorDocumento");
     double valorDesconto   = objHistorico.optDouble("valorDesconto");
     double valorJuros      = objHistorico.optDouble("valorJuros");
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && parametro.equals("documento")) lote = cutString(lote,"NF "); //ROT-2023-0989219
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && parametro.equals("documento")) lote = cutString(lote,"NFE:"); //ROT-2023-0989219
 
     return lote.trim();
 }
@@ -9791,16 +9785,6 @@ public String getColunaAlternativa(String parametro, JSONObject objHistorico) {
 
     String retornaColunas  = "";
 
-    if (parametro.equals("valorDocumento") && StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomePortador).equals("5") &&
-        StringUtil.removeSpecialCharsToUC(complemento06).contains("PRESTA")) {
-        retornaColunas = "5";
-    }
-    if (parametro.equals("valorDocumento") && StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomePortador).equals("4") &&
-        StringUtil.removeSpecialCharsToUC(complemento06).contains("PRESTA")) {
-        retornaColunas = "5";
-    }
     return retornaColunas.replace(",",";").trim();
 }
 

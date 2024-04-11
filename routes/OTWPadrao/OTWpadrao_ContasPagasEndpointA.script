@@ -1109,7 +1109,26 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								// leitura de xlsx e csv
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") || (!roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && !roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA ("))) {
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
- 									
+
+									if(tipoPlanilha.contains("MOVIMENTO") && (
+										line.contains("ENTRADA") &&
+										line.contains("MOVIMENTO") &&
+										line.contains("HISTORICO") &&
+										line.contains("CONTA") ) || 
+										line.contains("SALDO ANTERIOR") 
+									) continue;
+
+									if(tipoPlanilha.contains("MOVIMENTO") && memFile.getFieldsSize() < 3){
+										ttMovimentoPadrao ttMov4 = (ttMovimentoPadrao)mapaVariavel.get(chave + "-CTB");
+										if(ttMov4 != null){
+											ttMov4.nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0) +" "+ memFile.getStringFieldRemoveEspCharsUpper(1);
+											ttMov4.complemento01 += " " + memFile.getStringFieldRemoveEspCharsUpper(0) +" "+ memFile.getStringFieldRemoveEspCharsUpper(1);
+											mapaVariavel.put(chave + "-CTB", ttMov4);
+											continue;
+										}
+									}
+									// logger.logDebug("LIN -> " + line);
+									
 									// #Fabrica(2019-05-20)
 									if (tipoPlanilha.contains("OTTCARTAO")) {
 										try{
@@ -1123,20 +1142,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 												dataMovimento     = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).lastIndexOf("/")+5);
 											}else{
 												dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											}
-											if(tipoPlanilha.contains("CARTAO_ALELO2")){
-												if(dataMovimento.equals("")){
-													String dataAux = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, ".");
-													Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
-													int datanum = Integer.parseInt(dataAux);
-													Calendar calSerial = Calendar.getInstance();
-													calSerial.setTime(dt);
-													calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
-													dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
-												}
-											}
-
-											
+											} 											
 											 
 											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
 										}catch(Exception e){
@@ -1155,20 +1161,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataMovimento   = "";
 											// dataLote        = "";
 										}
-
-										if(tipoPlanilha.contains("MOVIMENTO") && valuesDataMovimento.equals("") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DATA")){
-											for(int idata = 2; idata < memFile.getFieldsSize(); idata++){
-												valuesDataMovimento += (memFile.getStringFieldRemoveEspCharsUpper(idata).trim().equals("")?"000000000":(getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idata))+";"));
-											}
-											String[] dddttt = valuesDataMovimento.split(";");
-											for(String yout : dddttt){
-												logger.logInfo("DATAMOVER:> " + yout);
-											}
-											continue;
-										}
-										String[] primeiraDataMV = valuesDataMovimento.split(";");
-										if(tipoPlanilha.contains("MOVIMENTO")) dataMovimento = primeiraDataMV[0];
-
 									}
 									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
 										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
@@ -1177,13 +1169,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										break;
 									}
 									
-									
-									if (tipoLancamento.contains("RECEBER")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA PAGAMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("FORNECEDOR /  DESCRICAO PAGAMENTO") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO PAGAMENTO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR ORIGINAL") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("VALOR PAGO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(6).contains("BANCO (PORTADOR)") && memFile.getStringFieldRemoveEspCharsUpper(7).contains("CATEGORIA (DESPESA)")){
-										break;
-									}
+									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+dataMovimento);
 									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
 									
@@ -1277,7 +1263,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorDocumentoArray[7] = 0;
 									valorDocumentoArray[8] = 0;
 									valorDocumentoArray[9] = 0;
-									valorDocumentoArray[10] = 0;
 									
 									valorJuros		= 0;
 									valorDesconto	= 0;
@@ -1296,12 +1281,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										try{valorDesconto = Math.abs(memFile.getDoubleField(ivalorDesconto));}
 										catch(Exception vlrd) {valorDesconto = 0;}
 									}
-
-									/*for(int ivalor = 3; ivalor < memFile.getFieldsSize(); ivalor++){
-										try{
-											valorDocumentoArray[ivalor-3] = memFile.getDoubleField(ivalor);
-										}catch(Exception e){ valorDocumentoArray[ivalor-2] = 0; }
-									}*/
 									
 									// quando no CRM colocarmos que a coluna de juros eh a mesma de valor desconto 
 									// no caso do valor ser negativo, jogaremos zero para juros, ficando o valor absoluto da coluna como desconto
@@ -1323,23 +1302,27 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
-
-									logger.logInfo("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
 									
-									// if(codEmpresa.contains("191")) logger.logDebug("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
-									
-									// logger.logDebug("TP -> "+ ivalorDocumento + " | " + idataMovimento + " TREM " + 
-													// tipoPlanilha+" - Empresa -> "+valorDocumento+" - DM -> "+dataMovimento + " | " + memFile.getStringFieldRemoveEspCharsUpper(0));
-									
+								    logger.logInfo("TP  1110 -> "+tipoPlanilha+" - DM "+idataMovimento+" -> "+dataMovimento+" - VD "+ivalorDocumento+" -> "+valorDocumento);
 									if(logs && cont <= 200){
 										
 										logsTxt.append("\r\n");
-										logsTxt.append("ANALISTA AUX").append(";").append(dataMovimento).append(";").append(valorDocumento).append(";")
-											   .append(documento).append(";").append(nomeOrigem).append(";").append(nomePortador).append(";").append(complemento01)
-											   .append(";").append(complemento02).append(";").append(complemento03).append(";").append(complemento04).append(";")
-											   .append(complemento05).append(";").append(complemento06).append(";").append(tipoPlanilha).append(";")
-											   .append(mantemArquivo.equals("SIM") ? "LENDO PELO TEMPLATE (SIM)" : "LENDO ESPECIFICO (NAO)").append(";")
-											   .append(line).append(";");
+										logsTxt.append("ANALISTA AUX");												logsTxt.append(";");
+										logsTxt.append(dataMovimento); 												logsTxt.append(";");
+										logsTxt.append(valorDocumento);												logsTxt.append(";");
+										logsTxt.append(documento);													logsTxt.append(";");
+										logsTxt.append(nomeOrigem);													logsTxt.append(";");
+										logsTxt.append(nomePortador);												logsTxt.append(";");
+										logsTxt.append(complemento01);												logsTxt.append(";");
+										logsTxt.append(complemento02);												logsTxt.append(";");
+										logsTxt.append(complemento03);												logsTxt.append(";");
+										logsTxt.append(complemento04);												logsTxt.append(";");
+										logsTxt.append(complemento05);												logsTxt.append(";");
+										logsTxt.append(complemento06);												logsTxt.append(";");
+										logsTxt.append(tipoPlanilha);												logsTxt.append(";");
+										if(mantemArquivo.equals("SIM"))logsTxt.append("LENDO PELO TEMPLATE (SIM)");	logsTxt.append(";");
+										if(mantemArquivo.equals("NAO"))logsTxt.append("LENDO ESPECIFICO (NAO)");	logsTxt.append(";");
+										logsTxt.append(line);														logsTxt.append(";");
 																	
 									}
 
@@ -6342,21 +6325,21 @@ public JSONObject getRoteiro() {
     js.put("idContabilidade", "a096R0000361GKE");
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
-    js.put("fornecedor", "1");
-	js.put("dataMovimento", "2");
-	js.put("portador", "NOME DO ARQUIVO");
-	js.put("documentoNF", "");
-	js.put("valorDocumento", "2");
-	js.put("valorJuros", "");
-	js.put("valorDesconto", "");
-	js.put("valorMulta", "");
-	js.put("valorPagamento", "");
-	js.put("complemento01", "");
-	js.put("complemento02", "");
-	js.put("complemento03", "");
-	js.put("complemento04", "");
-	js.put("complemento05", "10");
-	js.put("complemento06", "INTERNO");
+    js.put("fornecedor", "3");
+    js.put("dataMovimento", "0");
+    js.put("portador", "1");
+    js.put("documentoNF", "3");
+    js.put("valorDocumento", "4");
+    js.put("valorJuros", "");
+    js.put("valorDesconto", "");
+    js.put("valorMulta", "");
+    js.put("valorPagamento", "");
+    js.put("complemento01", "3");
+    js.put("complemento02", "2");
+    js.put("complemento03", "");
+    js.put("complemento04", "");
+    js.put("complemento05", "");
+    js.put("complemento06", "4");
 	js.put("centroCusto", "");
 	js.put("valorAlternativo", "");
     js.put("cpfCnpj", "");
