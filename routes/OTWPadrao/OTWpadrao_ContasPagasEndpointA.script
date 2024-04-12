@@ -24556,6 +24556,10 @@ public boolean readExtratoCresolPDF(MemoryFile memFile, String nomePortador, JSO
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+
+		if(quantityOf(line, ";") > 1){
+			memFile.setFieldSeparator(";");
+		}
 		
 		// 202303-0026638 JWR descomentar caso der problema
 		idataMovimento	= 0;
