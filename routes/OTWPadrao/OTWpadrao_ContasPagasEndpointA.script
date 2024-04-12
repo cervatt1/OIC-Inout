@@ -2478,7 +2478,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
  			if (restoLinha == 0) putStatus(dirName, "03--Etapa 3 de 4 - " + String.valueOf(contRegra) + "--" + tipoLancamento + ".status", jStatus, logger);
 			
 			
-			// logger.logInfo("TPPORTTEMPLATE " + ttMov.tipoPlanilha + " | " + ttMov.lote + " | " + ttMov.dataMovimento + " | " + ttMov.tipoLancamento + " | " + ttMov.debitoCredito);
+			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
 			
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
@@ -21395,7 +21395,7 @@ public boolean readExtratoSicoobDefaultNovo(MemoryFile memFile, String nomePorta
 					}
 				}
 			} catch (Exception readExtratoException) {
-				logger.logError("Erro de leitura de Extrato Padr?Sicoob", readExtratoException);
+				logger.logError("Erro de leitura de Extrato Padr㯠Sicoob", readExtratoException);
 			}
 		}
 		
