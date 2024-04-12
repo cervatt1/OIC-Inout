@@ -2168,7 +2168,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEPORTADOR", nomePortador2);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOPLANILHA", "EXTRATO-SICREDI-FRANCESINHA");
+				jDados.put("TIPOPLANILHA", "FRANCESINHA-SICREDI");
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				mapaVariavel = readExtratoECartao("readFrancesinhaSicrediPdf", memFile, jDados, mapaVariavel, logger);
