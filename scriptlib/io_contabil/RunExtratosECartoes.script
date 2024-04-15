@@ -1696,7 +1696,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		//por outra validacao.
 		////// Extrato - BANCO SANTANDER PDF ///////////////////////////////////////////////////
         if ((roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Santander_PDF") &&
-            (cabecalhoPlanilha.contains("INTERNET BANKING") &&
+            ((cabecalhoPlanilha.contains("INTERNET BANKING") || arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER")) &&
             (arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER") || cabecalhoPlanilha.contains("EXTRATO >")) &&
             ((cabecalhoPlanilha.contains("CONSULTAR") && (!arquivoCompleto.contains("SEU NUMERO") || !arquivoCompleto.contains("NOSSO NUMERO"))) 
 			|| ((cabecalhoPlanilha.contains("CONTA CORRENTE >") && (cabecalhoPlanilha.contains("DATA")
