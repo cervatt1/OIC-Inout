@@ -11303,6 +11303,8 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 	int idocumento      = -1;
 	int ivalorDocumento	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
 	int icomplemento02	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
+
+	boolean naoLeMais = false;
 	
     complemento01 = nomePortador;
 
@@ -11320,6 +11322,12 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
 			continue;
 		}
+
+		if(!naoLeMais && line.contains("CONVENIO") && line.contains("OCORRENCIA") && line.contains("ENTRADA CONFIRMADA") && line.contains("2")) naoLeMais = true;
+		if(naoLeMais && line.contains("CONVENIO") && line.contains("OCORRENCIA") && line.contains("LIQUIDACAO") && line.contains("6")) naoLeMais = false;
+		if(!naoLeMais && line.contains("CONVENIO") && line.contains("OCORRENCIA") && line.contains("BAIXA") && line.contains("9")) naoLeMais = true;
+
+		if(segmentoAilos.equals("VIACRED") && naoLeMais) continue;
 		
 		// if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("CPF/CNPJ:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
 			// nomeOrigem = nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
@@ -11387,17 +11395,19 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 
 					valorDocumento	= 0;
 					if(segmentoAilos.equals("VIACRED")){
-						logger.logInfo("ENTROU");
+						ivalorDocumento = 12;
+						idataMovimento = 16;
+						try{dataMovimento=getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+						}catch(Exception e){ logger.logInfo("Erro datamov: "+e); }
+
 						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 						catch (Exception vlrd) { valorDocumento = 0; }
+						logger.logInfo("VLRDCM: " + valorDocumento);
 
 						if (valorDocumento == 0.0) continue;
 					
 						if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
-						if (valorDocumento < 0) {
-							debitoCredito = "EXTRATO-DEBITO";
-							valorDocumento = Math.abs(valorDocumento);
-						}
+						
 						nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).trim();
 						documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento).trim();
 					}
@@ -11421,11 +11431,11 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 							documento = documento + "  -" +cutString(memFile.getStringFieldRemoveEspCharsUpper(idocumento), documento, " ");
 					}
 					
-					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ") && segmentoAilos.equals("")){
 						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 						catch (Exception vlrd) { valorDocumento = 0; }
 					}
-					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ")){
+					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains(" ") && segmentoAilos.equals("")){
 						//try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", ""))/1000;}
 						try{valorDocumento = Double.parseDouble(cutString(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento), 0, " ").replaceAll("\\.", "").replaceAll(",", ""))/100;}
 						catch (Exception vlrd) { valorDocumento = 0; }
