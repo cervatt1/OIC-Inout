@@ -2144,9 +2144,13 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("NOMEPORTADOR", nomePortador2);
+				jDados.put("NOMEEMPRESA", nomeEmpresa);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("TIPOPLANILHA", "FRANCESINHA-AILOSVIACRED");
 				jDados.put("TIPOPLANILHA", "FRANCESINHAAILOS -" + nomeArquivo.toUpperCase());
 			
-				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
@@ -2161,10 +2165,14 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("NOMEPORTADOR", nomePortador2);
+				jDados.put("NOMEEMPRESA", nomeEmpresa);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("TIPOPLANILHA", "FRANCESINHA-AILOSVIACRED");
 				jDados.put("TIPOPLANILHA", "EXTRATO-FRANCESINHAAILOS -" + nomeArquivo.toUpperCase());
 				jDados.put("SEGMENTOAILOS", "VIACRED");
 			
-				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+				readExtratoECartao("readFrancesinhagrupoAilosPDF", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}

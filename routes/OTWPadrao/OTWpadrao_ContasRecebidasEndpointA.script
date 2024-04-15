@@ -11261,7 +11261,7 @@ public HashMap readSicoobComprovantesPDF(MemoryFile memFile, JSONObject jDados, 
 }
 
 
-public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
+public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
 	JSONObject extratoEmpresa = new JSONObject();
 
     // Inicializacao de Variaveis
@@ -11287,10 +11287,20 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
     String cpfCnpj           = "";
     String historico         = "";
     String debitoCreditoAux  = "";
+    String nomePortador		 = "";
 
+	String nomeEmpresa		 = "";
     String strValorDocumento = "";
     String contLinhaExtrato  = "";
+	String contLinhaTexto    = "";
+    String consolidaClass    = "";
+    String classificacao     = "";
+    String chave             = "";
+    String key               = "";
+    String lote              = "";
 	String segmentoAilos	 = "";
+	String tipoLancamento	 = "";
+	String tipoPlanilha		 = "";
 
     double valorDocumento    = 0.0;
     double valorJuros        = 0.0;
@@ -11308,9 +11318,14 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 	
     complemento01 = nomePortador;
 
-    if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
-    if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
-    if(jDados.has("SEGMENTOAILOS"))  segmentoAilos  = jDados.optString("SEGMENTOAILOS");
+    if(jDados.has("CODEMPRESA"))	  codEmpresa   		= jDados.optString("CODEMPRESA");
+    if(jDados.has("NOMEARQUIVO"))	  nomeArquivo  		= jDados.optString("NOMEARQUIVO");
+	if(jDados.has("NOMEEMPRESA"))	  nomeEmpresa		= jDados.optString("NOMEEMPRESA");
+    if(jDados.has("SEGMENTOAILOS"))	  segmentoAilos  	= jDados.optString("SEGMENTOAILOS");
+	if(jDados.has("TIPOLANCAMENTO"))  tipoLancamento 	= jDados.optString("TIPOLANCAMENTO");
+    if(jDados.has("TIPOPLANILHA"))	  tipoPlanilha    	= jDados.optString("TIPOPLANILHA");
+	if(jDados.has("NOMEPORTADOR"))	  nomePortador 		= jDados.optString("NOMEPORTADOR");
+
 	
 	// logger.logInfo("Viacredi Teste");
 	int cont = 0;
@@ -11535,57 +11550,72 @@ public boolean readFrancesinhagrupoAilosPDF(MemoryFile memFile, String nomePorta
 
 				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
-				//logger.logInfo("Lancamento: "+nomeOrigem+" - "+ dataMovimento+" - "+debitoCredito+" - "+valorDocumento+" - "+contLinhaExtrato);
+				 // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
+            // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
+            contLinhaTexto = String.valueOf(cont);
+            contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 04, "0");
+            consolidaClass = contLinhaTexto;
 
-				// Buscar Extrato por Chave na Tabela IO_EXTRATO.
-				extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
-				.fields("CHAVE")
-				.param(chaveExtrato)
-				.queryUnique();
+			classificacao = dataMovimento + "0" + consolidaClass;
 
-				// Inserir caso Chave nao encontrada.
-				
+            lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
 
-				if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+            /*  A) Um movimento que serᠣriado, para a contabiliza磯 da venda. Este movimento deverᠴer:
+                    * No campo portador = Caixa
+                    * No campo complemento(02) = Venda
+                    * No campo Valor do movimento = Posi絥s indicadas no roteiro
+            */
+            chave = lote + contLinhaTexto;
+            key	= chave  + "-CTB";
+            //logger.logDebug("###1319### "+line);
 
-				logger.logInfo(debitoCredito + " | nomePortador:" + nomePortador + " | dataMovimento:" + dataMovimento + " | nomeOrigem:" + nomeOrigem + " | documento:" + documento + " | valorDocumento:" +  valorDocumento);	
+            ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
+            if (ttMov2 == null) {
+                ttMov2 = new ttMovimentoPadrao();
+            }
+            ttMov2.lote		 	    = lote;
+            ttMov2.documento   	    = documento;
+            ttMov2.codEmpresa 	    = codEmpresa;
+            ttMov2.nomeEmpresa      = nomeEmpresa;
+            ttMov2.dataMovimento    = dataMovimento;
+            ttMov2.tipoMovimento    = "CTB";
+            ttMov2.tipoLancamento   = tipoLancamento;
+            ttMov2.historico		= "";
+            ttMov2.valorDocumento   = valorDocumento;
+            ttMov2.valorDesconto    = valorDesconto;
+            ttMov2.valorMulta  	    = valorMulta;
+            ttMov2.valorJuros  	    = valorJuros;
+            ttMov2.contaJuros    	= "";
+            ttMov2.contaMulta		= "";
+            ttMov2.contaDesconto  	= "";
+            ttMov2.nomePortador     = nomePortador;
+            ttMov2.centroCusto  	= "";
+            ttMov2.nomeOrigem 	    = nomeOrigem;
+            ttMov2.cpfCnpj          = cpfCnpj;
+            ttMov2.chave            = chave + "-CTB";
+            ttMov2.classificacao    = classificacao;
+            ttMov2.tipoPlanilha     = tipoPlanilha;
 
-					try {
-						dbIOCont.insert("IO_EXTRATO")
-						.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
-						.param(chaveExtrato)
-						.param(codEmpresa)
-						.param(dataMovimento)
-						.param(documento)
-						.param(nomePortador)
-						.param(nomeOrigem)
-						.param(nomeArquivo.toUpperCase())
-						.param(complemento02)
-						.param(valorDocumento)
-						.param(debitoCredito)
-						.param(0)
-						.execute();
-					} catch (Exception sqlInsertException) {
-						logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
-						continue;
-					}
-				} else {
-					try {
-						dbIOCont.update("IO_EXTRATO")
-						.fields("EXTRATOLIDO")
-						.where("CHAVE = ? ")
-						.param(0)
-						.param(chaveExtrato)
-						.execute();
-					} catch (Exception sqlUpdateException) {
-						logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
-						continue;
-					}
-				}
+            ttMov2.complemento01	= complemento01;
+            ttMov2.complemento02	= complemento02;
+            ttMov2.complemento03	= complemento03;
+            ttMov2.complemento04	= complemento04;
+            ttMov2.complemento05	= "";
+            ttMov2.complemento06	= "";
+            ttMov2.complemento07	= "";
+            ttMov2.complemento08	= "";
+            ttMov2.complemento09	= "";
+            ttMov2.complemento10	= "";
+            ttMov2.nomeArquivo		= nomeArquivo;
+            ttMov2.naturezaContabil  = "C";
+            ttMov2.contaDebito       = "";
+            ttMov2.contaCredito      = "";
+            mapaVariavel.put(key,ttMov2);
+			
 			} catch (Exception ex) { }
 		}
     }
-    return true;
+    return mapaVariavel;
 }
 
 
