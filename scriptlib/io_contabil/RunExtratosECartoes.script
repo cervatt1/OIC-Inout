@@ -1704,7 +1704,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
             || cabecalhoPlanilha.contains("CONTA CORRENTE|")))) 
 			
 			|| //2308-014288
-            (cabecalhoPlanilha.contains("APLICATIVO SANTANDER EMPRESAS") && cabecalhoPlanilha.contains("SALDO DISPONIVEL PARA USO:"))
+            (cabecalhoPlanilha.contains("APLICATIVO SANTANDER EMPRESAS") && (cabecalhoPlanilha.contains("SALDO DISPON") && cabecalhoPlanilha.contains("VEL PARA USO:")))
             || arquivoCompleto.contains("BANCO SANTANDER PESSOA JURIDICA")) ||
 
             (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Santander_PDF") &&
