@@ -17388,6 +17388,8 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 		
 		//logger.logInfo("LINHACOMNLM " + line + " | " + memFile.getStringFieldRemoveEspCharsUpper(0) + " | " + naoLeMais);
 		
+		if (line.contains("SALDO EM C/C")) return true;
+		
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("EXTRATO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("MENSAL")) {
 			//logger.logInfo("CONTINUE2 " + line);
 			continue;
