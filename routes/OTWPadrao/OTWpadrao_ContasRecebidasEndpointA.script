@@ -20956,7 +20956,7 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 					if(chaveExtrato.length() > 100) chaveExtrato = cutString(chaveExtrato, 0, 99);
 
 					if(tipoLayout.equals("001")){
-						nomePortador = cutString(nomePortador, "NCIA: ", "CONTA");
+						nomePortador = cutString(nomePortador, "CONTA: ", "PE").trim();
 					}
 
 					// Buscar Extrato por Chave na Tabela IO_EXTRATO.
