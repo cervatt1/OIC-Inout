@@ -19358,7 +19358,7 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 		
 		if (line.toUpperCase().contains("SALDO") && line.toUpperCase().contains("RESUMIDO") && tipo.equals("002")) naoLeMais = true;
 		
-		if (line.toUpperCase().contains("DATA") && line.toUpperCase().contains("LANCAMENTOS") && line.toUpperCase().contains("VALOR") && line.toUpperCase().contains("SALDO") && tipo.equals("002")) {
+		if (line.toUpperCase().contains("DATA") && line.toUpperCase().contains("LANCAMENTOS") && line.toUpperCase().contains("VALOR") && line.toUpperCase().contains("SALDO") && (tipo.equals("002") || tipo.equals("003"))) {
 			naoLeMais = false;
 			continue;
 		}
