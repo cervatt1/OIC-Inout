@@ -16762,7 +16762,7 @@ public boolean readExtratoCoraPDF(MemoryFile memFile, String nomePortador, JSONO
 
 public boolean readExtratoInterPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 	
-	logger.logInfo("InterInterInter 1");
+	// logger.logInfo("InterInterInter");
 	
 	JSONObject extratoEmpresa = new JSONObject();
  
