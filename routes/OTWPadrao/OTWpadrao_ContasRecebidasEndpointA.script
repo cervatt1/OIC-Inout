@@ -16983,7 +16983,7 @@ public boolean readExtratoPinkPayPDF(MemoryFile memFile, JSONObject jDados, Data
         line = StringUtil.removeSpecialCharsToUC(line);
 
 		try{
-			if(nomePortador.equals("") && !line.contains("AGENCIA") && !line.contains("CONTA") && memFile.getFieldsSize() > 1) nomePortador = memFile.getStringFieldRemoveEspCharsUpper(2);
+			if( memFile.getStringFieldRemoveEspCharsUpper(0).contains("") || nomePortador.equals("") && !line.contains("AGENCIA") && !line.contains("CONTA") && memFile.getFieldsSize() > 1) nomePortador = memFile.getStringFieldRemoveEspCharsUpper(2);
 		
 			dataMovimento = "";
 			try{
