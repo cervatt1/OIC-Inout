@@ -4014,19 +4014,37 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			return variaveis.toString();
 		}
 		
-		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Banrisul_PDF") && arquivoCompleto.contains("BANCO DO ESTADO DO RIO GRANDE DO SUL")
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Banrisul_PDF")){
+			if(arquivoCompleto.contains("BANCO DO ESTADO DO RIO GRANDE DO SUL")
 			&& arquivoCompleto.contains("OPERACOES PIX") && arquivoCompleto.contains("BANRISUL.COM.BR")){
 
-			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
-			jDados.put("NOMEEMPRESA",    nomeEmpresa);
-			jDados.put("CODEMPRESA",     codEmpresa);
-			jDados.put("NOMEARQUIVO",    nomeArquivo);
-			jDados.put("TIPOPLANILHA",   tipoPlanilha);
+				JSONObject jDados = new JSONObject();
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("TIPOPLANILHA",   tipoPlanilha);
 
-			readExtratoECartao("readExtratoBanrisulPDF", memFile, nomePortador, jDados, dbIOCont, logger);
-			variaveis.put("tipoRetorno", "break");
-			return variaveis.toString();
+				mapaVariavel = readExtratoECartao("readExtratoBanrisulPDF", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno", "break");
+				return variaveis.toString();
+			}
+			
+			if (cabecalhoPlanilha.contains("CONSULTA OPERACOES / EMITE RECIBOS") && cabecalhoPlanilha.contains("BANRISUL")
+				&& cabecalhoPlanilha.contains("NSU") && cabecalhoPlanilha.contains("SITUACAO")){
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("TIPOPLANILHA",   tipoPlanilha);
+
+				mapaVariavel = readExtratoECartao("readExtratoBanrisul2PDF", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+				
+			}
 		}
 		
 		////// EXTRATO - SAFRA FRANCESINHA PDF //////////////////////////////////////////////////////////////////
@@ -4267,6 +4285,37 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				mapaVariavel = readExtratoECartao("readErpFolhaWk", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
+			}
+		}
+		
+		////// ERP DETALHAMENTO SISPAG ITAU XLSX //////////////////////////////////////////////////////////////////
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("ERP_DetalhamentosSispagItau_EXCEL")){
+			if(cabecalhoPlanilha.contains("DADOS DA CONTA") && cabecalhoPlanilha.contains("RESULTADO DA BUSCA")){
+				
+				if(memFile.getLines().toString().toUpperCase().contains("FAVORECIDO / BENEFICI") && memFile.getLines().toString().toUpperCase().contains("NCIA DA EMPRESA")){
+					
+					nomePortador = cutString(cabecalhoPlanilha, "AGENCIA/CONTA", "NOME DA EMPRESA").trim();
+					// logger.logInfo("Nome Portador CT == " + nomePortador);
+					//logger.logInfo("Arquivo Completo: " + memFile.getLines().toString().toUpperCase());
+				
+
+					JSONObject jDados = new JSONObject();
+
+					//logger.logInfo("ENTROU SISPAG ITAU XLSX");
+					//logger.logInfo(arquivoCompleto);
+					
+					jDados.put("CODEMPRESA", codEmpresa);
+					jDados.put("NOMEARQUIVO", nomeArquivo);
+					jDados.put("TIPOPLANILHA", "DETALHAMENTOMOVIMENTOSISPAGITAU");
+					jDados.put("NOMEEMPRESA", nomeEmpresa);
+					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					jDados.put("NOMEPORTADOR", nomePortador);
+					jDados.put("LINE",            line);
+					mapaVariavel = readExtratoECartao("readErpDetalhamentoSispagItau", memFile, jDados, mapaVariavel, logger);
+					variaveis.put("tipoRetorno",   "break");
+					return variaveis.toString();
+					
+				}
 			}
 		}
 		
@@ -4527,7 +4576,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEPORTADOR", nomePortador);
+				jDados.put("NOMEPORTADOR", "FRANCESINHA BANCO DO BRASIL");
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "BANCODOBRASIL-FRANCESINHA");
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
@@ -4743,6 +4792,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			JSONObject jDados = new JSONObject();
 			if (line.contains("EXTRATO DE: AG") && line.contains("NCIA:") && line.contains("CONTA:")) {
 				nomePortador = ("BRADESCO " + line.substring(line.indexOf("NCIA:")+5, line.indexOf("NCIA:")+11).trim() + " " + line.substring(line.indexOf("CONTA:")+6).trim()).trim();
+				logger.logInfo("Bradesco txt: if 01 - "+nomePortador);
 				// variaveis.put("nomePortador", nomePortador);
 				// variaveis.put("tipoRetorno",   "continue");
 				// return variaveis.toString();
@@ -4750,21 +4800,24 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			// logger.logDebug("cabecalhoPlanilha -> " + cabecalhoPlanilha);
 			if((cabecalhoPlanilha.contains("AGENCIA") || cabecalhoPlanilha.contains("AGANCIA"))&& cabecalhoPlanilha.contains("CONTA") && cabecalhoPlanilha.contains("DEMONSTRATIVO") && cabecalhoPlanilha.contains("MENSAL")){
 				nomePortador = ("BRADESCO " + cutString(cabecalhoPlanilha, "CIA:", " ") + " " + cutString(cabecalhoPlanilha, "CONTA:", " "));
-				
+				logger.logInfo("Bradesco txt: if 02 - "+nomePortador);
 				// logger.logDebug("NOVO PADRAO BRADESCO");
 			}
 			if ((cabecalhoPlanilha.contains("AGENCIA") || cabecalhoPlanilha.contains("AGANCIA"))&& cabecalhoPlanilha.contains("CONTA") && cabecalhoPlanilha.contains("MOVIMENTA") && cabecalhoPlanilha.contains("PER")) {
 				nomePortador = ("BRADESCO " + cutString(cabecalhoPlanilha, "CIA:", " ") + " " + cutString(cabecalhoPlanilha, "CONTA:", " "));
 				jDados.put("qualpadrao", "003");
+				logger.logInfo("Bradesco txt: if 03 - "+nomePortador);
 			}
 			
 			if(!nomePortador.equals("")){
 				tipoPlanilha = "EXTRATO-BRADESCO-TXT";			
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				
+
+				logger.logInfo("Vai ate o read do Bradesco txt");
 				readExtratoECartao("readExtratoBradescoTxt", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
+				logger.logInfo("Bradesco txt variaveis: "+variaveis.toString());
 				return variaveis.toString();
 			}
 			
