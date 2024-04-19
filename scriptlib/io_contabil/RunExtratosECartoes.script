@@ -1547,7 +1547,10 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
-			if(arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA+")){
+			if( arquivoCompleto.contains("CONTA CORRENTE E APLICACOES REMUNERA+") &&
+				arquivoCompleto.contains("SALDO DE ABERTURA EM") &&
+				arquivoCompleto.contains("SALDO DE FECHAMENTO EM")
+			){
 				JSONObject jDados = new JSONObject();
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
