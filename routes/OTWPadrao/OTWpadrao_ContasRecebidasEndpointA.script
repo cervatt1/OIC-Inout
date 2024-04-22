@@ -18101,7 +18101,7 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
     double valorMulta        = 0.0;
     double valorPagamento    = 0.0;
 
-    int idataMovimento  = 2; // 2402-029712 - Nicholas - 11/03/2024
+    int idataMovimento  = 3; // 2402-029712 - Nicholas - 11/03/2024
 	int idocumento      = 10;
     int inomeOrigem     = 1;
     int ivalorDocumento = 4;
@@ -18141,7 +18141,7 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
 
            try{
 				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
-				dataAux = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento+1).trim()); // 2402-029712 - Nicholas - 11/03/2024
+				dataAux = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento-1).trim()); // 2402-029712 - Nicholas - 11/03/2024
 				if(dataAux.equals("")) continue;
                 dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
             }
@@ -18225,6 +18225,7 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
             ttMov2.historico        = "";
             ttMov2.valorDocumento   = valorDocumento;
             ttMov2.valorDesconto    = valorDesconto;
+            ttMov2.debitoCredito    = debitoCredito;
             ttMov2.valorMulta       = 0;
             ttMov2.valorJuros       = valorJuros;
             ttMov2.contaJuros       = "";
