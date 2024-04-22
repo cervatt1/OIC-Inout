@@ -3979,7 +3979,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		////// EXTRATO BANCO BK BANK PDF /////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BKBank_PDF")){
 
-			if (arquivoCompleto.contains("EXTRATO") && arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR")) {
+			if (arquivoCompleto.contains("EXTRATO") && (arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR") || arquivoCompleto.contains("WWW.HTTPS://BKBANK.COM.BR"))) {
 				
 				// logger.logInfo("Entra na validacao do BK BANK Pdf");
 				tipoPlanilha = "EXTRATO-BKBANK";
