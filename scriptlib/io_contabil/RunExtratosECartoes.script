@@ -350,6 +350,24 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
             }
         }
 		
+		 // EXTRATO - PDF - HSBC
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_HSBC_PDF")) {
+			if (arquivoCompleto.contains("TIPO DE TRN") &&
+				arquivoCompleto.contains("BALANCO DA RAZAO ATUAL") &&
+				arquivoCompleto.contains("SALDO ANTECIPADO DO FECHAMENTO DO RAZAO") &&
+				arquivoCompleto.contains("SALDO ANTECIPADO DO FECHAMENTO DISPONIVEL") &&
+				arquivoCompleto.contains("BALANCO DA RAZAO ATUAL")){
+					
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "EXTRATO-HSBC");
+				readExtratoECartao("readExtratoHSBCPDF", memFile, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
+		
 		////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 		// logger.logDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
 		logger.logInfo("LIN - "+line);
@@ -1207,9 +1225,11 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
-			
-			if(cabecalhoPlanilha.toUpperCase().contains("EXTRATO CONSOLIDADO DE MOVIMENTACAO") && cabecalhoPlanilha.toUpperCase().contains("TOTAL DOS SALDOS") &&
-				cabecalhoPlanilha.contains("DADOS CLIENTE E CONTA") && cabecalhoPlanilha.contains("NOME DO CLIENTE:") && nomePortador2.equals("")){
+			// logger.logInfo("CAB -> " + cabecalhoPlanilha.replaceAll("\\|", ""));
+			if((cabecalhoPlanilha.toUpperCase().contains("EXTRATO CONSOLIDADO DE MOVIMENTACAO") && cabecalhoPlanilha.toUpperCase().contains("TOTAL DOS SALDOS") &&
+				cabecalhoPlanilha.contains("DADOS CLIENTE E CONTA") && cabecalhoPlanilha.contains("NOME DO CLIENTE:")) 
+				||( cabecalhoPlanilha.replaceAll("\\|", "").toUpperCase().contains("EXTRATOCONSOLIDADODEMOVIMENTACAO") && cabecalhoPlanilha.replaceAll("\\|", "").toUpperCase().contains("TOTALDOSSALDOS") &&
+				cabecalhoPlanilha.replaceAll("\\|", "").contains("DADOSCLIENTEECONTA") && cabecalhoPlanilha.replaceAll("\\|", "").contains("NOMEDOCLIENTE:")) && nomePortador2.equals("")){
 				
 				nomePortador = "ABC " + cutString(cabecalhoPlanilha, "CONTA:", "TOTAL");
 				variaveis.put("nomePortador2",   nomePortador2);
@@ -1547,10 +1567,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
-			if( arquivoCompleto.contains("CONTA CORRENTE E APLICACOES REMUNERA+") &&
-				arquivoCompleto.contains("SALDO DE ABERTURA EM") &&
-				arquivoCompleto.contains("SALDO DE FECHAMENTO EM")
-			){
+			if(arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA+")){
 				JSONObject jDados = new JSONObject();
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
@@ -1577,24 +1594,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-ASAAS");
 				readExtratoECartao("readExtratoAsaasPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno",   "break");
-				return variaveis.toString();
-			}
-		}
-
-		// EXTRATO - PDF - HSBC
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_HSBC_PDF")) {
-			if (arquivoCompleto.contains("TIPO DE TRN") &&
-				arquivoCompleto.contains("BALANCO DA RAZAO ATUAL") &&
-				arquivoCompleto.contains("SALDO ANTECIPADO DO FECHAMENTO DO RAZAO") &&
-				arquivoCompleto.contains("SALDO ANTECIPADO DO FECHAMENTO DISPONIVEL") &&
-				arquivoCompleto.contains("BALANCO DA RAZAO ATUAL")
-			){
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOPLANILHA", "EXTRATO-HSBC");
-				readExtratoECartao("readExtratoHSBCPDF", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
@@ -1837,7 +1836,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
             jDados.put("CODEMPRESA", codEmpresa);
             jDados.put("NOMEARQUIVO", nomeArquivo);
             jDados.put("TIPOPLANILHA", "EXTRATO-SANTANDER");
-            //logger.logInfo("NOME PORTADOR SANTANDER -> "+ nomePortador2);
+            logger.logInfo("NOME PORTADOR SANTANDER -> "+ nomePortador2);
             readExtratoECartao("readExtratSantanderPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
             variaveis.put("tipoRetorno",   "break");
             return variaveis.toString();
@@ -3979,7 +3978,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		////// EXTRATO BANCO BK BANK PDF /////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BKBank_PDF")){
 
-			if (arquivoCompleto.contains("EXTRATO") && (arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR") || arquivoCompleto.contains("WWW.HTTPS://BKBANK.COM.BR"))) {
+			if (arquivoCompleto.contains("EXTRATO") && arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR")) {
 				
 				// logger.logInfo("Entra na validacao do BK BANK Pdf");
 				tipoPlanilha = "EXTRATO-BKBANK";
@@ -4194,6 +4193,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			}
 		}*/
 		
+		
+			// EXTRATO - EXCEL - HSBC
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_HSBC_Excel")) {
+			if( cabecalhoPlanilha.contains("NOME DA CONTA") && cabecalhoPlanilha.contains("NUMERO DA CONTA") &&
+				cabecalhoPlanilha.contains("NOME DO BANCO") && cabecalhoPlanilha.contains("MOEDA") &&
+				cabecalhoPlanilha.contains("IBAN") && cabecalhoPlanilha.contains("STATUS DA CONTA") &&
+				cabecalhoPlanilha.contains("TIPO DE CONTA") && cabecalhoPlanilha.contains("SALDO DE FECHAMENTO") &&
+				cabecalhoPlanilha.contains("LOCALIZACAO") && cabecalhoPlanilha.contains("BIC")){
+
+				tipoPlanilha  = "EXTRATO-HSBC-EXCEL";
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+
+				readExtratoECartao("readExtratoHSBCExcel", memFile, nomePortador, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
+		
 		////// EXTRATO - OTERO BANK EXCEL ////////////////////////////////////////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_OTEROBANK_Excel")){
 			if( memFile.getLines().toString().toUpperCase().contains("OTEROBANK") || memFile.getLines().toString().toUpperCase().contains("ATENDIMENTO@OTEROBANK.COM") ){
@@ -4247,27 +4267,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 
 				readExtratoECartao("readExtratoBTGExcel", memFile, nomePortador, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno",   "break");
-				return variaveis.toString();
-			}
-		}
-
-		// EXTRATO - EXCEL - HSBC
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_HSBC_Excel")) {
-			if( cabecalhoPlanilha.contains("NOME DA CONTA") && cabecalhoPlanilha.contains("NUMERO DA CONTA") &&
-				cabecalhoPlanilha.contains("NOME DO BANCO") && cabecalhoPlanilha.contains("MOEDA") &&
-				cabecalhoPlanilha.contains("IBAN") && cabecalhoPlanilha.contains("STATUS DA CONTA") &&
-				cabecalhoPlanilha.contains("TIPO DE CONTA") && cabecalhoPlanilha.contains("SALDO DE FECHAMENTO") &&
-				cabecalhoPlanilha.contains("LOCALIZACAO") && cabecalhoPlanilha.contains("BIC")
-			){
-
-				tipoPlanilha  = "EXTRATO-HSBC-EXCEL";
-
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-
-				readExtratoECartao("readExtratoHSBCExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
