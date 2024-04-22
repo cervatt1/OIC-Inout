@@ -18092,7 +18092,6 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
     String lote              = "";
 	String nomeOrigemAux     = "";
 	String dataAux			 = "";
-	String dataMovimentoAux	 = "";
     
     boolean naoLeMais = false;
 
@@ -18125,7 +18124,7 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		if(memFile.getFieldsSize() <= 3) continue;
+		if(memFile.getFieldsSize() <= 3 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA")) continue;
 
 		ivalorDocumento = 4;
 		ivalorJuros     = 6;
@@ -18140,10 +18139,10 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
 			
 			if(nomeArquivo.contains(".csv") && line.contains(";") && !line.contains("\\|")) memFile.setFieldSeparator(";");
 
-            try{
+           try{
 				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
-				dataMovimentoAux = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento+1).trim());
-				if(dataMovimentoAux.equals("")) continue;
+				dataAux = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento+1).trim()); // 2402-029712 - Nicholas - 11/03/2024
+				if(dataAux.equals("")) continue;
                 dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
             }
 			catch(Exception e){}
@@ -18194,7 +18193,7 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
             valorMulta = Math.abs(valorMulta);
             valorDesconto = Math.abs(valorDesconto);
 
-			if (valorDocumento == 0) continue;
+            if (valorDocumento == 0) continue;
 
              // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
             // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
@@ -18209,6 +18208,8 @@ public HashMap readFrancesinha_BBPDF(MemoryFile memFile, JSONObject jDados, Hash
             chave = lote + contLinhaTexto;
             key = chave  + "-CTB";
             //logger.logDebug("###1319### "+line);
+			
+			logger.logInfo("NO == "+nomeOrigem+" | VALOR = "+valorDocumento+" | DT = "+dataMovimento);
 
             ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
             if (ttMov2 == null) {
