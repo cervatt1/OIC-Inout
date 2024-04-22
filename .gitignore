@@ -20,3 +20,4 @@ scriptlib/io_contabil/*
 !scriptlib/io_contabil/RunExtratosECartoes.script
 !scriptlib/io_contabil/RegrasSemCartoes.script
 !scriptlib/io_contabil/GeraArquivo.script
+!scriptlib/io_contabil/TemplateUtils.script
