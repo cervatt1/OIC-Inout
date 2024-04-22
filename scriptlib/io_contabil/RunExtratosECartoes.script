@@ -4251,6 +4251,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				return variaveis.toString();
 			}
 		}
+
+		// EXTRATO - EXCEL - HSBC
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_HSBC_Excel")) {
+			if( cabecalhoPlanilha.contains("NOME DA CONTA") && cabecalhoPlanilha.contains("NUMERO DA CONTA") &&
+				cabecalhoPlanilha.contains("NOME DO BANCO") && cabecalhoPlanilha.contains("MOEDA") &&
+				cabecalhoPlanilha.contains("IBAN") && cabecalhoPlanilha.contains("STATUS DA CONTA") &&
+				cabecalhoPlanilha.contains("TIPO DE CONTA") && cabecalhoPlanilha.contains("SALDO DE FECHAMENTO") &&
+				cabecalhoPlanilha.contains("LOCALIZACAO") && cabecalhoPlanilha.contains("BIC")
+			){
+
+				tipoPlanilha  = "EXTRATO-HSBC-EXCEL";
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+
+				readExtratoECartao("readExtratoHSBCExcel", memFile, nomePortador, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
 		
 		////// EXTRATO - BMG EXCEL //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BMG_Excel")) {
