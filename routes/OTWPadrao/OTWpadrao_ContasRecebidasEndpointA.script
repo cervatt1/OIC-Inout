@@ -25080,12 +25080,16 @@ public boolean readExtratoAbcExcel(MemoryFile memFile, String nomePortador, JSON
 	int inomeOrigem = -1;
 	int idataMovimento  = -1;
 	int ivalorDocumento = -1;
+	boolean tipoABC = false;
 	
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
+    if(jDados.has("TIPOEXTRATOABC"))  tipoABC  = jDados.optBoolean("TIPOEXTRATOABC");
 	if(jDados.has("LINE"))  line = jDados.optString("LINE");
 
     while (memFile.hasNextLine()) {
+
+		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:")) nomePortador = "ABC-"+memFile.getStringFieldRemoveEspCharsUpper(1).trim();
 		
 		// logger.logDebug("LIN -> " + line);
 		for(int i =0; i < memFile.getFieldsSize(); i++){

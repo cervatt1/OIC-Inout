@@ -6666,11 +6666,20 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		
 		////// EXTRATO - ABC //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Abc_Excel")) {
-			if((nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV")) && memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA") 
+			logger.logInfo(memFile.getLines().toString().toUpperCase());
+			if((nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV")) && 
+				((memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA") 
 				&& ((memFile.getStringFieldRemoveEspCharsUpper(1).contains("NRO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")) 
 				|| (memFile.getStringFieldRemoveEspCharsUpper(1).contains("QTDE") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("REGISTRO")))
 				&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("HIST") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("OPERA") 
-				&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("SALDO")){
+				&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("SALDO")) 
+			|| 
+				(memFile.getLines().toString().toUpperCase().contains("DATA") && memFile.getLines().toString().toUpperCase().contains("VALOR INCLUI LIMITE") &&
+				(memFile.getLines().toString().toUpperCase().contains("QTDE") && memFile.getLines().toString().toUpperCase().contains("REGISTRO")) &&
+				memFile.getLines().toString().toUpperCase().contains("HIST") && memFile.getLines().toString().toUpperCase().contains("OPERA") &&
+				memFile.getLines().toString().toUpperCase().contains("DADOS DO CLIENTE E CONTA") && memFile.getLines().toString().toUpperCase().contains("EXTRATO CONSOLIDADO") &&
+				memFile.getLines().toString().toUpperCase().contains("VALOR") && memFile.getLines().toString().toUpperCase().contains("SALDO")))
+			){
 
 				//2312-025938
 				//nomePortador  = "EXTRATO-ABC";
@@ -6684,6 +6693,9 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 					nomePortador = cutString(nomePortador, "_OUD_ID");
 					nomePortador = cutString(nomePortador, nomePortador.indexOf("_")+1);
 				}
+
+				boolean tipoABC = false;
+				if(memFile.getLines().toString().toUpperCase().contains("EXTRATO CONSOLIDADO")) tipoABC = true;
 				
 				tipoPlanilha  = "EXTRATO-ABC";
 
@@ -6691,6 +6703,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("LINE", line);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOEXTRATOABC", tipoABC);
 
 				readExtratoECartao("readExtratoAbcExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
