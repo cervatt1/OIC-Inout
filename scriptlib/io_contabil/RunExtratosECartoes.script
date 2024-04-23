@@ -4146,8 +4146,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				arquivoCompleto.contains("ENDERECO:") &&
 				arquivoCompleto.contains("EMISSAO:") &&
 				arquivoCompleto.contains("ULT. MOV:") &&
-				arquivoCompleto.contains("NR. DOC.") &&
-				arquivoCompleto.contains("NBCBANK.COM.BR")
+				arquivoCompleto.contains("NR. DOC.")
 			){
 				JSONObject jDados = new JSONObject();
 
