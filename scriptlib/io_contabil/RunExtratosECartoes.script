@@ -3282,11 +3282,13 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			
 			
 			if ((cabecalhoPlanilha.contains("POSICAO DA CONTA CORRENTE -") && arquivoCompleto.toUpperCase().contains("ITAU")) ||
-				(cabecalhoPlanilha.contains("LOGOTIPO ITAU") && cabecalhoPlanilha.contains("LANCAMENTO")) ||
-				(cabecalhoPlanilha.contains("SALDO RESUMIDO") && cabecalhoPlanilha.contains("BANCO ITAU S/A")) &&
-				nomePortador2.equals("") || (cabecalhoPlanilha.contains("EXTRATO CONTA CORRENTE") && 
-				cabecalhoPlanilha.contains("PERIODO DE VISUALIZACAO: MES COMPLETO")) ||
-					(cabecalhoPlanilha.contains("INTERNET5.ITAU.COM.BR") && cabecalhoPlanilha.contains("AGENCIA:") && cabecalhoPlanilha.contains("CONTA:"))) {
+			   (cabecalhoPlanilha.contains("LOGOTIPO ITAU") && cabecalhoPlanilha.contains("LANCAMENTO")) ||
+			   (cabecalhoPlanilha.contains("SALDO RESUMIDO") && cabecalhoPlanilha.contains("BANCO ITAU S/A")) &&
+					 nomePortador2.equals("") || (cabecalhoPlanilha.contains("EXTRATO CONTA CORRENTE") &&
+			   cabecalhoPlanilha.contains("PERIODO DE VISUALIZACAO: MES COMPLETO")) ||
+			   (cabecalhoPlanilha.contains("INTERNET")  && cabecalhoPlanilha.contains(".ITAU.COM.BR") && cabecalhoPlanilha.contains("AGENCIA:")
+			   && cabecalhoPlanilha.contains("CONTA:"))) {
+
 				// logger.logInfo("NOMESSPORT " +nomePortador2);
 				JSONObject jDados = new JSONObject();
 
