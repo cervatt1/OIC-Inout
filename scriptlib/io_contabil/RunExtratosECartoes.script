@@ -1552,8 +1552,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			}
 		}
 		////// EXTRATO - BTG PDF //////////////////////////////////////////////////////////////////
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Btg_PDF") && nomeArquivo.toUpperCase().contains("ANCORA")) {
-			if (arquivoCompleto.toUpperCase().contains("BTG PACTUAL") && arquivoCompleto.toUpperCase().contains("RAZAO SOCIAL") && cabecalhoPlanilha.contains("CONTA CORRENTE") && cabecalhoPlanilha.contains("CNPJ")) {
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Btg_PDF")) {
+			if (nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.toUpperCase().contains("BTG PACTUAL") && arquivoCompleto.toUpperCase().contains("RAZAO SOCIAL") && cabecalhoPlanilha.contains("CONTA CORRENTE") && cabecalhoPlanilha.contains("CNPJ")) {
 				if (!memFile.getStringFieldRemoveEspCharsUpper(0).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(2).equals("") && memFile.getStringFieldRemoveEspCharsUpper(3).matches("[0-9]*") && !memFile.getStringFieldRemoveEspCharsUpper(4).matches("[0-9]*") && memFile.getStringFieldRemoveEspCharsUpper(5).matches("[0-9]*")){
 					nomePortador = "BTG PACTUAL" + " | " +"BANCO: " + memFile.getStringFieldRemoveEspCharsUpper(2) + " | " +"AGENCIA: " + memFile.getStringFieldRemoveEspCharsUpper(3) + " | " +"CONTA: " + memFile.getStringFieldRemoveEspCharsUpper(4);
 				}
@@ -1567,7 +1567,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
-			if(arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA+")){
+			if(nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA+")){
 				JSONObject jDados = new JSONObject();
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
@@ -1576,6 +1576,25 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
 
 				readExtratoECartao("readExtratoBtg2PDF", memFile, nomePortador, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno", "break");
+				return variaveis.toString();
+			}
+			if( arquivoCompleto.contains("INVESTIDOR QUE POSSUI BAIX") &&
+				arquivoCompleto.contains("INVESTIDOR QUE POSSUI ALT") &&
+				arquivoCompleto.contains("BTG PACTUAL") &&
+				arquivoCompleto.contains("OUVIDORIA@BTGPACTUAL.COM") &&
+				arquivoCompleto.contains("PROCESSO DECISORIO DO INVESTIDOR") &&
+				arquivoCompleto.contains("LEITUR")
+			){
+				JSONObject jDados = new JSONObject();
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("NOMEEMPRESA",    nomeEmpresa);
+				jDados.put("CODEMPRESA",     codEmpresa);
+				jDados.put("NOMEARQUIVO",    nomeArquivo);
+				jDados.put("TIPOPLANILHA",   tipoPlanilha);
+				jDados.put("TIPOPLANILHAAUX",   "000");
+
+				readExtratoECartao("readExtratoBtg2PDF", memFile, nomePortador, jDados, dbIOCont, logger); //
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}

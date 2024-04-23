@@ -19807,6 +19807,8 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
     boolean naoLeMais = false;
     boolean leuIndice = false;
 	boolean pegaProx  = false;
+	boolean pegouPortador  = false;
+	boolean podePegar  = true;
 
 
     int idataMovimento	= 0;
@@ -19826,6 +19828,10 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
     if (nomeArquivo.toUpperCase().contains("CSV")) {
         memFile.setFieldSeparator(";");
     }
+	if(tipoPlanilhaAux.equals("000")){ 
+		inomeOrigem = 0;
+		inomePortador = 0;	
+	}
 
 
     //#2311-021318 - Leal
@@ -19839,23 +19845,46 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
             line = StringUtil.removeSpecialCharsToUC(line);
 
 			ivalorDocumento = memFile.getFieldsSize()-2;
+			if( leuIndice && tipoPlanilhaAux.equals("000") && memFile.getStringFieldRemoveEspCharsUpper(0).trim().matches("\\d{2}/\\d{2}/\\d{2}") ){
+				logger.logInfo("LINHA FALSE:" + line);
+				podePegar = true;
+			}
+			if(leuIndice && tipoPlanilhaAux.equals("000") && !memFile.getStringFieldRemoveEspCharsUpper(0).trim().matches("\\d{2}/\\d{2}/\\d{2}") ){
+				podePegar = false;
+				logger.logInfo("LINHA TRUE:" + line);
+			}
 
-            if(line.contains("CNPJ") && line.contains("CONTA") && line.contains("BANCO") && line.contains("AGENCIA") ) {
+            if(tipoPlanilhaAux.equals("") && line.contains("CNPJ") && line.contains("CONTA") && line.contains("BANCO") && line.contains("AGENCIA") ) {
 				pegaProx = true;
 				continue;	
 			}
-			if( pegaProx ){
+			if(tipoPlanilhaAux.equals("") && pegaProx ){
                 nomePortador = memFile.getStringFieldRemoveEspCharsUpper(inomePortador);
                 complemento01 = nomePortador;
 				pegaProx = false;
             }
+			if( tipoPlanilhaAux.equals("000") && !pegouPortador && memFile.getStringFieldRemoveEspCharsUpper(inomePortador).contains("BANCO: ")){
+                nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "BANCO: ");
+            }
+			if( tipoPlanilhaAux.equals("000") && !pegouPortador &&  memFile.getStringFieldRemoveEspCharsUpper(inomePortador).contains("CONT") &&
+				memFile.getStringFieldRemoveEspCharsUpper(inomePortador).contains("INVESTIMENTO:")
+			){
+                nomePortador += " " + cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "INVESTIMENTO: ");
+				complemento01 = nomePortador;
+				pegouPortador = true;
+            }
 
-			if( line.contains("BANCO") && line.contains("AG") && line.contains("CONTA") ) naoLeMais = true;
-			if( line.contains("/20") ) naoLeMais = false;
+			if(tipoPlanilhaAux.equals("") && line.contains("BANCO") && line.contains("AG") && line.contains("CONTA") ) naoLeMais = true;
+			if(tipoPlanilhaAux.equals("") && line.contains("/20") ) naoLeMais = false;
+			if(tipoPlanilhaAux.equals("000") && line.contains("SALDO FINAL + RENDIMENTO PROVISIONADO DE SALDO REMUNERADO")) naoLeMais = true;
 			if( naoLeMais ) continue;
 
             //if n cabeca
-            if (line.contains("DATA LANCAMENTO") && line.contains("DESCRICAO DO LANCAMENTO") && line.contains("ENTRADAS / SAIDAS")) {
+            if (tipoPlanilhaAux.equals("") && line.contains("DATA LANCAMENTO") && line.contains("DESCRICAO DO LANCAMENTO") && line.contains("ENTRADAS / SAIDAS")) {
+                leuIndice = true;
+                continue;
+            }
+            if (tipoPlanilhaAux.equals("000") && line.contains("DAT") && line.contains("DESCRICAO") && line.contains("LANCAMENTO") && line.contains("SALDO") && line.contains("R$")) {
                 leuIndice = true;
                 continue;
             }
@@ -19865,21 +19894,21 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
                     continue;
                 }
 
-                dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
+                if( podePegar ) dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
                 try {
-                    valorDocumento = memFile.getDoubleField(ivalorDocumento);
+                    if( podePegar ) valorDocumento = memFile.getDoubleField(ivalorDocumento);
                 } catch (Exception vlrj) {
                     valorDocumento = 0;
                 }
                 if (valorDocumento < 0) {
-                    debitoCredito = "EXTRATO-DEBITO";
+                    if( podePegar ) debitoCredito = "EXTRATO-DEBITO";
                 } else {
-                    debitoCredito = "EXTRATO-CREDITO";
+                    if( podePegar ) debitoCredito = "EXTRATO-CREDITO";
                 }
-                valorDocumento = Math.abs(valorDocumento);
-				if(valorDocumento == 0) continue;
+                if( podePegar ) valorDocumento = Math.abs(valorDocumento);
+				if(podePegar && valorDocumento == 0) continue;
 
-                if (!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains("/20") && !nomeOrigem.equals("")) {
+                if (tipoPlanilhaAux.equals("") && !memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains("/20") && !nomeOrigem.equals("")) {
                     try {
                         dbIOCont.update("IO_EXTRATO")
                                 .fields("HISTORICO")
@@ -19892,7 +19921,7 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
                     continue;
                 }
 
-				if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains("/20")){
+				if(tipoPlanilhaAux.equals("") && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains("/20")){
 					nomeOrigem = "";
 					for(int i = inomeOrigem; i < (memFile.getFieldsSize()-2); i++){
 						nomeOrigem += memFile.getStringFieldRemoveEspCharsUpper(i).trim() + " ";
@@ -19900,6 +19929,13 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
 					nomeOrigem = nomeOrigem.trim(); 
 				}
                 complemento04 = nomeOrigem;
+
+				if( tipoPlanilhaAux.equals("000") && !podePegar) nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
+				if( tipoPlanilhaAux.equals("000") && nomeOrigem.contains("CONT") && nomeOrigem.contains("CORRENTE")){
+					nomeOrigem = "";
+					continue;
+				}
+				if( tipoPlanilhaAux.equals("000") && podePegar) continue;
 
                 if (!nomeOrigem.equals("")) {
                     //logger.logInfo(line);
@@ -19944,6 +19980,7 @@ public boolean readExtratoBtg2PDF(MemoryFile memFile, String nomePortador, JSONO
                             continue;
                         }
                     }
+					if(tipoPlanilhaAux.equals("000")) nomeOrigem = "";
                 }
 
 
