@@ -4920,6 +4920,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			
 		}
 
+		////// FRANCESINHA - BANRISUL TXT //////////////////////////////////////////////////////////////////
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Francesinha_Banrisul_TXT") && nomeArquivo.toUpperCase().endsWith(".TXT")) {
+			if (memFile.getLines().toString().toUpperCase().contains("BANCO DO ESTADO DO RIO GRANDE DO SUL") && 
+				memFile.getLines().toString().toUpperCase().contains("AVISO DE MOVIMENTACAO DE COBRANCA") && 
+				memFile.getLines().toString().toUpperCase().contains("CEDENTE") && 
+				memFile.getLines().toString().toUpperCase().contains("BDL-CARTEIRA") && 
+				memFile.getLines().toString().toUpperCase().contains("COBRANCA CAUCIONADA")
+			) {
+				tipoPlanilha = "FRANCESINHA-BANRISUL";
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				
+				readExtratoECartao("readFrancesinhaBanrisulTXT", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno", "break");
+				return variaveis.toString();
+			}
+			
+		}
+
 		
 			////// EXTRATO - AMAZONIA TXT //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Amazonia_TXT") && nomeArquivo.toUpperCase().endsWith(".TXT")) {
