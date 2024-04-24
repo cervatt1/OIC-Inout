@@ -4522,10 +4522,14 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				memFile.getStringFieldRemoveEspCharsUpper(3).replaceAll("\"","").contains("VALOR") &&
 				memFile.getStringFieldRemoveEspCharsUpper(4).replaceAll("\"","").contains("SALDO")) {
 				// logger.logDebug("P3 - "+nomePortador2+" - "+nomePortador);
+				String pegaAnoAux = cutString(memFile.getLines().toString().toUpperCase(), "PERIODO:|", "AT");
+				pegaAnoAux = "/"+cutString(pegaAnoAux, pegaAnoAux.lastIndexOf("/"), " ");
+				
 				tipoPlanilha = "EXTRATO-ITAU";
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("ANOAUX", pegaAnoAux);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO03", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();			
