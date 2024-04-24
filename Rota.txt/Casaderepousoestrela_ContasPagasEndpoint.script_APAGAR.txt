@@ -361,7 +361,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				try { forcarPartidaDobrada	= Boolean.parseBoolean(roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toLowerCase().trim()); } 
 				catch (Exception bl) {forcarPartidaDobrada = false;}
 				
-				//2304-003551. Quando utiliza esse ERP é obrigado a sem em partida dobrada.
+				//2304-003551. Quando utiliza esse ERP ï¿½ obrigado a sem em partida dobrada.
 				if (roteiroCRMPrincipal.optString("erpContabilidade").equals("DOMINIO2") || roteiroCRMPrincipal.optString("erpContabilidade").equals("ALTERDATA") || roteiroCRMPrincipal.optString("erpContabilidade").equals("CORDILHEIRA") || roteiroCRMPrincipal.optString("erpContabilidade").equals("LEDWARE")) {
                     forcarPartidaDobrada = true;
                 }
@@ -622,6 +622,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					// =======================  ========================   =======================
 					// =======================  VARIAVEIS PERSONALIZADAS   =======================
 					// =======================  ========================   =======================
+					boolean pegaProxNO = false;
 
 
 					JSONObject objetoParametro = new JSONObject();
@@ -1214,6 +1215,25 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
 									documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
 
+									if ( memFile.getStringFieldRemoveEspCharsUpper(3).trim().equals("") && 
+										 memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("") &&
+										 pegaProxNO
+									){	
+										ttMovimentoPadrao ttMov4 = (ttMovimentoPadrao)mapaVariavel.get(chave + "-CTB");
+										if(ttMov4 != null){
+											ttMov4.nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(1);
+											mapaVariavel.put(chave + "-CTB", ttMov4);
+											pegaProxNO = false;
+											continue;
+										}
+									}
+
+									if( !memFile.getStringFieldRemoveEspCharsUpper(3).trim().equals("") ){
+										pegaProxNO = true;
+									}else{
+										pegaProxNO = false;
+									}
+
 									complemento01	= getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);
 									complemento02	= getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger);
 									complemento03	= getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger);
@@ -1664,7 +1684,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								nomeOrigem = StringUtil.removeSpecialCharsToUC(nomeOrigem);
 								
 								// 202301-0023496 JWR Coloquei esse balde com o X para remontar o nomeOrigem
-								// Descomentar caso dê problema com caracteres especiais
+								// Descomentar caso dï¿½ problema com caracteres especiais
 								/*String letrasPermitidas = "ABCDEFGHIJKLMNOPRSTUVWXYZ 0123456789.-/&";
 								String nomeOrigemNovo = "";
 								for (int xx = 0; xx < nomeOrigem.length(); xx++) {
@@ -1899,7 +1919,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// Trocado para validar se a planilha comeca como movimento - importante por causa da iguacu, Onnegestao, confialtiva que tinham movimento no roteiro secundario e estavam sendo bloqueados
 									if (mantemArquivo.equals("SIM") && !tipoPlanilha.contains("PADRAOOTTIMIZZA") && 
 									   !roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES") && 
-									   (tipoPlanilha.contains("SECUNDARIO") || tipoPlanilha.startsWith("MOVIMENTO"))) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
+									   (tipoPlanilha.contains("SECUNDARIO") || tipoPlanilha.startsWith("MOVIMENTO"))) { //#Soares esteve aqui -> chamado referente a mudanï¿½a: 202210-0019668
 									   // Colocado este IF para dar mais performance, ou seja, se ja tiver lido mais de 15 linhas
 									   // e planilha for para ser rodada na personalizada
 									   // break agiliza a saida da leitura da planilha. Xavier em 19.08
@@ -1911,7 +1931,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									// definido que as planilhas simples que rodam pelo template leem apenas a aba 0
 									if (tipoPlanilha.equals("MOVIMENTO") && mantemArquivo.equals("SIM") && 
-										porAba > 0 && roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES")) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
+										porAba > 0 && roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES")) { //#Soares esteve aqui -> chamado referente a mudanï¿½a: 202210-0019668
 									   
 									   logs = false;
 									   // logger.logDebug("SB");
@@ -1921,7 +1941,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								}
 								//#FABRICA 31/08/2022 - @sergio - 202208-0017778
 								//Estavamos processando as planilhas padroes sem apaga-las no processo
-								//O if abaixo faz com que paguemos a planilha, após processar pelo padrao
+								//O if abaixo faz com que paguemos a planilha, apï¿½s processar pelo padrao
 								
 								// logger.logDebug("TPAQ " + tipoPlanilha);
 								
@@ -2857,7 +2877,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			contaMovimento    = getConta09(contaMovimento, ttMov.nomeOrigem,  ttMov.documento, "", ttMov.complemento01,  ttMov.complemento02,  ttMov.complemento03, "",  ttMov.centroCusto);
 			contaPortador     = getConta09(contaPortador, "", "", ttMov.nomePortador, "", "", "", ttMov.nomeArquivo, "");
 			//ttMov.centroCusto = getCentroCusto("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador, ttMov.complemento01, ttMov.complemento02, ttMov.complemento03, "", ttMov.centroCusto);
-			//2310-017917 - As regras de centro custo tem validacao com o nome do arquivo e não funcionava porque nomeArquivo nao estava sendo passado no getCentroCusto
+			//2310-017917 - As regras de centro custo tem validacao com o nome do arquivo e nï¿½o funcionava porque nomeArquivo nao estava sendo passado no getCentroCusto
 			ttMov.centroCusto = getCentroCusto("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador, ttMov.complemento01, ttMov.complemento02, ttMov.complemento03, nomeArquivo, ttMov.centroCusto); 
 			ttMov.codFilial   = getFilial("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador,
 										  ttMov.complemento01, ttMov.complemento02, ttMov.complemento03,
@@ -2987,7 +3007,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			contaMovimento = getContaMovimento3(contaMovimento, ttMov.tipoLancamento, ttMov.documento, ttMov.nomeOrigem, histobj);
 			contaPortador  = getContaPortador(contaPortador, ttMov.tipoLancamento, ttMov.documento, ttMov.nomeOrigem, histobj);
 			
-			//#2305-004914. Carrega a chamadas das rotinas getContaMovimento e getContaPortador caso não tenha ainda.
+			//#2305-004914. Carrega a chamadas das rotinas getContaMovimento e getContaPortador caso nï¿½o tenha ainda.
 			// Classe Principal SC
 			Class<?> sc = this.getClass();
 			// Instancia da Classe Principal
@@ -3062,7 +3082,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			if (!contaMovimento.contains("IGNORA")) { // colocado para ignorar os lancamentos de partida dobrada quando o lancamento principal eh ignorado 20122022 JWR
 				if (ttMov.chave.contains("DOBRADA_JUR") && !ttMov.contaJuros.equals("")) contaMovimento = ttMov.contaJuros;//#2304-002846
 				if (ttMov.chave.contains("DOBRADA_DES")) {
-					// inversão de contas em desconto.
+					// inversï¿½o de contas em desconto.
 					contaMovimento = contaPortador;
 					if (!ttMov.contaDesconto.equals("")) contaPortador = ttMov.contaDesconto;
 				}
@@ -4185,7 +4205,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					 else  { 
 						if(!chaveDuplicata.equals("")){
 							try {
-								// INSERIDO O WHERE CODEMPRESA = ? PARA CORREÇÃO DO CHAMADO 202301-0023064.
+								// INSERIDO O WHERE CODEMPRESA = ? PARA CORREï¿½ï¿½O DO CHAMADO 202301-0023064.
 								String sql = "SELECT SERIE, SITUACAO, CHAVEDUPLICATA, VALORPARCELA, CHAVE, CPFCNPJ FROM IO_DUPLICATA WHERE CODEMPRESA = ? AND IO_DUPLICATA.CHAVE LIKE ? "; 
 								recordsDup = dbIOCont.sql(sql)
 								  .setFields("SERIE, SITUACAO, CHAVEDUPLICATA, VALORPARCELA, CHAVE, CPFCNPJ")
@@ -4461,7 +4481,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 							}
 							String valorLiquido = String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto + ttMov.valorMulta);
 							jDescricaoDupl.put("VALORLIQUIDO",  valorLiquido);
-							//#2402-029218 - Quando há Filial mandamos o codFilial e não o codEmpresa
+							//#2402-029218 - Quando hï¿½ Filial mandamos o codFilial e nï¿½o o codEmpresa
 							txtFornecedor.append(ttMov.codFilial.equals("") ? jDescricaoDupl.optString("CODEMPRESA") : ttMov.codFilial).append(";").append(razaoSocialDuplicata).append(";").append(ttMov.documento).append(";")
 										 .append(ttMov.dataMovimento).append(";").append(String.format("%.2f", ttMov.valorDocumento)).append(";")
 										 .append(jDescricaoDupl.optString("VALORLIQUIDO").replaceAll("\\.",",")).append(";").append(ttMov.nomePortador).append(";")
@@ -4873,7 +4893,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			if (roteiroCRMPrincipal.optString("erpContabilidade").contains("JBSOFTWARE") || 
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("TRON") || 
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("CONSISANET") || 
-				roteiroCRMPrincipal.optString("erpContabilidade").contains("DYAD") ||//removido o erp FORTES dessa validação - 202301-0023113
+				roteiroCRMPrincipal.optString("erpContabilidade").contains("DYAD") ||//removido o erp FORTES dessa validaï¿½ï¿½o - 202301-0023113
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("MICROSYSTEM") ||
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("PROSYST")) ttMov3.contador = 3;
 				
