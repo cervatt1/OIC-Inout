@@ -19463,9 +19463,7 @@ public boolean readExtratoDaycoval(MemoryFile memFile, JSONObject jDados, DataBa
 
 
 /*#############################################@ EXTRATO-ITAU-EXCEL @##############################################*/
-public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String tipoExtrato, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
-
-	logger.logInfo("ENTROU NO readExtratoItauDefault");
+public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String tipoExtrato, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 
     JSONObject extratoEmpresa = new JSONObject();
 
@@ -19519,7 +19517,7 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
             line = StringUtil.removeSpecialCharsToUC(line);
 
 
-            String nomePortador = "";
+            complemento01   = nomePortador;
             complemento02   = "";
             complemento03   = "";
             complemento04   = "";
@@ -19719,7 +19717,7 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
 			}
 
             contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
-            chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + "-" + contLinhaExtrato;
+            chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 
             // Buscar Extrato por Chave na Tabela IO_EXTRATO.
             extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
