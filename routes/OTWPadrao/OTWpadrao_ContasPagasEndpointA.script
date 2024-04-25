@@ -1130,11 +1130,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									}
 
 									if(tipoPlanilha.contains("MOVIMENTO")){
-
-										logger.logInfo("LOGDUIF:"+
-											(memFile.getFieldsSize() < 2) +" && "+
-											!getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(0).trim().replaceAll("-","/")).equals("")
-										);
 										if( memFile.getFieldsSize() < 2 &&
 											!getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(0).trim().replaceAll("-","/")).equals("")
 										){
