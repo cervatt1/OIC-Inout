@@ -1108,50 +1108,16 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								// #DOCUMENTACAO
 								// leitura de xlsx e csv
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") || (!roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && !roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA ("))) {
+									TemplateUtils templateUtil = new TemplateUtils();
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
-
-									if(tipoPlanilha.contains("MOVIMENTO") && (
-										line.contains("ENTRADA") &&
-										line.contains("MOVIMENTO") &&
-										line.contains("HISTORICO") &&
-										line.contains("CONTA") ) || 
-										line.contains("SALDO ANTERIOR") 
-									) continue;
-
-									if(tipoPlanilha.contains("MOVIMENTO") && memFile.getFieldsSize() < 3){
-										ttMovimentoPadrao ttMov4 = (ttMovimentoPadrao)mapaVariavel.get(chave + "-CTB");
-										if(ttMov4 != null){
-											ttMov4.nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0) +" "+ memFile.getStringFieldRemoveEspCharsUpper(1);
-											ttMov4.complemento01 += " " + memFile.getStringFieldRemoveEspCharsUpper(0) +" "+ memFile.getStringFieldRemoveEspCharsUpper(1);
-											mapaVariavel.put(chave + "-CTB", ttMov4);
-											continue;
-										}
-									}
-									// logger.logDebug("LIN -> " + line);
-									
+ 									
 									// #Fabrica(2019-05-20)
 									if (tipoPlanilha.contains("OTTCARTAO")) {
-										try{
-											String auxMes 	  = getMonth(cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), " ", " "));
-											if(auxMes.length() == 2 && !auxMes.equals(cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), " ", " "))){
-												dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll(cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), " ", " "), auxMes).replaceAll(" ", "/");
-											}else if (memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).length() > 11 
-											 && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains("/") 
-											 && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(",")
-											 && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).contains(":")){
-												dataMovimento     = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).lastIndexOf("/")+5);
-											}else{
-												dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											} 											
-											 
-											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
-										}catch(Exception e){
-											// dataMovimento   = "";
-											// dataLote        = "";
-										}
+										//dataMovimento = templateUtil.getDataOttCartao(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), tipoPlanilha, idataMovimento, line, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);logger.logInfo("DT dps -> " + dataMovimento);
+										dataLote	  = getCampoDate(dataMovimento, "", "yyyy-MM");
 									}
 									
-									if (!tipoPlanilha.contains("OTTCARTAO")) {
+									if (!tipoPlanilha.contains("OTTCARTAO") && !tipoPlanilha.contains("MOVIMENTO")) {
 										// #Fabrica(2019-05-20)
 										try{
 											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
@@ -1162,14 +1128,23 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataLote        = "";
 										}
 									}
-									if (tipoLancamento.contains("PAGAR")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR ORIGINAL") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("VALOR RECEBIDO")
-										&& memFile.getStringFieldRemoveEspCharsUpper(6).contains("BANCO (PORTADOR)") && memFile.getStringFieldRemoveEspCharsUpper(7).contains("CATEGORIA (RECEITA)")){
-										break;
+
+									logger.logInfo("LOGDUIF:"+
+										tipoPlanilha.contains("MOVIMENTO") +" && "+
+										memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("") +" && "+
+										!getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(1).trim()).equals("") +" && "+
+										memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("")
+									);
+									if( tipoPlanilha.contains("MOVIMENTO") &&
+										memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("") &&
+										!getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(1).trim().replaceAll("-","/")).equals("") &&
+										memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("")
+									){
+										dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(1).trim().replaceAll("-","/"));
+										logger.logInfo("DTMOV:"+dataMovimento);
 									}
 									
-									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+dataMovimento);
+									//if(templateUtil.validaPlanilhaPadrao(tipoLancamento, memFile)) break;
 									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
 									
@@ -1220,30 +1195,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, logger);
 									
 									if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR")) {
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO01")) {
-											try{complemento01     = getDate(complemento01, icomplemento01, line, false, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										}
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO02")) {
-											try{complemento02     = getDate(complemento02, icomplemento02, line, false, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										}
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO03")) {
-											try{complemento03     = getDate(complemento03, icomplemento03, line, false, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										}
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO04")) {
-											try{complemento04     = getDate(complemento04, icomplemento04, line, false, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										}
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO05")) {
-											try{complemento05     = getDate(complemento05, icomplemento05, line, false, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										} 
-										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO06")) {
-											try{complemento06     = getDate(complemento06, icomplemento06, line, false, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger);}
-											catch(Exception e){}
-										} 
+										//complemento09 = templateUtil.validaComplementoVencimento(roteiroCRM, roteiroCRMPrincipal, line, memFile, logger);
 									}
 									
 									cpfCnpj			= getCampoString(cpfCnpj,		icpfCnpj, 		line, zerar, roteiroCRM.optString("cpfCnpj").toUpperCase(), memFile, logger);
@@ -1303,26 +1255,20 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
 									
-								    logger.logInfo("TP  1110 -> "+tipoPlanilha+" - DM "+idataMovimento+" -> "+dataMovimento+" - VD "+ivalorDocumento+" -> "+valorDocumento);
+									// if(codEmpresa.contains("191")) logger.logDebug("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
+									
+									// logger.logDebug("TP -> "+ ivalorDocumento + " | " + idataMovimento + " TREM " + 
+													// tipoPlanilha+" - Empresa -> "+valorDocumento+" - DM -> "+dataMovimento + " | " + memFile.getStringFieldRemoveEspCharsUpper(0));
+									
 									if(logs && cont <= 200){
 										
 										logsTxt.append("\r\n");
-										logsTxt.append("ANALISTA AUX");												logsTxt.append(";");
-										logsTxt.append(dataMovimento); 												logsTxt.append(";");
-										logsTxt.append(valorDocumento);												logsTxt.append(";");
-										logsTxt.append(documento);													logsTxt.append(";");
-										logsTxt.append(nomeOrigem);													logsTxt.append(";");
-										logsTxt.append(nomePortador);												logsTxt.append(";");
-										logsTxt.append(complemento01);												logsTxt.append(";");
-										logsTxt.append(complemento02);												logsTxt.append(";");
-										logsTxt.append(complemento03);												logsTxt.append(";");
-										logsTxt.append(complemento04);												logsTxt.append(";");
-										logsTxt.append(complemento05);												logsTxt.append(";");
-										logsTxt.append(complemento06);												logsTxt.append(";");
-										logsTxt.append(tipoPlanilha);												logsTxt.append(";");
-										if(mantemArquivo.equals("SIM"))logsTxt.append("LENDO PELO TEMPLATE (SIM)");	logsTxt.append(";");
-										if(mantemArquivo.equals("NAO"))logsTxt.append("LENDO ESPECIFICO (NAO)");	logsTxt.append(";");
-										logsTxt.append(line);														logsTxt.append(";");
+										logsTxt.append("ANALISTA AUX").append(";").append(dataMovimento).append(";").append(valorDocumento).append(";")
+											   .append(documento).append(";").append(nomeOrigem).append(";").append(nomePortador).append(";").append(complemento01)
+											   .append(";").append(complemento02).append(";").append(complemento03).append(";").append(complemento04).append(";")
+											   .append(complemento05).append(";").append(complemento06).append(";").append(tipoPlanilha).append(";")
+											   .append(mantemArquivo.equals("SIM") ? "LENDO PELO TEMPLATE (SIM)" : "LENDO ESPECIFICO (NAO)").append(";")
+											   .append(line).append(";");
 																	
 									}
 
@@ -1425,25 +1371,13 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									////	busca Coluna Alternativa 
 									JSONObject obj1 = new JSONObject();
 									String validar	= "dataMovimento;nomeOrigem;documento;complemento01;complemento02;complemento03;complemento04;complemento05;complemento06;complemento07;complemento08;complemento09;complemento10;nomePortador;valorDocumento;valorPagamento;valorJuros;valorDesconto;valorMulta";
-									obj1.put("validar",			validar);
-									obj1.put("documento",		documento);
-									obj1.put("nomeOrigem",		nomeOrigem);
-									obj1.put("nomePortador",	nomePortador);
-									obj1.put("dataMovimento",	dataMovimento);
-									obj1.put("complemento01",	complemento01);
-									obj1.put("complemento02",	complemento02);
-									obj1.put("complemento03",	complemento03);
-									obj1.put("complemento04",	complemento04);
-									obj1.put("complemento05",	complemento05);
-									obj1.put("complemento06",	complemento06);
-									obj1.put("complemento07",	complemento07);
-									obj1.put("complemento08",	complemento08);
-									obj1.put("complemento09",	complemento09);
-									obj1.put("complemento10",	complemento10);
-									obj1.put("codCentroCusto",	codCcOrigem);
-									obj1.put("tipoPlanilha",	tipoPlanilha);
-									obj1.put("numeroAba",		String.valueOf(abaConvertida));
-									obj1.put("nomeArquivo",		nomeArquivo.toUpperCase());
+									obj1.put("validar", validar).put("documento", documento).put("nomeOrigem", nomeOrigem).put("nomePortador", nomePortador)
+										.put("dataMovimento", dataMovimento).put("complemento01", complemento01).put("complemento02", complemento02)
+										.put("complemento03", complemento03).put("complemento04", complemento04).put("complemento05", complemento05)
+										.put("complemento06", complemento06).put("complemento07", complemento07).put("complemento08", complemento08)
+										.put("complemento09", complemento09).put("complemento10", complemento10).put("codCentroCusto", codCcOrigem)
+										.put("tipoPlanilha", tipoPlanilha).put("numeroAba",	String.valueOf(abaConvertida)).put("nomeArquivo", nomeArquivo.toUpperCase());
+									
 									JSONObject alternativeObj = getAlternativeDataInt (obj1, memFile);
 									String changed = alternativeObj.optString("changeIt");
 									
@@ -6325,21 +6259,21 @@ public JSONObject getRoteiro() {
     js.put("idContabilidade", "a096R0000361GKE");
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
-    js.put("fornecedor", "3");
-    js.put("dataMovimento", "0");
-    js.put("portador", "1");
+    js.put("fornecedor", "1");
+    js.put("dataMovimento", "-1");
+    js.put("portador", "9");
     js.put("documentoNF", "3");
-    js.put("valorDocumento", "4");
-    js.put("valorJuros", "");
-    js.put("valorDesconto", "");
+    js.put("valorDocumento", "-1");
+    js.put("valorJuros", "6");
+    js.put("valorDesconto", "7");
     js.put("valorMulta", "");
-    js.put("valorPagamento", "");
+    js.put("valorPagamento", "8");
     js.put("complemento01", "3");
-    js.put("complemento02", "2");
+    js.put("complemento02", "3");
     js.put("complemento03", "");
     js.put("complemento04", "");
     js.put("complemento05", "");
-    js.put("complemento06", "4");
+    js.put("complemento06", "");
 	js.put("centroCusto", "");
 	js.put("valorAlternativo", "");
     js.put("cpfCnpj", "");
