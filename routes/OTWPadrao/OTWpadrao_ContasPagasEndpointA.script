@@ -16106,7 +16106,7 @@ public boolean readExtratoCEFExcel(MemoryFile memFile, String nomePortador, JSON
 
 public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 	JSONObject extratoEmpresa = new JSONObject();
-	logger.logInfo("PADRAO CAIXA PDF123");
+	//logger.logInfo("PADRAO CAIXA PDF123");
 
 
     // Inicializacao de Variaveis
@@ -16137,6 +16137,8 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
     String contLinhaExtrato  = "";
     String tipoPadrao  = "";
 
+	String valorDocAux = "";
+
     double valorDocumento    = 0.0;
     double valorJuros        = 0.0;
     double valorDesconto     = 0.0;
@@ -16151,9 +16153,17 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
     nomePortador = nomePortador.replaceAll("\\?","");
     complemento01 = nomePortador.replaceAll("\\?","");
 
+	boolean tipoUmSemSaldo = false;
+	String linhaRun = "";
+
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
     if(jDados.has("TIPOPADRAO"))   tipoPadrao   = jDados.optString("TIPOPADRAO");
+    if(jDados.has("LINHA"))   linhaRun   = jDados.optString("LINHA");
+
+	if(tipoPadrao.equals("001") && linhaRun.contains("DATA") && !linhaRun.contains("SALDO")) tipoUmSemSaldo = true;
+
+	//logger.logInfo("Tipo: "+tipoPadrao);
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
@@ -16169,6 +16179,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 		if (line.startsWith("PAGINA") && memFile.getFieldsSize() == 1) continue;
 		if (line.startsWith("SUJEITO") && memFile.getFieldsSize() == 1) continue;
 		if (line.contains("INTERNETBANKING") && line.contains("IMPRIME")) continue;
+		if (line.contains("CAIXA.GOV.BR")) continue;
 
 
 		if(line.toUpperCase().contains("CONTA:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && memFile.getStringFieldRemoveEspCharsUpper(2).equals("") && memFile.getStringFieldRemoveEspCharsUpper(3).equals("")){
@@ -16180,7 +16191,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 		}
 
 		// logger.logInfo("DENTRO DO EXTRAto tipoPadrao -> " + tipoPadrao);
-		logger.logInfo("linelength " + line.length());
+		//logger.logInfo("linelength " + line.length());
 		if(tipoPadrao.contains("002")){
 			if (line.contains("DATA") && line.contains("HISTORICO") && line.contains("DOC") && line.contains("VALOR")) {
 				// logger.logInfo("ENTROU IDX");
@@ -16201,14 +16212,15 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 		}
 		if(tipoPadrao.contains("001")){
 			if (line.contains("DATA") && line.contains("HISTORICO") && line.contains("DOC") && line.contains("VALOR")) {
-				// logger.logInfo("ENTROU IDX");
+				 logger.logInfo("ENTROU IDX");
 				idataMovimento	= -1;
 				idocumento      = -1;
 				inomePortador	= -1;
 				inomeOrigem		= -1;
 				ivalorDocumento	= -1;
 				for (int i = 0; i < memFile.getFieldsSize(); i++) {
-					if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOC"))       idocumento = i+1;
+					// if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOC"))       idocumento = i+1;
+					if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOC"))       idocumento = i; //Correção do chamado BUG CAIXA -> 2401-027811
 					if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("HISTORICO")) inomeOrigem = i;
 					if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DATA"))      idataMovimento = i;
 					if (memFile.getStringFieldRemoveEspCharsUpper(i).contains("VALOR"))     ivalorDocumento = i;
@@ -16216,6 +16228,8 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 				// logger.logInfo("LEITURA AUTOMATIZADA CABECALHO CEF \n DM:" + idataMovimento + " |DOC: " + idocumento + " |NO: " + inomeOrigem + "| VD: " + ivalorDocumento);
 				continue;
 			}
+
+			if(line.startsWith("SALDO")) continue;
 		}
 		if(tipoPadrao.contains("003")){
 			if (line.contains("MOVIMENTO") && line.contains("HISTORICO") && line.contains("DOCUMENTO")) {
@@ -16259,16 +16273,20 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 			}
 		}
 
-        if (memFile.getFieldsSize() == 1) {
-			nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-			try {
-				dbIOCont.update("IO_EXTRATO")
-				.fields("HISTORICO")
-				.where("CHAVE = ? ")
-				.param(nomeOrigem)
-				.param(chaveExtrato)
-				.execute();
-			} catch (Exception sqlUpdateException) {
+        if (memFile.getFieldsSize() == 1 ) {
+			if(tipoPadrao.equals("001") && memFile.getStringFieldRemoveEspCharsUpper(0).trim().startsWith("EXTRATO")) {
+				continue;
+			} else {
+				nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
+				try {
+					dbIOCont.update("IO_EXTRATO")
+					.fields("HISTORICO")
+					.where("CHAVE = ? ")
+					.param(nomeOrigem)
+					.param(chaveExtrato)
+					.execute();
+				} catch (Exception sqlUpdateException) {
+				}
 			}
         } else {
 				// logger.logInfo("DTS " + dataString);
@@ -16306,17 +16324,40 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
                 try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
                 catch (Exception vlrd) { valorDocumento = 0; }
 
-
+				//2401-026791
+				if(tipoPadrao.equals("001") && memFile.getFieldsSize() > 4 && tipoUmSemSaldo) valorDocumento = 1;
 
                 if (valorDocumento == 0) continue;
 
 
                 nomeOrigem      = "";
-                nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+				nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
 				if (nomeOrigem.contains("SALDO C/C")) continue;
                 documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
                 complemento02 = documento;
 
+				//2401-026791
+				if(tipoPadrao.equals("001") && memFile.getFieldsSize() > 4 && tipoUmSemSaldo){
+					if(memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).trim().equals("D") ||
+						memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).trim().equals("C")){
+						ivalorDocumento = memFile.getFieldsSize()-2;
+					} else {
+						ivalorDocumento = memFile.getFieldsSize()-1;
+					}
+					valorDocAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).replace("+", "").replace("-", "").replace(".", "").replace(",", ".").replace("R$", "").replace("D", "").replace("C", "").trim();
+					valorDocumento  = 0;
+					try{valorDocumento = Double.parseDouble(valorDocAux);}
+					catch (Exception vlrd) { valorDocumento = 0; }
+
+					debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1);
+
+					documento = memFile.getStringFieldRemoveEspCharsUpper(1);
+
+					for(int i = 2; i < ivalorDocumento; i++){
+						if(i == 2) nomeOrigem = "";
+						nomeOrigem+=" "+memFile.getStringFieldRemoveEspCharsUpper(i);
+					}
+				}
 
 
 				if(tipoPadrao.equals("003")){
