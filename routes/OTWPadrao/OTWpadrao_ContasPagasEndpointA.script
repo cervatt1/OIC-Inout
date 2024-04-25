@@ -14942,7 +14942,7 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
 							indiceSujo = nomeOrigem.indexOf("  ");
 							if(indiceSujo > 0) nomeOrigem = nomeOrigem.substring(0, indiceSujo);
 
-							nomePortador = "INFINITE-PAY " ;//+ nomeArquivo.replace(".PDF","");
+							nomePortador = "INFINITE-PAY " + nomeArquivo.replace(".PDF","");
 							if(nomePortador.length() > 100) nomePortador = nomePortador.substring(0,100);
 						}else{
 							dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
