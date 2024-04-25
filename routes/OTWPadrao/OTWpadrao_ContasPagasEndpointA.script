@@ -14902,12 +14902,14 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
     // 11/12/2019|0000|13013|807 ESTORNO DE D?BITO|23.068|285,50 C|0,00 C |  -> 7
 	int idataMovimento	= 0;
 	int ivalorDocumento	= 4;
+	int indiceSujo = -1;
 
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
 	
 	boolean naoLeMais = false;
 	boolean leuIndice = false;
+	boolean dataAcimaPrincipal = false;
 	
 	String nomeOrigemAux = "";
 	String nomeOrigemAux2 = "";
@@ -14919,18 +14921,36 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
 		
             try {
 				
-				
 				if(line.contains("DATA") && line.contains("TIPO DE TRANSACAO") && line.contains("DETALHE") && line.contains("VALOR")){
 					leuIndice = true;
 					continue;
 				}
 				
 				if(leuIndice){
+
+						if(memFile.getFieldsSize() < 2 && !getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim()).equals("") ){
+							dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+							dataAcimaPrincipal = true;
+							continue;
+						} 
+						if(dataAcimaPrincipal){
+							if(line.trim().startsWith("SALDO DO DIA")) continue;
+							ivalorDocumento = memFile.getFieldsSize()-1;
+							nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1).trim();
+							if(nomeOrigem.startsWith("DE ") || nomeOrigem.startsWith("PARA ")) nomeOrigem = cutString(nomeOrigem, " ");
+							indiceSujo = -1;
+							indiceSujo = nomeOrigem.indexOf("  ");
+							if(indiceSujo > 0) nomeOrigem = nomeOrigem.substring(0, indiceSujo);
+
+							nomePortador = "INFINITE-PAY " ;//+ nomeArquivo.replace(".PDF","");
+							if(nomePortador.length() > 100) nomePortador = nomePortador.substring(0,100);
+						}else{
+							dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+							nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1) + " " + memFile.getStringFieldRemoveEspCharsUpper(2);
+							nomePortador = "INFINITE PAY";
+						}
 					
-						dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 						if(dataMovimento.equals("")) continue;
-						
-						nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1) + " " + memFile.getStringFieldRemoveEspCharsUpper(2);
 						
 						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 						catch (Exception vlrd) { valorDocumento = 0; }
@@ -14944,7 +14964,6 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
 							debitoCredito = "EXTRATO-CREDITO";
 						}
 						
-						nomePortador = "INFINITE PAY";
 						
 						logger.logInfo(" Dt.Mov: " + dataMovimento + " N.Port: " + nomePortador + " Vl.Doc: " + valorDocumento +  " N.Orig: " + nomeOrigem + " Deb-Cre: " + debitoCredito);
 						//logger.logInfo(nomeOrigem);
