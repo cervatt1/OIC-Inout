@@ -1151,7 +1151,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										dataLote	  = getCampoDate(dataMovimento, "", "yyyy-MM");
 									}
 									
-									if (!tipoPlanilha.contains("OTTCARTAO") && !tipoPlanilha.contains("MOVIMENTO") && !tipoPlanilha.contains("SECUND_BANCOS")) {
+									if (!tipoPlanilha.contains("OTTCARTAO") && !tipoPlanilha.contains("MOVIMENTO")) {
 										// #Fabrica(2019-05-20)
 										try{
 											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
@@ -1170,6 +1170,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("")
 										){
 											dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(1).trim().replaceAll("-","/"));
+											continue;
 										}
 									}
 									
@@ -5241,7 +5242,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			}else{
 				roteiroCRM = getRoteiro();
 			}
-			// if(ttMov.codEmpresa.contains("68345")) logger.logDebug("QUATRO " + ttMov.valorDocumento + " | " + ttMov.dataMovimento + " | " + ttMov.tipoPlanilha + " | " + ttMov.tipoMovimento + " | " + roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toUpperCase());
+			logger.logInfo("NO:"+ttMov.nomeOrigem+"|CC:"+ttMov.contaCredito+"|CD:"+ttMov.contaDebito+"|QUATRO " + ttMov.valorDocumento + " | " + ttMov.dataMovimento + " | " + ttMov.tipoPlanilha + " | " + ttMov.tipoMovimento + " | " + roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toUpperCase());
 			// logger.logDebug("AQQQQ " + roteiroCRM.optString("erpContabilidade") + " | " + roteiroCRMPrincipal.optString("erpContabilidade") + " | " + ttMov.complemento05 + " | " + roteiroCRM.optString("Forcar_Partida_Dobrada").toUpperCase() + " | " + roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toUpperCase() + " | " + ttMov.contaJuros + " | " + ttMov.contaDebito + " | " + ttMov.contaCredito + " | " + classificacao);
 			
 			if (classificacao.startsWith("X")) {

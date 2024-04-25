@@ -370,7 +370,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		
 		////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 		// logger.logDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
-		logger.logInfo("LIN - "+line);
+		// logger.logInfo("LIN - "+line);
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Banese_PDF") && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))){
 			String anoAux = "";
 			if (cabecalhoPlanilha.contains("BANESE") && cabecalhoPlanilha.contains("AUTOMACAO") && cabecalhoPlanilha.contains("MESES ANTERIORES") && cabecalhoPlanilha.contains("DATA")
@@ -541,26 +541,54 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		}
 		
 		////// Extrato - GRAFENO PDF///////////////////////////////////////////////////////////
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Grafeno_PDF") &&
-			arquivoCompleto.contains("SALDO INICIAL") && cabecalhoPlanilha.contains("EXTRATO DETALHADO") && 
-			cabecalhoPlanilha.contains("GERADO EM") && cabecalhoPlanilha.contains("AGENCIA") && 
-			arquivoCompleto.contains("SALDO FINAL") && arquivoCompleto.contains("CPF/CNPJ")) {
-				
-			if(nomeArquivo.contains(".csv") && line.contains(";") && !line.contains("\\|")) memFile.setFieldSeparator(";");
-			
-			if(!line.contains("CONTA")){
-				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(2);
-			
-				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
-				jDados.put("NOMEEMPRESA",    nomeEmpresa);
-				jDados.put("CODEMPRESA",     codEmpresa);
-				jDados.put("NOMEARQUIVO",    nomeArquivo);
-				jDados.put("LINE",   		 line);
+		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Grafeno_PDF")){
+			logger.logInfo("CONDICOES:" + 
+				(arquivoCompleto.contains("EXTRATO DETALHADO") && arquivoCompleto.contains("PERIODO") &&
+				line.contains("DATA") && line.contains("LANCAMENTO") &&
+				line.contains("AGENCIA") && line.contains("CONTA") &&
+				line.contains("VALOR") && line.contains("SALDO") &&
+				line.contains("NOME") && line.contains("BANCO"))
+			);
+			if( (arquivoCompleto.contains("SALDO INICIAL") && cabecalhoPlanilha.contains("EXTRATO DETALHADO") && 
+				cabecalhoPlanilha.contains("GERADO EM") && cabecalhoPlanilha.contains("AGENCIA") && 
+				arquivoCompleto.contains("SALDO FINAL") && arquivoCompleto.contains("CPF/CNPJ"))
+			||
+				(arquivoCompleto.contains("EXTRATO DETALHADO") && arquivoCompleto.contains("PERIODO") &&
+				line.contains("DATA") && line.contains("LANCAMENTO") &&
+				line.contains("AGENCIA") && line.contains("CONTA") &&
+				line.contains("VALOR") && line.contains("SALDO") &&
+				line.contains("NOME") && line.contains("BANCO"))) {
 
-				readExtratoECartao("readExtratoGrafenoPDF", memFile, nomePortador, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno", "break");
-				return variaveis.toString();
+				if(nomeArquivo.contains(".csv") && line.contains(";") && !line.contains("\\|")) memFile.setFieldSeparator(";");
+
+				if(!line.contains("CONTA")){
+					nomePortador = memFile.getStringFieldRemoveEspCharsUpper(2);
+
+					JSONObject jDados = new JSONObject();
+					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					jDados.put("NOMEEMPRESA",    nomeEmpresa);
+					jDados.put("CODEMPRESA",     codEmpresa);
+					jDados.put("NOMEARQUIVO",    nomeArquivo);
+					jDados.put("LINE",   		 line);
+
+					readExtratoECartao("readExtratoGrafenoPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+					variaveis.put("tipoRetorno", "break");
+					return variaveis.toString();
+				}else{
+					nomePortador = cutString(arquivoCompleto,"CONTA", "PERIODO");
+					nomePortador = cutString(nomePortador,nomePortador.lastIndexOf("|"), ",").trim();
+
+					JSONObject jDados = new JSONObject();
+					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					jDados.put("NOMEEMPRESA",    nomeEmpresa);
+					jDados.put("CODEMPRESA",     codEmpresa);
+					jDados.put("NOMEARQUIVO",    nomeArquivo);
+					jDados.put("LINE",   		 line);
+
+					readExtratoECartao("readExtratoGrafenoPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+					variaveis.put("tipoRetorno", "break");
+					return variaveis.toString();
+				}
 			}
 		}
 		
@@ -647,7 +675,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("TIPOEXTRATO", "002");
 			}*/
 			//logger.logInfo("LOG CABECALHO PLANILHA --- " + cabecalhoPlanilha);
-			logger.logInfo("NP2 == "+nomePortador2+" | LINE BRADESCO 2 = "+line);
+			// logger.logInfo("NP2 == "+nomePortador2+" | LINE BRADESCO 2 = "+line);
 			// nomePortador = "";
 			// Nome Portador  ->  "BRADESCO {AGENCIA} {CONTA}"
 			if (cabecalhoPlanilha.contains("EXTRATO DE: AGENCIA:")) {
@@ -1567,7 +1595,10 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
-			if(nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA+")){
+			if( nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.contains("CONTA CORRENTE E APLICACOES REMUNERA+") &&
+				arquivoCompleto.contains("SALDO DE ABERTURA EM") &&
+				arquivoCompleto.contains("SALDO DE FECHAMENTO EM")){
+					
 				JSONObject jDados = new JSONObject();
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
@@ -1579,13 +1610,14 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
+			
 			if( arquivoCompleto.contains("INVESTIDOR QUE POSSUI BAIX") &&
 				arquivoCompleto.contains("INVESTIDOR QUE POSSUI ALT") &&
 				arquivoCompleto.contains("BTG PACTUAL") &&
 				arquivoCompleto.contains("OUVIDORIA@BTGPACTUAL.COM") &&
 				arquivoCompleto.contains("PROCESSO DECISORIO DO INVESTIDOR") &&
-				arquivoCompleto.contains("LEITUR")
-			){
+				arquivoCompleto.contains("LEITUR")){
+					
 				JSONObject jDados = new JSONObject();
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
@@ -3564,39 +3596,48 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Cresol_PDF")) {
 			
 			String tipoExtrato = "";
+			logger.logInfo("NP = "+nomePortador+" | LN RUN = "+line);
 			
 			if (cabecalhoPlanilha.contains("CRESOL") && (cabecalhoPlanilha.contains("SEGUNDO TITULAR") || cabecalhoPlanilha.contains("SEGUNDO|TITULAR")) &&
 				(cabecalhoPlanilha.contains("CONTA INTEGRACAO") || cabecalhoPlanilha.contains("CONTA|INTEGRACAO"))
 				){ 
 					
 				tipoExtrato = "001";
-				nomePortador = "CRESOL - " + cutString(cabecalhoPlanilha, "AGENCIA:", cabecalhoPlanilha.indexOf("AGENCIA:")+18).replaceAll(" ", "");
-				nomePortador += " " + cutString(cabecalhoPlanilha, "CONTA:", cabecalhoPlanilha.indexOf("CONTA:")+15);
+				nomePortador2 = "CRESOL - " + cutString(cabecalhoPlanilha, "AGENCIA:", cabecalhoPlanilha.indexOf("AGENCIA:")+18).replaceAll(" ", "");
+				nomePortador2 += " " + cutString(cabecalhoPlanilha, "CONTA:", cabecalhoPlanilha.indexOf("CONTA:")+15);
 				// logger.logInfo("NOME PORTADOR DE CRESOL PADRAO 1 -> "+ nomePortador);
+				logger.logInfo("TE1 = "+tipoExtrato+" | CP02 = "+complemento02+" | NP = "+nomePortador2);
+				complemento02 = tipoExtrato;
+				variaveis.put("complemento02", complemento02);
 			}
 			if (arquivoCompleto.contains("CONSULTA POSICAO CONSOLIDADA") && cabecalhoPlanilha.contains("SALDO EM CONTA") &&
 				cabecalhoPlanilha.contains("LIMITE DE") && cabecalhoPlanilha.contains("LANCAMENTOS") && cabecalhoPlanilha.contains("AGENCIA")){
 					
 				tipoExtrato = "002";
-				nomePortador = " CRESOL - " + cutString(cabecalhoPlanilha, "CONTA", cabecalhoPlanilha.indexOf("SALDO EM CONTA"));
+				nomePortador2 = " CRESOL - " + cutString(cabecalhoPlanilha, "CONTA", cabecalhoPlanilha.indexOf("SALDO EM CONTA"));
 				if(line.contains("SALDO DO DIA")){
 						String anoAux = cutString(line, line.lastIndexOf("/")+1, line.lastIndexOf("/")+5);
-						nomePortador = anoAux+ " CRESOL - " + cutString(cabecalhoPlanilha, "CONTA", cabecalhoPlanilha.indexOf("SALDO EM CONTA"));
+						nomePortador2 = anoAux+ " CRESOL - " + cutString(cabecalhoPlanilha, "CONTA", cabecalhoPlanilha.indexOf("SALDO EM CONTA"));
 						// logger.logInfo("Ano: "+anoAux);
 					}
+				logger.logInfo("TE2 = "+tipoExtrato+" | CP02 = "+complemento02+" | NP = "+nomePortador2);
 				// logger.logInfo("NOME PORTADOR DE CRESOL PADRAO 2 -> "+ nomePortador);
+				complemento02 = tipoExtrato;
+				variaveis.put("complemento02", complemento02);
 			}
-			if (nomePortador.contains("CRESOL")){
+			if (nomePortador2.contains("CRESOL")){
 				
 				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOEXTRATO", tipoExtrato);
+				jDados.put("TIPOEXTRATO", complemento02);
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",   "EXTRATO-CRESOL-PDF");
 				
-				readExtratoECartao("readExtratoCresolPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+				
+				
+				readExtratoECartao("readExtratoCresolPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
@@ -4011,7 +4052,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		////// EXTRATO BANCO BK BANK PDF /////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BKBank_PDF")){
 
-			if (arquivoCompleto.contains("EXTRATO") && arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR")) {
+			if (arquivoCompleto.contains("EXTRATO") && (arquivoCompleto.contains("WWW.IB.BKBANK.COM.BR") || arquivoCompleto.contains("WWW.HTTPS://BKBANK.COM.BR"))) {
 				
 				// logger.logInfo("Entra na validacao do BK BANK Pdf");
 				tipoPlanilha = "EXTRATO-BKBANK";
@@ -4146,7 +4187,8 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				arquivoCompleto.contains("ENDERECO:") &&
 				arquivoCompleto.contains("EMISSAO:") &&
 				arquivoCompleto.contains("ULT. MOV:") &&
-				arquivoCompleto.contains("NR. DOC.")
+				arquivoCompleto.contains("NR. DOC.") &&
+				arquivoCompleto.contains("NBCBANK.COM.BR")
 			){
 				JSONObject jDados = new JSONObject();
 
@@ -4522,14 +4564,10 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				memFile.getStringFieldRemoveEspCharsUpper(3).replaceAll("\"","").contains("VALOR") &&
 				memFile.getStringFieldRemoveEspCharsUpper(4).replaceAll("\"","").contains("SALDO")) {
 				// logger.logDebug("P3 - "+nomePortador2+" - "+nomePortador);
-				String pegaAnoAux = cutString(memFile.getLines().toString().toUpperCase(), "PERIODO:|", "AT");
-				pegaAnoAux = "/"+cutString(pegaAnoAux, pegaAnoAux.lastIndexOf("/"), " ");
-				
 				tipoPlanilha = "EXTRATO-ITAU";
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("ANOAUX", pegaAnoAux);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO03", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();			
@@ -4914,27 +4952,6 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				
 				readExtratoECartao("readExtratoBBMTxt", memFile, nomePortador2, jDados, dbIOCont, logger);
-				variaveis.put("tipoRetorno", "break");
-				return variaveis.toString();
-			}
-			
-		}
-
-		////// FRANCESINHA - BANRISUL TXT //////////////////////////////////////////////////////////////////
-		if (roteiroCRM.optString("Planilhas_Padroes").contains("Francesinha_Banrisul_TXT") && nomeArquivo.toUpperCase().endsWith(".TXT")) {
-			if (memFile.getLines().toString().toUpperCase().contains("BANCO DO ESTADO DO RIO GRANDE DO SUL") && 
-				memFile.getLines().toString().toUpperCase().contains("AVISO DE MOVIMENTACAO DE COBRANCA") && 
-				memFile.getLines().toString().toUpperCase().contains("CEDENTE") && 
-				memFile.getLines().toString().toUpperCase().contains("BDL-CARTEIRA") && 
-				memFile.getLines().toString().toUpperCase().contains("COBRANCA CAUCIONADA")
-			) {
-				tipoPlanilha = "FRANCESINHA-BANRISUL";
-
-				JSONObject jDados = new JSONObject();
-				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("NOMEARQUIVO", nomeArquivo);
-				
-				readExtratoECartao("readFrancesinhaBanrisulTXT", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno", "break");
 				return variaveis.toString();
 			}
@@ -6347,6 +6364,12 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 				logger.logDebug("P1");
 
 				tipoPlanilha = "EXTRATO-SANTANDER";
+				
+				//2404-036372 - Portador vinha em branco quando nao tinha "Santander" no nome do arquivo - Padrao 02
+				if(!nomePortador2.contains("SANTANDER") && !cabecalhoPlanilha.contains("NOME")){ 
+					nomePortador2 = "SANTANDER " + cutString(cabecalhoPlanilha, "AGENCIA", "CONTA") +" "+ cutString(cabecalhoPlanilha, "CONTA", "DATA");
+					nomePortador2 = nomePortador2.replaceAll("\\|", "").trim();
+				}
 
 				JSONObject jDados = new JSONObject();
 
