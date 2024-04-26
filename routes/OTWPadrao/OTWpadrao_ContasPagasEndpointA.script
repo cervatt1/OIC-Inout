@@ -15552,7 +15552,18 @@ public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDad
 
             //Pega o ano para colocar nas datas
 			if(line.contains("DATA DE VENCIMENTO")){
-				anoData = cutString(line, line.lastIndexOf("/"), line.lastIndexOf("/")+5);
+				if (!anoDataNomeArquivo) anoData = cutString(line, line.lastIndexOf("/"), line.lastIndexOf("/")+5);
+				
+				if(nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*")){ 
+					anoDataNomeArquivo = true;
+					anoData = "";
+				}
+
+				if(anoDataNomeArquivo && anoData.equals("")) {
+					if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
+					anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
+					anoData = cutString(anoData, "-");
+				}
 			}
 
             //Ignora tudo antes dos lancamentod
