@@ -3166,6 +3166,33 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhaItau_PDF")) {
 			//ITAU FRANCESINHA
+			if( arquivoCompleto.contains("RESULTADO DA BUSCA") &&
+				arquivoCompleto.contains("AGENCIA/CONTA:") &&
+				arquivoCompleto.contains("DATA DA MOVIMENTACAO:") &&
+				arquivoCompleto.contains("NOME DA EMPRESA:") &&
+				arquivoCompleto.contains("MOVIMENTACAO RESUMIDA DE COBRANCA") &&
+				arquivoCompleto.contains("POSICAO DA(S) CARTEIRA(S) DE COBRANCA") &&
+				arquivoCompleto.contains("MOVIMENTACAO FINANCEIRA DE COBRANCA") &&
+				arquivoCompleto.contains("COBRANCA COM REGISTRO") &&
+				arquivoCompleto.contains("PRINCIPAL(LIQUIDACOES)") &&
+				arquivoCompleto.contains("(+)ENTRADAS") &&
+				arquivoCompleto.contains("(-)BAIXAS") &&
+				arquivoCompleto.contains("(-)LIQUIDACOES") &&
+				arquivoCompleto.contains("(=)POSICAO")
+			){
+				JSONObject jDados = new JSONObject();
+				
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "ITAU-FRANCESINHA");
+				jDados.put("NOMEEMPRESA", nomeEmpresa);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("TIPOFRANC", "002");
+
+				mapaVariavel = readExtratoECartao("readExtratItauPdfFrancesinha2", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno", "break");
+				return variaveis.toString();
+			}
 			if(line.contains("CONTA") && line.contains("CORRENTE") && line.contains("EMITIDO EM") && cabecalhoPlanilha.contains("BANCO ITAU S/A")){
 				JSONObject jDados = new JSONObject();
 

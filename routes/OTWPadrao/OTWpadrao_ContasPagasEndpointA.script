@@ -11077,6 +11077,7 @@ public HashMap readExtratItauPdfFrancesinha2(MemoryFile memFile, JSONObject jDad
     String chave             = "";
     String key               = "";
     String lote              = "";
+    String tipoFranc         = "";
 	
 	boolean naoLeMais = false;
 
@@ -11107,6 +11108,7 @@ public HashMap readExtratItauPdfFrancesinha2(MemoryFile memFile, JSONObject jDad
     if(jDados.has("TIPOPLANILHA"))    tipoPlanilha    = jDados.optString("TIPOPLANILHA");
 	if(jDados.has("NOMEEMPRESA"))       nomeEmpresa = jDados.optString("NOMEEMPRESA");
 	if(jDados.has("NOMEPORTADOR"))       nomePortador = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("TIPOFRANC"))       tipoFranc = jDados.optString("TIPOFRANC");
 	
 	// memFile.setFieldSeparator(";");
     
@@ -11157,7 +11159,7 @@ public HashMap readExtratItauPdfFrancesinha2(MemoryFile memFile, JSONObject jDad
                 // }
             // }
             
-            if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("") && memFile.getFieldsSize() == 2 && memFile.getStringFieldRemoveEspCharsUpper(0).matches("[0-9]+")){
+            if(tipoFranc.equals("") && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("") && memFile.getFieldsSize() == 2 && memFile.getStringFieldRemoveEspCharsUpper(0).matches("[0-9]+")){
                 ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
                 if(ttMov2 != null){
                     if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("4")){
@@ -11176,8 +11178,9 @@ public HashMap readExtratItauPdfFrancesinha2(MemoryFile memFile, JSONObject jDad
                     continue;
                 }
             }
+			if(tipoFranc.equals("002") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("AGENCIA/CONTA:")) nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1).trim();
 
-			dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim();
+			dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
 			// logger.logInfo("DT ITAU = "+dataMovimento);
 			
             if (dataMovimento.equals("")) continue;
