@@ -15087,6 +15087,7 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
     if(jDados.has("NOMEEMPRESA"))       nomeEmpresa = jDados.optString("NOMEEMPRESA");
     if(jDados.has("TIPOPLANILHA"))    tipoPlanilha    = jDados.optString("TIPOPLANILHA");
     if(jDados.has("NOMEPORTADOR"))    nomePortador    = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
@@ -15287,6 +15288,7 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
     if(jDados.has("TIPOPLANILHA"))      tipoPlanilha    = jDados.optString("TIPOPLANILHA");
     if(jDados.has("ANODATA"))           anoData    = jDados.optString("ANODATA");
 	if(jDados.has("NOMEPORTADOR"))    	nomePortador    = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
 
 		while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
@@ -15316,33 +15318,6 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
 
 			catch(Exception e){}
 		}
-
-
-		/*
-		if (memFile.getFieldsSize() == 2 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("/20") && valorDocumento == -1) {
-			nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-			nomeOrigem = nomeOrigem.replaceAll("     ", " ").replaceAll("    ", " ");
-			nomeOrigem = nomeOrigem.replaceAll("   ", " ").replaceAll("  ", " ");
-			valorDocumento = memFile.getDoubleField(1);
-			valorDocumento = Math.abs(valorDocumento);
-			complemento02 = memFile.getStringFieldRemoveEspCharsUpper(1);
-
-			try {
-				dbIOCont.update("IO_EXTRATO")
-				.fields("HISTORICO, VALORDOCUMENTO, COMPLEMENTO")
-				.where("CHAVE = ? ")
-				.param(nomeOrigem)
-				.param(valorDocumento)
-				.param(complemento02)
-				.param(chaveExtrato)
-				.execute();
-			} catch (Exception sqlUpdateException) {
-			}
-			valorDocumento = 0;
-			continue;
-		}
-
-		 */
 
 		cont++;
 
@@ -15428,6 +15403,7 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
 			ttMov2.chave            = chave + "-CTB";
 			ttMov2.classificacao    = classificacao;
 			ttMov2.tipoPlanilha     = tipoPlanilha;
+			ttMov2.debitoCredito    = debitoCredito;
 
 			ttMov2.complemento01    = complemento01;
 			ttMov2.complemento02    = complemento02;
@@ -15440,7 +15416,7 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
 			ttMov2.complemento09    = "";
 			ttMov2.complemento10    = "";
 			ttMov2.nomeArquivo      = nomeArquivo;
-			ttMov2.naturezaContabil  = "C";
+			ttMov2.naturezaContabil  = "D";
 			ttMov2.contaDebito       = "";
 			ttMov2.contaCredito      = "";
 			mapaVariavel.put(key,ttMov2);
@@ -15499,6 +15475,7 @@ public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDad
 	String anoData 			 = "";
 
 	boolean naoLeMais = true;
+	boolean anoDataNomeArquivo = false;
 
 	int idataMovimento	= 0;
 	int inomeOrigem		= 1;
@@ -15515,6 +15492,7 @@ public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDad
     if(jDados.has("NOMEEMPRESA"))       nomeEmpresa = jDados.optString("NOMEEMPRESA");
     if(jDados.has("TIPOPLANILHA"))    tipoPlanilha    = jDados.optString("TIPOPLANILHA");
 	if(jDados.has("NOMEPORTADOR"))       nomePortador = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
@@ -15639,7 +15617,7 @@ public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDad
 				ttMov2.complemento09    = "";
 				ttMov2.complemento10    = "";
 				ttMov2.nomeArquivo      = nomeArquivo;
-				ttMov2.naturezaContabil  = "C";
+				ttMov2.naturezaContabil  = "D";
 				ttMov2.contaDebito       = "";
 				ttMov2.contaCredito      = "";
 				mapaVariavel.put(key,ttMov2);
