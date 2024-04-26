@@ -12313,6 +12313,9 @@ public boolean readExtratoBMGPDF(MemoryFile memFile, String nomePortador, JSONOb
 	String tipoExtrato       = "";
 	String anoAux			 = ""; 
 	String dataString		 = ""; 
+	String tipoPDFEXT		 = ""; 
+
+	boolean naoLeMais		 = false;
 
     double valorDocumento    = 0.0;
     double valorJuros        = 0.0;
@@ -12330,11 +12333,13 @@ public boolean readExtratoBMGPDF(MemoryFile memFile, String nomePortador, JSONOb
 
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
+    if(jDados.has("TIPOPDFEXTRATO"))  tipoPDFEXT  = jDados.optString("TIPOPDFEXTRATO");
 	
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+		logger.logInfo("LINE"+line);
 		contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 
 
@@ -12342,16 +12347,42 @@ public boolean readExtratoBMGPDF(MemoryFile memFile, String nomePortador, JSONOb
 			nomePortador = memFile.getStringFieldRemoveEspCharsUpper(0).replace("CONTA:", "").trim();
 			complemento01 = nomePortador;
 		}
-		if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).matches("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(19|20)\\d\\d$")) continue;
+		if(tipoPDFEXT.equals("002") && (line.contains("24 HORAS POR DIA") || line.contains("CENTRAL DE RELACIONAMENTO"))) naoLeMais = true;
+		if(tipoPDFEXT.equals("002") && line.contains("INTERNET BANKING - BMG")) naoLeMais = false;
+		if(tipoPDFEXT.equals("002") && naoLeMais) continue;
+
+		if(tipoPDFEXT.equals("002") && memFile.getFieldsSize() < 2 && !line.contains("LANCAMENTO") && !chaveExtrato.equals("")){
+			try {
+				dbIOCont.update("IO_EXTRATO")
+					.fields("HISTORICO")
+					.where("CHAVE = ? ")
+					.param(nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(0))
+					.param(chaveExtrato)
+					.execute();
+			} catch (Exception sqlUpdateException) {
+			}
+		}
+		if(!memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim().matches("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(19|20)\\d\\d$")) continue;
 		
-		dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
-		dataMovimento = getCampoDate(dataMovimento).trim();
+		dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim();
+		dataMovimento = getCampoDate(dataMovimento);
 
 		if (dataMovimento.length() != 10){
 			continue;
 		}
 
 		nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
+		if(nomeOrigem.contains("	")){
+			boolean limpouu = true;
+			while(limpouu){
+				if(nomeOrigem.contains("	")){
+					nomeOrigem = nomeOrigem.replaceAll("	", " ");
+				}else{
+					limpouu = false;
+				}
+				logger.logInfo("NOWHILE:"+nomeOrigem);
+			}
+		}
 		complemento04 = nomeOrigem;
 
 		String creditoDebito = memFile.getStringFieldRemoveEspCharsUpper(idebitoCreditoAux);
@@ -12363,7 +12394,9 @@ public boolean readExtratoBMGPDF(MemoryFile memFile, String nomePortador, JSONOb
 			continue;
 		}
 
-		valorDocumento = Double.parseDouble(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).replace("R$", "").replaceAll("\\.", "").replaceAll(",", "."));
+		try{
+			valorDocumento = memFile.getDoubleField(ivalorDocumento);
+		}catch(Exception e){ valorDocumento = 0; }
 		logger.logInfo("BMG: " + nomePortador + " | " + dataMovimento + " | " + nomeOrigem + " | " + valorDocumento + " | " + debitoCredito);
 
 		valorDocumento = Math.abs(valorDocumento);

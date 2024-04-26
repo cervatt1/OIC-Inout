@@ -4043,6 +4043,21 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
                 variaveis.put("tipoRetorno", "break");
                 return variaveis.toString();
             }
+            if (arquivoCompleto.contains("BANCOBMG.COM.BR") && 
+				arquivoCompleto.contains("INTERNET BANKING - BMG") && 
+				arquivoCompleto.contains("CABECALHO DADOS")
+			){
+                JSONObject jDados = new JSONObject();
+                jDados.put("CODEMPRESA", codEmpresa);
+                jDados.put("TIPOLANCAMENTO", tipoLancamento);
+                jDados.put("NOMEEMPRESA",    nomeEmpresa);
+                jDados.put("NOMEARQUIVO",    nomeArquivo);
+                jDados.put("TIPOPLANILHA",    tipoPlanilha);
+                jDados.put("TIPOPDFEXTRATO", "002");
+                readExtratoECartao("readExtratoBMGPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+                variaveis.put("tipoRetorno", "break");
+                return variaveis.toString();
+            }
         }
 		
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PagPixBank_PDF") &&
