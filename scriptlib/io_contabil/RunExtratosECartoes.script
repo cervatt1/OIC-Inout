@@ -1961,6 +1961,28 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		if ((roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_CEF_PDF") || roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Caixa_PDF")) && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
 			String tipoPadrao = "";
 			// logger.logDebug("Line -> "+line);
+			if( memFile.getFieldsSize() < 2 &&
+				cabecalhoPlanilha.contains("CGC:") &&
+				cabecalhoPlanilha.contains("LIMITE FLUTUANTE GIM:") &&
+				cabecalhoPlanilha.contains("LIMITE  CHEQUE  AZUL:") &&
+				cabecalhoPlanilha.contains("VLR.TOTAL")
+			){
+				tipoPadrao = "010";
+				logger.logInfo("CB:"+cabecalhoPlanilha);
+				nomePortador2 = cutString(cabecalhoPlanilha, "CONTA:", "PERIODO").trim();
+
+				JSONObject jDados = new JSONObject();
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOPLANILHA", "EXTRATO-CEF");
+				jDados.put("TIPOPADRAO", tipoPadrao);
+				jDados.put("LINHA", line);
+
+				readExtratoECartao("readExtratoCaixaPDF" ,memFile, nomePortador2, jDados, dbIOCont, logger);
+
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
 
 			if ((nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA")) && (nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {
 			// if ((nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {

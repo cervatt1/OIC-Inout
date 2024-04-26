@@ -16189,6 +16189,35 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 		if(line.toUpperCase().contains("CONTA:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(2).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(3).equals("")){
 			nomePortador = "CEF - " + memFile.getStringFieldRemoveEspCharsUpper(1) + " / " + memFile.getStringFieldRemoveEspCharsUpper(2) + " / " + memFile.getStringFieldRemoveEspCharsUpper(3);
 		}
+		if(tipoPadrao.equals("010")){
+			String linhaLimpa = line.replaceAll("  ", " ");
+			if(linhaLimpa.contains("  ")){
+				boolean limpouu = true;
+				while(limpouu){
+					if(linhaLimpa.contains("  ")){
+						linhaLimpa = linhaLimpa.replaceAll("  ", " ");
+					}else{
+						limpouu = false;
+					}
+				}
+			}
+			String[] linhaArray = linhaLimpa.split(" ");
+			
+			dataMovimento = getCampoDate(linhaArray[0]);
+
+			documento = linhaArray[1];
+
+			nomeOrigem = "";
+			for(int i = 2; i < (linhaArray.length-4); i++){
+				nomeOrigem += " " + linhaArray[i];
+			}
+			try{
+				valorDocumento = Double.parseDouble(linhaArray[linhaArray.length-4].replaceAll("\\.", "").replaceAll(",", ""))/100;
+			}catch(Exception e){
+				valorDocumento = 0;
+			}
+			debitoCreditoAux = linhaArray[linhaArray.length-3];
+		}
 
 		// logger.logInfo("DENTRO DO EXTRAto tipoPadrao -> " + tipoPadrao);
 		//logger.logInfo("linelength " + line.length());
@@ -16273,7 +16302,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 			}
 		}
 
-        if (memFile.getFieldsSize() == 1 ) {
+        if (memFile.getFieldsSize() == 1 && !tipoPadrao.equals("010")) {
 			if(tipoPadrao.equals("001") && memFile.getStringFieldRemoveEspCharsUpper(0).trim().startsWith("EXTRATO")) {
 				continue;
 			} else {
@@ -16291,6 +16320,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
         } else {
 				// logger.logInfo("DTS " + dataString);
             try {
+				if(!tipoPadrao.equals("010")){ // ARRUMAR IDENTACAO, NÃO O FIZ PARA NAO SUJAR O COMMIT
 
                 String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
 
@@ -16335,6 +16365,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 				if (nomeOrigem.contains("SALDO C/C")) continue;
                 documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
                 complemento02 = documento;
+				}
 
 				//2401-026791
 				if(tipoPadrao.equals("001") && memFile.getFieldsSize() > 4 && tipoUmSemSaldo){
@@ -16386,7 +16417,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
                 .param(chaveExtrato)
                 .queryUnique();
 
-            // Inserir caso Chave nao encontrada.
+            	// Inserir caso Chave nao encontrada.
 
 
                 if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
