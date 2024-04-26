@@ -15088,6 +15088,7 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 	String anoData 			 = "";
 
 	boolean naoLeMais = true;
+	boolean anoDataNomeArquivo = false;
 
 	int idataMovimento	= 0;
 	int inomeOrigem		= 1;
@@ -15110,7 +15111,18 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
         line = StringUtil.removeSpecialCharsToUC(line);
 
 		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VENCIMENTO:")){
-			anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(0), memFile.getStringFieldRemoveEspCharsUpper(0).lastIndexOf("/")).replaceAll("/", "");
+			if(!anoDataNomeArquivo) anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(0), memFile.getStringFieldRemoveEspCharsUpper(0).lastIndexOf("/")).replaceAll("/", "");
+
+			if(nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*")){ 
+				anoDataNomeArquivo = true;
+				anoData = "";
+			}
+
+			if(anoDataNomeArquivo && anoData.equals("")) {
+				if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
+				anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
+				anoData = cutString(anoData, "-");
+			}
 		}
 
 		if(line.contains("HISTORICO") && line.contains("TRANSACOES")){
