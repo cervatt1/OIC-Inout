@@ -12052,7 +12052,7 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
 			ivalorJuros=8;
 			ivalorMulta=9;
 			ivalorDesconto=7;
-			icomplemento01=13;
+			icomplemento01=11;
 			ivalorDocumento=5;
 
 
@@ -12151,6 +12151,8 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
 
 			if(icomplemento01 >= 0){
 				complemento01 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento01);
+				if(tipo.equals("001")) complemento01 += " " + memFile.getStringFieldRemoveEspCharsUpper(icomplemento01+1);
+				logger.logInfo("SPSPSP: " + tipo);
 			}
 			
 			complemento02 = memFile.getStringFieldRemoveEspCharsUpper(8).replaceAll("\"", "");
