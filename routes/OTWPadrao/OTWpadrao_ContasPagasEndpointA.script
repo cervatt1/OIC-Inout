@@ -12004,9 +12004,12 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
     String chave             = "";
     String key               = "";
     String lote              = "";
+    String nomeOrigemAux     = "";
+    String lineAnterior	     = "";
 
 	boolean naoLeMais = false;
 	boolean cabecalho = false;
+	boolean leuCabecalho = false;
 
     double valorDocumento    = 0.0;
     double valorJuros        = 0.0;
@@ -12146,6 +12149,35 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
             // }
 			// dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim();
 
+			if (line.contains("NO DOC") &&
+				line.contains("NOSSO NO") &&
+				line.contains("PAGADOR") &&
+				line.contains("DATA VENCIMENTO") &&
+				line.contains("DATA LIQUIDACAO") &&
+				line.contains("VALOR (R$)") &&
+				line.contains("LIQUIDACAO (R$)")
+			){ 
+				leuCabecalho = true;
+				continue;
+			}
+			
+			if(line.equals(lineAnterior)){ 
+				lineAnterior = line;
+				continue;
+			}
+			lineAnterior = line;
+
+			nomeOrigem = "";
+			if(tipo.equals("002") && memFile.getFieldsSize() < 3 && leuCabecalho){
+				nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(0).trim();
+				continue;
+			}
+			if(tipo.equals("002")){
+				if(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).contains(nomeOrigemAux)) nomeOrigemAux = "";
+				nomeOrigem = (nomeOrigemAux + " " +memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem)).trim();
+			}
+			nomeOrigemAux = "";
+
             if (dataMovimento.equals("")) continue;
             if (memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("")) continue;
 
@@ -12159,10 +12191,6 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
 			complemento03 = memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\"", "");
 
             documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento);
-
-			if(tipo.equals("002")){
-				nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
-			}
 
             try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
             catch (Exception vlrd) { valorDocumento = 0; }
