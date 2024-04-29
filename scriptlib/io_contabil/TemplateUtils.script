@@ -236,6 +236,18 @@ public class TemplateUtils {
             return true; //FATURA CARTAO CREDITO BANCO DO BRASIL
         }
 
+		if(	arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
+				arquivoCompleto.contains("CONTA CORRENTE  >  EXTRATO  >") && 
+				arquivoCompleto.contains("OPCAO DE PESQUISA:") && 
+				arquivoCompleto.contains("CENTRAL DE ATENDIMENTO") && 
+				arquivoCompleto.contains("CAPITAIS E REGIOES METROPOLITANAS") && 
+				arquivoCompleto.contains("0800 762 7777") && 
+				arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") ) {
+					
+			return true;// SANTANDER PADRAO 01/001
+					
+		}
+
 		return false;
 	}
 	
