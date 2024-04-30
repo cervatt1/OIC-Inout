@@ -3742,9 +3742,12 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
         //Como misturar o primeiro lancamento com a linha de cima ou jogar a quebra de linha de um lancamentos no comeco de proximo
 		////// FATURA CARTAO CREDITO BANRISUL PDF //////////////////////////////////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_Banrisul_PDF")){
-			if(cabecalhoPlanilha.contains("FATURA") && cabecalhoPlanilha.contains("CARTAO") && arquivoCompleto.contains("HISTORICO") &&
-				arquivoCompleto.contains("SAC BANRISUL") && arquivoCompleto.contains("TRANSACOES")){
-
+			if (cabecalhoPlanilha.contains("BANCO DO ESTADO DO RIO GRANDE DO SUL") && 
+				cabecalhoPlanilha.contains("EMITE RECIBOS") && 
+				arquivoCompleto.contains("0800 6442200") &&
+				arquivoCompleto.contains("0800 6461515") && 
+				arquivoCompleto.contains("BANRISUL")
+			){
                 nomePortador = "BANRISUL";
 
 				JSONObject jDados = new JSONObject();

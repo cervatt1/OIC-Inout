@@ -15544,8 +15544,9 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 
 	int idataMovimento	= 0;
 	int inomeOrigem		= 1;
-	int ivalorDocumento	= 2;
-	int icomplemento02  = 2;
+	int ivalorDocumento	= 3;
+	int icomplemento02  = 4;
+	int inomePortador   = 5;
 
 	int cont = 0;
 
@@ -15561,62 +15562,41 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
-
-		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VENCIMENTO:")){
-			anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(0), memFile.getStringFieldRemoveEspCharsUpper(0).lastIndexOf("/")).replaceAll("/", "");
-		}
-
-		if(line.contains("HISTORICO") && line.contains("TRANSACOES")){
-			naoLeMais = false;
-			continue;
-		}
-
-		if(naoLeMais) continue;
-
-        if(memFile.getFieldsSize() == 1 && !nomeOrigem.equals("")){
-            try{
-                ttMov2 = (ttMovimentoPadrao)mapaVariavel.get(chave + "-CTB");
-                if(ttMov2 != null){
-                    ttMov2.nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-                    ttMov2.complemento04 += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-                    mapaVariavel.put(chave + "-CTB", ttMov2);
-                    continue;
-                }
-            }
-
-            catch(Exception e){}
-        }
-
-		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("TOTAL") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("GASTOS")) continue;
-
-		if(memFile.getFieldsSize() > 2){
-			inomeOrigem		= 1;
-			ivalorDocumento	= 2;
-			icomplemento02  = 2;
-		} else {
-			inomeOrigem		= 0;
-			ivalorDocumento	= 1;
-			icomplemento02  = 1;
-		}
-
 		cont++;
 
 		try {
 
-            try{
-				//Quando tem mais de um lancamento no mesmo dia, a data so aparece no primeiro
-				if(memFile.getFieldsSize() > 2){
-					String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) + "/" + anoData;
-					dataMovimentoAux = getCampoDate(dataString);
-				}
-				dataMovimento = dataMovimentoAux;
-                dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
-            } catch(Exception e){dataMovimento = "";}
-
-            if (dataMovimento.equals("")) continue;
+			try{
+				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+			}catch(Exception e){ 
+				dataMovimento = "";
+				logger.logInfo("ERRO DATA MOVIMENTO: " + e.getMessage());
+			}
 
 			try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
-			catch (Exception vlrd) { valorDocumento = 0; }
+			catch (Exception vlrd) { 
+				logger.logInfo("ERRO VALOR DOCUMENTO: " + vlrd.getMessage());
+				valorDocumento = 0; 
+			}
+
+			if(!dataMovimento.equals("") && memFile.getFieldsSize() == 5 && valorDocumento == 0){
+				String[] strValorDocumentoArr = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).split(" ");
+				try{
+					valorDocumento = Double.parseDouble(strValorDocumentoArr[1].replaceAll("\\.", "").replaceAll(",", ""))/100;
+				}catch(Exception e){
+					logger.logInfo("ERRO PARSE DOUBLE:" + e.getMessage());
+					valorDocumento = 0;
+				}
+				nomeOrigem = "";
+				nomeOrigem = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem), 0, memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).lastIndexOf("-"));
+				nomeOrigem = cutString(nomeOrigem, " ");
+				nomeOrigem = cutString(nomeOrigem, " ");
+				nomeOrigem = cutString(nomeOrigem, " ");
+			}else{
+				nomeOrigem = "";
+				nomeOrigem = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem), 0, memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).lastIndexOf("-"));
+				nomeOrigem = cutString(nomeOrigem, " ");
+			}
 
 			debitoCredito = "EXTRATO-DEBITO";
 
@@ -15624,10 +15604,9 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 
 			if (valorDocumento == 0) continue;
 
-			nomeOrigem = "";
-            nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
 
 			complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
+			nomePortador  = memFile.getStringFieldRemoveEspCharsUpper(inomePortador);
 			complemento01 = nomePortador;
 			complemento04 = nomeOrigem;
 
@@ -15661,6 +15640,7 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 			ttMov2.valorDesconto    = valorDesconto;
 			ttMov2.valorMulta       = 0;
 			ttMov2.valorJuros       = valorJuros;
+			ttMov2.debitoCredito       = debitoCredito;
 			ttMov2.contaJuros       = "";
 			ttMov2.contaMulta       = "";
 			ttMov2.contaDesconto    = "";
