@@ -16227,12 +16227,12 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
 				if(anoDataNomeArquivo && anoData.equals("")) {
 					if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
 					anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
-					anoData = cutString(anoData, "-");
+					anoData = "/"+cutString(anoData, "-");
 				}
 			}
 
             try{
-				String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) + "/" +anoData;
+				String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) + anoData;
 				dataMovimento = getCampoDate(dataString);
                 dataLote = getCampoDate(dataMovimento, "", "yyyy-MM");
             } catch(Exception e){dataMovimento = "";}
