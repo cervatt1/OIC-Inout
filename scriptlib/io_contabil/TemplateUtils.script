@@ -129,11 +129,11 @@ public class TemplateUtils {
 		return  new StringBuilder()
 				.append(jDescricaoDupl.optString("CPFCNPJ")).append(",")
 				.append(jDescricaoDupl.optString("EMISSAO")).append(",")
-				.append(jDescricaoDupl.optString("DATAPAGAMENTO")).append(",")
-				.append(jDescricaoDupl.optString("VALORFINALMULTA")).append(",")
-				.append(jDescricaoDupl.optString("VALORFINALJUROS")).append(",")
-				.append(jDescricaoDupl.optString("VALORFINALDESCONTO")).append(",")
-				.append(jDescricaoDupl.optString("VALORPAGO")).append(",")
+				.append(ttMov.dataMovimento).append(",")
+				.append(String.format("%.2f",ttMov.valorMulta)).append(",")
+				.append(String.format("%.2f", ttMov.valorJuros)).append(",")
+				.append(String.format("%.2f",ttMov.valorDesconto)).append(",")
+				.append(String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto)).append(",")
 				.append(jDescricaoDupl.optString("DUPLICATA")).append("\r\n");
 	}
 	
@@ -156,6 +156,10 @@ public class TemplateUtils {
 		jDados.put("VALORMULTA",     ttMov.valorMulta);
 		jDados.put("VALORDESCONTO",  ttMov.valorDesconto);
 		jDados.put("TABELACONTABIL", jDadosAux.optString("TABELACONTABIL"));
+		//2308-014199 Refatoracao do validaFornecedorFiscal 
+		if (!roteiroCRMPrincipal.optString("ValidaFornecedorFiscal").equals("")) {
+			jDados.put("VALIDAFORNECEDORFISCAL", roteiroCRMPrincipal.optString("ValidaFornecedorFiscal"));
+		}
 		
 		jDescricaoDupl    = buscarIODuplicataContabit(jDados, dbIOCont, logger);
 		
@@ -194,6 +198,21 @@ public class TemplateUtils {
 
 
 		jDescricaoDupl    = buscarIODuplicata(jDados, dbIOCont, logger);
+		
+		if(roteiroCRMPrincipal.optString("idContabilidade").contains("a091C00002PHPi3")){
+			// logger.logInfo("SERGIo -> ANTES VALIDA DATA");
+			java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy");
+			try{
+				// logger.logDebug("dataArquivo _> " + dateFormat.parse(ttMov.dataMovimento) + " | dataDuplicata -> " + dateFormat.parse(jDescricaoDupl.optString("DATAVENCIMENTO")) + " SHR");
+				if(dateFormat.parse(ttMov.dataMovimento).before(dateFormat.parse(jDescricaoDupl.optString("DATAVENCIMENTO")))){
+					// logger.logInfo("ENTROU BEFORE");
+					jDescricaoDupl.put("TIPO","FORNECEDOR");
+					jDescricaoDupl.put("DATAPOSTERIOR","TRUE");
+				}
+			}catch(Exception EE){
+				logger.logDebug("EE DATAPOSTERIOR -> " + EE.getMessage());
+			}
+		}
 
 		// #Fabrica(2019-05-20)
 		// Descomentar a proxima linha para testar a razaoSocial do movimento com a jDescricaoDupl.optString("RAZAOSOCIAL") que vem das duplicatas em aberto!
@@ -231,11 +250,273 @@ public class TemplateUtils {
 	}
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
-        if (arquivoCompleto.contains("CARTAO:") && arquivoCompleto.contains("DETALHAMENTO DA SUA FATURA") &&
-            arquivoCompleto.contains("BB.COM.BR") && arquivoCompleto.contains("BANCO DO BRASIL")) {
-            return true; //FATURA CARTAO CREDITO BANCO DO BRASIL
+		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
+			arquivoCompleto.contains("0800 887 0463"))) && (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
+			return true; //NUBANK
+		}
+		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
+			return true; //BRADESCO
+		}
+		if (arquivoCompleto.contains("BANCO SAFRA") && (arquivoCompleto.contains("EXTRATO DE MOVIMENTACAO") || (arquivoCompleto.contains("3175 8248")) || arquivoCompleto.contains("3175-8248")) && 
+      		arquivoCompleto.contains("CONTA:")) {
+            return true; //SAFRA
         }
+		/* Chamado #2311-023023 - Condicao "(arquivoCompleto.contains("STONE INSTITUICAO DE PAGAMENTO") && arquivoCompleto.contains("S.A."))" 
+           foi feita para validar "STONE INSTITUICAO DE PAGAMENTO S.A." quando ha quebra de linha no arquivo dos termos citados, deixando eles
+           separados.*/
+        if (arquivoCompleto.contains("STONE INSTITUICAO DE PAGAMENTO S.A.") || (arquivoCompleto.contains("STONE INSTITUICAO DE PAGAMENTO") &&
+            arquivoCompleto.contains("S.A."))  && 
+            arquivoCompleto.contains("CONTRAPARTE") &&
+            arquivoCompleto.contains("PERIODO") && arquivoCompleto.contains("CONTA") &&
+            arquivoCompleto.contains("DATA") && arquivoCompleto.contains("TIPO") &&
+            arquivoCompleto.contains("DOCUMENTO") && arquivoCompleto.contains("AGENCIA")) {
+            return true; //STONE
+        }
+		if (arquivoCompleto.contains("EXTRATO EMITIDO PELA CONTA SIMPLES - A CONTA FEITA PARA EMPREENDER")
+			&& arquivoCompleto.contains("CONTA NUMERO")) {
+			return true; //CONTASIMPLES MODELOS 1 E 2
+		}
+		if (arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("CARTEIRA DE COBRANCA COM REGISTRO") &&
+			arquivoCompleto.contains("PERIODO DE") && arquivoCompleto.contains("BENEFICIARIO") &&
+			arquivoCompleto.contains("SITUACAO") && arquivoCompleto.contains("PAGADOR") &&
+			arquivoCompleto.contains("CPF/CNPJ")) {
+			return true; //FRANCESINHAGRUPOAILOS
+		}
+		if (arquivoCompleto.contains("CARTEIRA DE COBRANCA") && arquivoCompleto.contains("STATUS") && arquivoCompleto.contains("LIQUIDADO")){
+			return true; //FRANCESINHA CRESOL
+		}
+		if (arquivoCompleto.contains("INVESTIMENTOS BRADESCO") && arquivoCompleto.contains("CERTIFICADO") &&
+			arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("PERIODO DE:")) {
+			return true; //INVESTIMENTOBRADESCO
+		}
+		if (arquivoCompleto.contains("ASAAS GESTAO FINANCEIRA INSTITUICAO DE PAGAMENTO")) {
+			return true; //ASAAS
+		}
+		//#2311-022830
+		//if (arquivoCompleto.contains("TOTAL APLICACOES FINANCEIRAS")  && arquivoCompleto.contains("SALDOS POR DIA BASE") &&
+		//	arquivoCompleto.contains("SUJEITOS A CONFIRMACAO NO MOMENTO DA CONTRATACAO")) {
+		//	return true; //BBMOBILE
+		//}
+		if(arquivoCompleto.contains("HISTORICO DE MOVIMENTACAO") && arquivoCompleto.contains("IOF") && arquivoCompleto.contains("BB RENDE FACIL")){
+			return true; // APLI BB
+		}
+		if (arquivoCompleto.contains("CC:")  && arquivoCompleto.contains("INFORMACOES ATUALIZADAS ATE A DATA E O HORARIO INDICADOS ACIMA E SUJEITAS A ALTERACOES") &&
+			arquivoCompleto.contains("O EXTRATO REFLETE O(S) VALOR(ES) DO SALDO EM CONTA, QUE CONTEMPLA O SALDO DA CONTA CORRENTE, SEM CONTABILIZAR") &&
+			arquivoCompleto.contains("VALORES BLOQUEADOS OU LIMITE, CASO EXISTAM")) {
+			return true; //VOTORANTIM
+		}
+		if (arquivoCompleto.contains("INSTITUICAO DE PAGAMENTO") && arquivoCompleto.contains("TITULAR DA CONTA DE PAGAMENTO") &&
+			arquivoCompleto.contains("DATA") && arquivoCompleto.contains("CREDITO/DEBITO") &&
+			arquivoCompleto.contains("STATUS") && arquivoCompleto.contains("IOF")) {
+			return true; //VOTORANTIM2
+		}
+		if (arquivoCompleto.contains("EXTRATO DE CONTA VINCULADA") && arquivoCompleto.contains("O EXTRATO REFLETE") &&
+			arquivoCompleto.contains("CLIENTE:")) {
+			return true; //VOTORANTIM3
+		}
+		if (arquivoCompleto.contains("BTG PACTUAL") && arquivoCompleto.contains("RAZAO SOCIAL") &&
+			arquivoCompleto.contains("CONTA CORRENTE") && arquivoCompleto.contains("CNPJ")) {
+			return true; //BTG
+		}
+		if (arquivoCompleto.contains("01. CONTA CORRENTE E APLICACOES REMUNERA")) {
+			return true; //BTG2
+		}
+		if(arquivoCompleto.contains("BANCO DO ESTADO DO RIO GRANDE DO SUL")
+			&& arquivoCompleto.contains("OPERACOES PIX") && arquivoCompleto.contains("BANRISUL.COM.BR")){
+			return true;//BANRISUL
+		}
+		if(arquivoCompleto.contains("BANCO DO ESTADO DO RIO GRANDE DO SUL")
+			&& arquivoCompleto.contains("CONSULTA OPERACOES / EMITE RECIBOS") && arquivoCompleto.contains("BANRISUL")){
+			return true;//BANRISUL2
+		}
+		if (arquivoCompleto.contains("MEUS CARTOES DE CREDITO OU OFFICE BANKING")
+			&& arquivoCompleto.contains("BANRISUL S.A.") && arquivoCompleto.contains("ANUIDADE")){
+			return true;//CARTAO BANRISUL
+		}
+		
+		// gui - 2404-035964 -> NOVO PADRAO EXTRATO ITAU -> 22/04/2024
+        if (arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("ITAU") &&
+                arquivoCompleto.contains("LANCAMENTO") && !arquivoCompleto.contains("POSICAO DA CONTA CORRENTE")
+                && arquivoCompleto.contains("INTERNET") && arquivoCompleto.contains(".ITAU.COM.BR") && arquivoCompleto.contains("NOME: AGENCIA:")) {
+            return true; //ITAU PADRAO 6
+        }
+		
+		if (arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("ITAU") &&
+			arquivoCompleto.contains("LANCAMENTO") && !arquivoCompleto.contains("MENSAL") && !arquivoCompleto.contains("SALDO RESUMIDO")
+			/*&& arquivoCompleto.contains("POSICAO DA") &&
+			arquivoCompleto.contains("CONTA:)"*/) {
+			return true; //ITAUPADRAO3 TIPOEXTRATO4
+		}
+		if(arquivoCompleto.contains("DATA") && arquivoCompleto.contains("AG/ORIGEM") &&
+			/* && arquivoCompleto.contains("LIMITE DA CONTA CONTRATADO")*/ //2311-022345 comentado
+			arquivoCompleto.contains("0800 728 0728")){
+			return true; //ITAU 2
+		}
+		if(arquivoCompleto.contains("RELATORIO DE VENDAS") && arquivoCompleto.contains("INFINITEPAY") && arquivoCompleto.contains("0800 591 7207")){
+			return true; //INFINITE-PAY-CARTAO
+		}
+		if(arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("BANCO ITAU S/A") && arquivoCompleto.contains("MOVIMENTACAO")){
+            return true; //ITAUFRANCESINHA01
+        }
+		if(arquivoCompleto.contains("CART") && arquivoCompleto.contains("PAGADOR") && arquivoCompleto.contains("TIPO") && arquivoCompleto.contains("NOSSO|") && 
+			arquivoCompleto.contains("SEU|") && arquivoCompleto.contains("VENC.") && arquivoCompleto.contains("AGENCIA|") && arquivoCompleto.contains("INICIAL") && 
+			arquivoCompleto.contains("VALOR") && arquivoCompleto.contains("DESCRICAO DE OPERACOES") && arquivoCompleto.contains("OPERACOES|VALOR") && 
+			arquivoCompleto.contains("VALOR FINAL") && arquivoCompleto.contains("CONSULTAS, INFORMACOES E TRANSACOES, ACESSE") && arquivoCompleto.contains("ITAU.COM.BR")) {
+			return true; //ITAUFRANCESINHA04
+		}
+        /*if(arquivoCompleto.contains("NOME DO PAGADOR") && arquivoCompleto.contains("VCTO") &&
+            arquivoCompleto.contains("DATA DE MOVIMENTACAO") && arquivoCompleto.contains("AGENCIA/CONTA")){
+            return true; //ITAUFRANCESINHA02
+        }*/
+		/* gui - 30/04/2024 -> AJUSTE PARA FORÇAR LER PELO ANTIGO CONVERSOR O PADRÃO 01 DO UNICREDPDF
+		 CHAMADOO -> 2404-037187
+		 AJUSTE FEITO PORQUE O NOVO CONVERSOR NAO ESTAVA TRAZENDO TODOS OS LANCAMENTOS DO PDF, JA O ANTIGO, TRAZ TUDO.
+		if(((arquivoCompleto.contains("CENTRAL DE RELACIONAMENTO") && arquivoCompleto.contains("DEMAIS REGIOES:")
+			&& arquivoCompleto.contains("NO EXTERIOR:") && arquivoCompleto.contains("SAC:"))
+			|| arquivoCompleto.contains("OUVIDORIA") && arquivoCompleto.contains("0800 940 0602") && !arquivoCompleto.contains("COOPERATIVA DE CREDITO UNICRED"))
+			&& !arquivoCompleto.contains("TELE ATENDIMENTO")){
+			return true; //UNICRED1
+		}*/
+		
 
+		if(arquivoCompleto.contains("OUVIDORIA: 0800 591 5120") &&
+			arquivoCompleto.contains("COOPERATIVA DE CREDITO CREHNOR")){
+			return true; //CREHNOR
+		}
+		if (arquivoCompleto.contains("BANCO SAFRA S/A") && arquivoCompleto.contains("0800 770 1236")
+				&& arquivoCompleto.contains("ATENDIMENTO PERSONALIZADO") && arquivoCompleto.contains("CENTRAL DE SUPORTE A PESSOA JURIDICA")){
+			
+			return true;//FRANCESINHA SAFRA
+		}
+		if(arquivoCompleto.contains("SAC - 0800 647 2200") && 
+			arquivoCompleto.contains("OUVIDORIA - 0800 644 1100 ")){
+				return true;//AILOS CIVIA
+		}
+		if(arquivoCompleto.contains("BANCO INTER") && arquivoCompleto.contains("CPF/CNPJ") && arquivoCompleto.contains("0800 940 9999") && 
+		   arquivoCompleto.contains("FALE COM A GENTE") && arquivoCompleto.contains("SALDO POR")){
+			return true; //INTER PADRAO3
+		}
+		if(arquivoCompleto.contains("NEXT (237 - BANCO BRADESCO S.A.)")
+			&& arquivoCompleto.contains("SE NAO FICAR SATISFEITO COM A SOLUCAO APRESENTADA, CONTATE A OUVIDORIA") && arquivoCompleto.contains("CONSULTAS, INFORMACOES E SERVICOS TRANSACIONAIS")
+			&& arquivoCompleto.contains("SAC NEXT")){
+					return true;// NEXT
+		}
+		if(arquivoCompleto.toUpperCase().contains("SALDO DO DIA") && arquivoCompleto.toUpperCase().contains("LIMITE") && 
+		   arquivoCompleto.toUpperCase().contains("CONSOLIDADA EM") && arquivoCompleto.toUpperCase().contains("SALDO ANTERIOR") && 
+		   arquivoCompleto.toUpperCase().contains("SALDO EM CONTA")){
+			return true; //CRESOL2
+		}
+		if(arquivoCompleto.contains("CREDISAN COOPERATIVA DE CREDITO")
+			&& arquivoCompleto.contains("EXTRATO PARA SIMPLES CONFERENCIA")){
+			return true;//CREDISAN
+		}
+		if(arquivoCompleto.toUpperCase().contains("SISTEMA DE COOPERATIVAS DE CREDITO DO BRASIL") &&
+           arquivoCompleto.toUpperCase().contains("SISBR") &&
+           arquivoCompleto.toUpperCase().contains("PLATAFORMA DE SERVICOS FINANCEIROS DO SICOOB -") &&
+           !arquivoCompleto.toUpperCase().contains("HORA:") &&
+           !arquivoCompleto.toUpperCase().contains("PERIODO:")){
+            return true; //SICOOB 3
+        }
+		if(arquivoCompleto.contains("EXTRATO CONTA LINKER") && arquivoCompleto.contains("WWW.LINKER.COM.BR") &&
+		   arquivoCompleto.contains("TOTAL ENTRADAS")){
+           return true; //LINKER
+        }
+		if(arquivoCompleto.contains("XP INVESTIMENTOS CCTVM S/A") && arquivoCompleto.contains("NAO HA LANCAMENTOS FUTUROS") &&
+		   arquivoCompleto.contains("ATENDIMENTO AO CLIENTE") && arquivoCompleto.contains("TORRE SUL") ){
+            return true; //XP 2
+        }
+		if (arquivoCompleto.contains("EFI S.A.") && arquivoCompleto.contains("TIPO DE REGISTRO")
+            && arquivoCompleto.contains("EXTRATO FINANCEIRO") && arquivoCompleto.contains("FILTROS DO") &&
+            arquivoCompleto.contains("EFI S.A. CNPJ: 09.089.356/0001-18")) {
+			return true; //EFI
+		}
+		if(arquivoCompleto.contains("OUVIDORIA CREDISIS") && arquivoCompleto.contains("0800 648 00 20")){
+			return true; //CREDISIS
+		}
+		/*if(arquivoCompleto.toUpperCase().contains("EXTRATO DE: AG: ") && arquivoCompleto.toUpperCase().contains("OS DADOS ACIMA TEM COMO BASE ") &&
+		 arquivoCompleto.toUpperCase().contains("SALDOS INVEST FACIL / PLUS") && arquivoCompleto.contains("TOTAL DISPONIVEL") &&
+		 arquivoCompleto.toUpperCase().contains("DCTO.") && arquivoCompleto.toUpperCase().contains("ENTRE")){
+		 return true; //BRADESCO
+		}*/
+		if(arquivoCompleto.contains("RELATORIO FINANCEIRO FRANCESINHA") && arquivoCompleto.contains("ASSOCIADO:") && arquivoCompleto.contains("COOPERATIVA") && arquivoCompleto.contains("CONTA CORRENTE")
+			&& arquivoCompleto.contains("BENEFICIARIO") && arquivoCompleto.contains("A TRANSACAO ACIMA FOI REALIZADA VIA SICREDI INTERNET")){
+			return true;//FrancesinhaSicrediPdf tipo 001
+		}
+		//2312-024917 - Existem algumas quebras de linha no cliente/fornecedor, algumas dessas quebras de linhas são tratadas pelos conversores, no antigo
+		//nao coloca espacamento quando junta as partes da linha, enquanto no novo nao apresenta esse problema
+		if(arquivoCompleto.contains("CARTEIRA") && arquivoCompleto.contains("RELATORIO DE TITULOS") && arquivoCompleto.contains("VALOR TOTAL LIQUIDACAO")
+			&& arquivoCompleto.contains("BENEFICIARIO") && arquivoCompleto.contains("COOPERATIVA") && arquivoCompleto.contains("DADOS REFERENTES AO PERIODO DE")){
+			return true; //FRANCESINHA SICREDI PDF TIPO 002
+		}
+		if (arquivoCompleto.contains("CARTAO:") && arquivoCompleto.contains("DETALHAMENTO DA SUA FATURA") &&
+			arquivoCompleto.contains("BB.COM.BR") && arquivoCompleto.contains("BANCO DO BRASIL")) {
+			return true; //FATURA CARTAO CREDITO BANCO DO BRASIL
+		}
+		//#2311-023772 By Leal
+		if(arquivoCompleto.contains("RELATORIO  -  TITULOS POR PERIODO") && arquivoCompleto.contains("TIPO CONSULTA:") &&
+		   arquivoCompleto.contains("LIQUIDACAO - VIA COMPENSACAO") && arquivoCompleto.contains("CPF/CNPJ SACADO:") &&
+           arquivoCompleto.contains("VLR. OUTROS") && arquivoCompleto.contains("VERSAO:")){
+
+            return true; //FRANCESINHA SICOOB
+        }
+		if(arquivoCompleto.contains("PAYBROKERS IP") && arquivoCompleto.contains("CONTAPAG") && arquivoCompleto.contains("FILTROS UTILIZADOS NO RELATORIO")){
+            return true; //PAYBROKERS
+        }
+		if(arquivoCompleto.contains("EXTRATO CONTA DE PAGAMENTO/LANCAMENTOS") &&
+			arquivoCompleto.contains("ACESSOACONTA.COM.BR") &&
+			arquivoCompleto.contains("PINKPAY")){
+			
+			return true; //PINK PAY
+		}
+		//2311-022659
+		if(arquivoCompleto.contains("BANCO ITAU S.A.") && arquivoCompleto.contains("TITULOS") && arquivoCompleto.contains("MOVIMENTACAO") && 
+			arquivoCompleto.contains("PAGADOR")  && arquivoCompleto.contains("OUTROS VALORES")){
+			return true; //ITAUFRANCESINHA03
+		}
+		//2311-023654
+		if(arquivoCompleto.contains("OUVIDORIA BB") && arquivoCompleto.contains("DEFICIENTES") && arquivoCompleto.contains("AUDITIVOS") &&
+			arquivoCompleto.contains("CONSULTAR") && arquivoCompleto.contains("BOLETOS") && arquivoCompleto.contains("INSTRUCOES")){
+			return true; //FRANCESINHABB
+		}
+		//2401-026435
+		if(arquivoCompleto.contains("OMIE.CASH") && arquivoCompleto.contains("GERADO EM") && arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("SITUACAO")){
+			return true; //OMIECASH
+		}
+		if(arquivoCompleto.contains("EXTRATO DE CONTA CORRENTE") && arquivoCompleto.contains("TITULAR") && arquivoCompleto.contains("SALDO ANTERIOR") && arquivoCompleto.contains("SALDO ATUAL") &&
+			arquivoCompleto.contains("GERADO EM") && arquivoCompleto.contains("PERIODO:") && arquivoCompleto.contains("AGENCIA:")){
+			return true; //NORDESTE TIPO 2
+		}
+		//2402-028676
+		if(arquivoCompleto.contains("PAGSEGURO") && arquivoCompleto.contains("EXTRATO FINANCEIRO") && arquivoCompleto.contains("CONTA CORRENTE") && arquivoCompleto.contains("CNPJ")){
+			return true; //PAGBANK PADRAO 2
+		}
+		
+		if(arquivoCompleto.contains("SAC DAYCOVAL") && arquivoCompleto.contains("EXTRATO DETALHADO") && arquivoCompleto.contains("DAYCONNECT") && arquivoCompleto.contains("PROVISAO DE ENCARGOS")){
+			return true; //DAYCOVAL PADRAO 1 E 2 
+		}
+		if (arquivoCompleto.contains("XP INVESTIMENTOS") && 
+			arquivoCompleto.contains("ASSESSOR:") &&
+			arquivoCompleto.contains("WWW.XPI.COM.BR") &&
+			arquivoCompleto.contains("CORRETORA DE CAMBIO")) {
+			return true; //XP Padrao 3
+		}
+		
+		if(	arquivoCompleto.contains("SISBB") &&
+				arquivoCompleto.contains("SISTEMA DE INFORMACOES BANCO DO BRASIL") && 
+				arquivoCompleto.contains("AUTOATENDIMENTO BB") && 
+				arquivoCompleto.contains("DATA MOVIM.") && 
+				arquivoCompleto.contains("DEP. ORIGEM") && 
+				arquivoCompleto.contains("HISTORICO") ) {
+					
+			return true;// SISBB
+					
+		}
+		
+		if (arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") && arquivoCompleto.contains("0800 762 7777") &&
+			arquivoCompleto.contains("NOSSO NUMERO") && arquivoCompleto.contains("AGENCIA/CONTA")){ //FRANCESINHASANTANDER 2
+			return true;
+		}
+		
 		if(	arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
 				arquivoCompleto.contains("CONTA CORRENTE  >  EXTRATO  >") && 
 				arquivoCompleto.contains("OPCAO DE PESQUISA:") && 
@@ -243,22 +524,39 @@ public class TemplateUtils {
 				arquivoCompleto.contains("CAPITAIS E REGIOES METROPOLITANAS") && 
 				arquivoCompleto.contains("0800 762 7777") && 
 				arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") ) {
-					
+
 			return true;// SANTANDER PADRAO 01/001
-					
+
+		}
+		
+		if (arquivoCompleto.contains("RELATORIO DE TITULOS") && arquivoCompleto.contains("BANCO/AGENCIA/CONTA") && arquivoCompleto.contains("CARTORIO") &&
+			arquivoCompleto.contains("QUANTIDADE:") && arquivoCompleto.contains("RESUMO PARCIAL:") && arquivoCompleto.contains("RESUMO GERAL:")) {
+			return true; //FRANCESINHA UNICREDI
 		}
 
-		if (arquivoCompleto.contains("MEUS CARTOES DE CREDITO OU OFFICE BANKING")
-			&& arquivoCompleto.contains("BANRISUL S.A.") && arquivoCompleto.contains("ANUIDADE")){
-			return true;//BANRISUL2
+		if (arquivoCompleto.contains("%$&") || arquivoCompleto.contains("!%") || arquivoCompleto.contains("$!%&") || arquivoCompleto.contains("# $%") 
+			|| arquivoCompleto.contains("$*&-") || arquivoCompleto.contains("%$$&$$") || arquivoCompleto.contains("#$#%") || arquivoCompleto.contains("%&*") 
+			|| arquivoCompleto.contains("*##%%") || arquivoCompleto.contains("##$%#&") || arquivoCompleto.contains("!\"#\"") || arquivoCompleto.contains("[!\"") 
+			|| arquivoCompleto.contains("&<") || arquivoCompleto.contains("[!") || arquivoCompleto.contains(".%$$") || arquivoCompleto.contains("#!+")
+			|| arquivoCompleto.contains("++(0+0&") || arquivoCompleto.contains("*&+&")) {
+			return true;
 		}
-
+		if (arquivoCompleto.equals("[]")) {
+			return true;
+		}
+		if (arquivoCompleto.length() < 40) {
+			return true;
+		}
+        
 		return false;
 	}
 	
 	public static boolean verificaConversorNovoTipoPlanilha(String tipoPlanilha) {
 		if (tipoPlanilha.contains("OTTCARTAO")) {
 			if (tipoPlanilha.contains("BANRICOMPRASPDF")) {
+				return true;
+			}
+			if(tipoPlanilha.contains("AACARTAO_VERO")){
 				return true;
 			}
 		}
@@ -278,4 +576,121 @@ public class TemplateUtils {
 		
 		return idLote;
 	}
+
+	public static boolean verificaConciliacao(String arquivoCompleto) {
+		if (arquivoCompleto.contains("CTA.C.PART") && arquivoCompleto.contains("LOTE") && arquivoCompleto.contains("DEBITO") &&
+			arquivoCompleto.contains("CREDITO") && arquivoCompleto.contains("SALDO-EXERCICIO") && arquivoCompleto.contains("TOTAL DA CONTA:")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean validaPlanilhaPadrao(String tipoLancamento, MemoryFile memFile)throws Exception{
+		if (tipoLancamento.contains("PAGAR") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA RECEBIMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("CLIENTE /  DESCRICAO RECEITA") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO RECEBIMENTO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR ORIGINAL") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("VALOR RECEBIDO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(6).contains("BANCO (PORTADOR)") && memFile.getStringFieldRemoveEspCharsUpper(7).contains("CATEGORIA (RECEITA)")){
+			// logger.logInfo("TP UTIL -> IF PAG PLANILHA PADRAO ");
+			return true;
+		}
+		if (tipoLancamento.contains("RECEBER")&& memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA PAGAMENTO") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("DOCUMENTO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(2).contains("FORNECEDOR /  DESCRICAO PAGAMENTO") && memFile.getStringFieldRemoveEspCharsUpper(3).contains("DETALHES DO PAGAMENTO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(4).contains("VALOR ORIGINAL") && memFile.getStringFieldRemoveEspCharsUpper(5).contains("VALOR PAGO")
+			&& memFile.getStringFieldRemoveEspCharsUpper(6).contains("BANCO (PORTADOR)") && memFile.getStringFieldRemoveEspCharsUpper(7).contains("CATEGORIA (DESPESA)")){
+			// logger.logInfo("TP UTIL -> IF REC PLANILHA PADRAO ");
+			return true;
+		}
+		return false;
+	}
+	
+	public String validaComplementoVencimento(JSONObject roteiroCRM, JSONObject roteiroCRMPrincipal, String line, MemoryFile memFile, InoutLogger logger)throws Exception{
+		int icomplemento01 = -1;
+		int icomplemento02 = -1;
+		int icomplemento03 = -1;
+		int icomplemento04 = -1;
+		int icomplemento05 = -1;
+		int icomplemento06 = -1;
+		
+		String complemento01 = "";
+		String complemento02 = "";
+		String complemento03 = "";
+		String complemento04 = "";
+		String complemento05 = "";
+		String complemento06 = "";
+		
+		icomplemento01  = getIndice("complemento01", icomplemento01, roteiroCRM);
+		icomplemento02	= getIndice("complemento02", icomplemento02, roteiroCRM);
+		icomplemento03  = getIndice("complemento03", icomplemento03, roteiroCRM);
+		icomplemento04  = getIndice("complemento04", icomplemento04, roteiroCRM);
+		icomplemento05  = getIndice("complemento05", icomplemento05, roteiroCRM);
+		icomplemento06  = getIndice("complemento06", icomplemento06, roteiroCRM);
+		
+		// logger.logInfo("TPUTILS  getIndice ->  cpl03 -> " + icomplemento03 + " cpl04 -> " + icomplemento04);
+		
+		
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO01")) {
+			try{complemento01     = getDate(complemento01, icomplemento01, line, false, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento01;
+		}
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO02")) {
+			try{complemento02     = getDate(complemento02, icomplemento02, line, false, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento02;
+		}
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO03")) {
+			try{complemento03     = getDate(complemento03, icomplemento03, line, false, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento03;
+		}
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO04")) {
+			try{complemento04     = getDate(complemento04, icomplemento04, line, false, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento04;
+		}
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO05")) {
+			try{complemento05     = getDate(complemento05, icomplemento05, line, false, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento05;
+		} 
+		if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO06")) {
+			try{complemento06     = getDate(complemento06, icomplemento06, line, false, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger);}
+			catch(Exception e){}
+			return complemento06;
+		}
+		return "";
+	}
+	
+	public String getDataOttCartao(String dataPretendente, String tipoPlanilha, int idataMovimento, String line, String textoCRM, MemoryFile memFile, InoutLogger logger)throws Exception{
+		String dataMovimento = "";
+		logger.logInfo("ENTROU DT CART TP UTIL");
+		try{
+			
+			String auxMes 	  = getMonth(cutString(dataPretendente, " ", " "));
+			if(auxMes.length() == 2 && !auxMes.equals(cutString(dataPretendente, " ", " "))){
+				dataMovimento = dataPretendente.replaceAll(cutString(dataPretendente, " ", " "), auxMes).replaceAll(" ", "/");
+			}else if (dataPretendente.length() > 11 && dataPretendente.contains("/") && dataPretendente.contains(",") && dataPretendente.contains(":")){
+				dataMovimento     = cutString(dataPretendente, 0, dataPretendente.lastIndexOf("/")+5);
+			}else{
+				dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, textoCRM.toUpperCase(), memFile, logger);
+			}
+			if(tipoPlanilha.contains("CARTAO_ALELO2") || tipoPlanilha.contains("CARTAO_SICREDI7")){
+				if(dataMovimento.equals("")){
+					String dataAux = cutString(dataPretendente, 0, ".");
+					Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+					int datanum = Integer.parseInt(dataAux);
+					Calendar calSerial = Calendar.getInstance();
+					calSerial.setTime(dt);
+					calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+					dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+				}
+			}
+			logger.logInfo("TP UTIL -> dt " + dataMovimento);
+		}catch(Exception e){
+			dataMovimento   = "";
+		}
+
+		return dataMovimento;
+	}
+	
 }
