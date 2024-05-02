@@ -22231,11 +22231,11 @@ public boolean readExtratoEfiPDF(MemoryFile memFile, String nomePortador, JSONOb
     double valorMulta        = 0.0;
     double valorPagamento    = 0.0;
 
-	int inomeOrigem		= 0;
-	int idocumento      = 1;
-	int idataMovimento	= 2;
-	int ivalorDocumento	= 3;
-
+	int idataMovimento	= -1;
+	int idocumento      = -1;
+	int inomePortador	= -1;
+	int inomeOrigem		= -1;
+	int ivalorDocumento	= -1;
 	String nomeOrigemAnterior = "";
     nomePortador = nomePortador.replaceAll("\\?","");
     complemento01 = nomePortador.replaceAll("\\?","");
@@ -22247,70 +22247,99 @@ public boolean readExtratoEfiPDF(MemoryFile memFile, String nomePortador, JSONOb
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 
-		if( memFile.getFieldsSize() < 4 ) continue;
-		if( line.contains("TIPO DE REGISTRO") && line.contains("PROTOCOLO") && line.contains("DATA") && line.contains("VALOR") ) continue;
+		if(line.contains("SALDO")) continue;
 
-		nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
-		documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento);
-		dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
-		try{
-			valorDocumento = memFile.getDoubleField(ivalorDocumento);
-		}catch(Exception e){ 
-			logger.logInfo("Erro no memFile.getDoubleField"+e); 
-		}
+		ivalorDocumento = memFile.getFieldsSize() - 1;
+		idataMovimento  = 2;
+		inomeOrigem     = 0;
+		idocumento      = 1;
+		
+		//logger.logInfo("LOG INDICE - " + ivalorDocumento + " | " + inomeOrigem + "|" + idataMovimento);
 
-		debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento);
-        if (debitoCreditoAux.contains("-")) {
-            debitoCredito = "EXTRATO-DEBITO";
-        } else {
-            debitoCredito = "EXTRATO-CREDITO";
-        }
+        nomeOrigem = "";
+		valorDocumento = 0;
+		String dataString = "";
+		
+		//logger.logInfo("LOG DATA - " + memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 
-		if( valorDocumento == 0 ) continue;
-		valorDocumento = Math.abs(valorDocumento);
+        try {
+				Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
+				dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+				dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+			} catch (Exception dt1) {
+				try {
+					Date dt = memFile.getDateField(idataMovimento);
+					dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+					dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+				} catch (Exception dt2) {
+					try {
+						dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
+						Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+						dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+						dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+					} catch (Exception dt2) { continue; }
+				}
+			}
+		
+		try {
+            debitoCredito = "";
+            try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
+            catch (Exception vlrd) { valorDocumento = 0; }
+            if (valorDocumento < 0) debitoCredito = "EXTRATO-DEBITO";
+            if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
+            valorDocumento = Math.abs(valorDocumento);
 
-		chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
-		// Buscar Extrato por Chave na Tabela IO_EXTRATO.
-		extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
-		.fields("CHAVE")
-		.param(chaveExtrato)
-		.queryUnique();
+            if (valorDocumento == 0) continue;
+            if (dataMovimento.equals("")) continue;
+
+            nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+            
+			//2312-023958
+            documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
+
+			chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+			// Buscar Extrato por Chave na Tabela IO_EXTRATO.
+			extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
+			.fields("CHAVE")
+			.param(chaveExtrato)
+			.queryUnique();
 
 		// Inserir caso Chave nao encontrada.
 		
-		if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
-			logger.logInfo(nomePortador + " | " + dataMovimento + " | " + valorDocumento + " | " + nomeOrigem + " | " + debitoCredito + " | DADO A MOSTRA");
-            try {
-				dbIOCont.insert("IO_EXTRATO")
-				.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
-				.param(chaveExtrato)
-				.param(codEmpresa)
-				.param(dataMovimento)
-				.param(documento)
-				.param(nomePortador)
-				.param(nomeOrigem)
-				.param(nomeArquivo.toUpperCase())
-				.param(complemento02)
-				.param(valorDocumento)
-				.param(debitoCredito)
-				.param(0)
-				.execute();
-			} catch (Exception sqlInsertException) {
-				logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
-				continue;
+			if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+				try {
+					dbIOCont.insert("IO_EXTRATO")
+					.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
+					.param(chaveExtrato)
+					.param(codEmpresa)
+					.param(dataMovimento)
+					.param(documento)
+					.param(nomePortador)
+					.param(nomeOrigem)
+					.param(nomeArquivo.toUpperCase())
+					.param(complemento02)
+					.param(valorDocumento)
+					.param(debitoCredito)
+					.param(0)
+					.execute();
+				} catch (Exception sqlInsertException) {
+					logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
+					continue;
+				}
+			} else {
+				try {
+					dbIOCont.update("IO_EXTRATO")
+					.fields("EXTRATOLIDO")
+					.where("CHAVE = ? ")
+					.param(0)
+					.param(chaveExtrato)
+					.execute();
+				} catch (Exception sqlUpdateException) {
+					logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
+					continue;
+				}
 			}
-		} else {
-			try {
-				dbIOCont.update("IO_EXTRATO")
-				.fields("EXTRATOLIDO")
-				.where("CHAVE = ? ")
-				.param(0)
-				.param(chaveExtrato)
-				.execute();
-			} catch (Exception sqlUpdateException) {
-				logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
-				continue;
-			}
+		} catch (Exception ex) {
 		}
      }
     return true;
