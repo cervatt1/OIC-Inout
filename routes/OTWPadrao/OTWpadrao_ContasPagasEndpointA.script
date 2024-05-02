@@ -488,6 +488,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 						boolean rodaConversorNovo = TemplateUtils.verificaConversorNovo(StringUtil.removeSpecialCharsToUC(memFile.getLines().toString()).toUpperCase());
 						
 						if (rodaConversorNovo) {
+							logger.logInfo("NOVO CONVERSASSSS");
 							LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 							String idConversor  = TemplateUtils.getIdLote(nomeArquivo);
 							// logger.logInfo("FOI PRO CONVERSOR1 " + nomeArquivo);
