@@ -22297,6 +22297,7 @@ public boolean readExtratoEfiPDF(MemoryFile memFile, String nomePortador, JSONOb
 			//2312-023958
             documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
 
+	        contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 			chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 			// Buscar Extrato por Chave na Tabela IO_EXTRATO.
 			extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
