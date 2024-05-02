@@ -6305,7 +6305,7 @@ public JSONObject getRoteiro() {
     js.put("lerAposPrincipal", "");
     js.put("campoLinhaPrincipal", "VALOR DOCUMENTO");
     js.put("nomeRelatorioRef", "PRINCIPAL");
-    js.put("Planilhas_Padroes", "Extrato_Itau_Excel;Extrato_BB_TXT;Extrato_Sicoob;Extrato_Sicoob_Txt;Extrato_Itau_Txt;Extrato_BB_PDF;Extrato_Sicoob_PDF;Extrato_Sicredi_PDF;Extrato_ITAU_PDF;Extrato_BB_Excel;Extrato_ItauConsolidado_PDF;Extrato_Credisan_Excel;Extrato_Cresol_PDF;Extrato_Nordeste_PDF;FrancesinhaSicredi_PDF;Extrato_Santander_PDF;Extrato_CEF_PDF;Extrato_Cef_Html,FaturaCartaoCredito_Bradesco_PDF;FaturaCartaoCredito_Sicoob_PDF;FaturaCartaoCredito_BB_PDF;FaturaCartaoCredito_Banrisul_PDF;Extrato_Tribanco2_PDF;Extrato_PagPixBank_PDF;Sicoob_Comprovantes_PDF;Extrato_BMG_PDF;Extrato_Infinitepay_PDF;Francesinha_Banrisul_TXT;Extrato_Grafeno_PDF;Extrato_Abc_Excel;Extrato_BKBank_PDF;Extrato_HSBC_Excel;Extrato_HSBC_PDF;Extrato_Btg_PDF;Extrato_AilosCivia_PDF;Extrato_SISBB_PDF;Extrato_Banrisul_PDF;Extrato_Cora_PDF;Extrato_Inter_PDF;Extrato_Bradesco2_PDF;Extrato_NBC_PDF;Extrato_Efi_PDF;Extrato_Efi_Excel;FrancesinhaItau_PDF;Francesinha_BB_PDF;FrancesinhagrupoAilos_PDF;Extrato_XPInvestimentos_PDF;Extrato_Sicredi_TXT;Extrato_Credisis_PDF;Extrato_OTEROBANK_Excel;Extrato_C6Bank_PDF;Extrato_Uniprime_PDF;Extrato_Uniprime_Excel;Extrato_ContaSimples_PDF;Cartao_Bradesco_PDF;Extrato_Unicred2_PDF;Extrato_Unicred_PDF;Extrato_Stone_PDF;Extrato_PinkPay_PDF");
+    js.put("Planilhas_Padroes", "Extrato_Itau_Excel;Extrato_BB_TXT;Extrato_Sicoob;Extrato_Sicoob_Txt;Extrato_Itau_Txt;Extrato_BB_PDF;Extrato_Sicoob_PDF;Extrato_Sicredi_PDF;Extrato_ITAU_PDF;Extrato_BB_Excel;Extrato_ItauConsolidado_PDF;Extrato_Credisan_Excel;Extrato_Cresol_PDF;Extrato_Nordeste_PDF;FrancesinhaSicredi_PDF;Extrato_Santander_PDF;Extrato_CEF_PDF;Extrato_Cef_Html,FaturaCartaoCredito_Bradesco_PDF;FaturaCartaoCredito_Sicoob_PDF;FaturaCartaoCredito_BB_PDF;FaturaCartaoCredito_Banrisul_PDF;Extrato_Tribanco2_PDF;Extrato_PagPixBank_PDF;FrancesinhaBradesco_PDF;Sicoob_Comprovantes_PDF;Extrato_BMG_PDF;Extrato_Infinitepay_PDF;Francesinha_Banrisul_TXT;Extrato_Grafeno_PDF;Extrato_Abc_Excel;Extrato_BKBank_PDF;Extrato_HSBC_Excel;Extrato_HSBC_PDF;Extrato_Btg_PDF;Extrato_AilosCivia_PDF;Extrato_SISBB_PDF;Extrato_Banrisul_PDF;Extrato_Cora_PDF;Extrato_Inter_PDF;Extrato_Bradesco2_PDF;Extrato_NBC_PDF;Extrato_Efi_PDF;Extrato_Efi_Excel;FrancesinhaItau_PDF;Francesinha_BB_PDF;FrancesinhagrupoAilos_PDF;Extrato_XPInvestimentos_PDF;Extrato_Sicredi_TXT;Extrato_Credisis_PDF;Extrato_OTEROBANK_Excel;Extrato_C6Bank_PDF;Extrato_Uniprime_PDF;Extrato_Uniprime_Excel;Extrato_ContaSimples_PDF;Cartao_Bradesco_PDF;Extrato_Unicred2_PDF;Extrato_Unicred_PDF;Extrato_Stone_PDF;Extrato_PinkPay_PDF");
     js.put("statusRoteiro", "EM DESENVOLVIMENTO");
     js.put("tipoArquivo", ".XLSX - EXCEL");
     js.put("tipoIntegracao", "CONTAS PAGAS");
@@ -11635,6 +11635,8 @@ public HashMap readFrancesinhaBradescoPDF(MemoryFile memFile, JSONObject jDados,
     int ivalorPagamento = 6;
 
     int cont = 0;
+
+	String tipoFrancesinha = "";
 	
     
 
@@ -11646,12 +11648,43 @@ public HashMap readFrancesinhaBradescoPDF(MemoryFile memFile, JSONObject jDados,
     if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
     if(jDados.has("TIPOPLANILHA"))    tipoPlanilha    = jDados.optString("TIPOPLANILHA");
 	if(jDados.has("NOMEPORTADOR"))       nomePortador = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("tipoFrancesinha")) tipoFrancesinha = jDados.optString("tipoFrancesinha");
     
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 
-        if(memFile.getFieldsSize() == 4 && nomePortador.equals("")){
+		if(tipoFrancesinha.equals("002")){
+			icomplemento01  = 0;
+			idocumento      = 1;
+			inomeOrigem		= 2;
+			idataMovimento	= 4;
+			ivalorDocumento	= 5;
+			ivalorJuros     = 6;
+			inomePortador	= 11;
+		}
+
+		if(tipoFrancesinha.equals("002") && line.contains("C/CREDITADA") && line.contains("CONTA/CONTRATO") && line.contains("RAZAO")){
+			line = memFile.nextLine();
+        	line = StringUtil.removeSpecialCharsToUC(line);
+
+			nomePortador = memFile.getStringFieldRemoveEspCharsUpper(inomePortador) + "-" + memFile.getStringFieldRemoveEspCharsUpper(inomePortador+1); 
+
+			try {
+				Iterator itExtrato = mapaVariavel.keySet().iterator();
+				while (itExtrato.hasNext()) {
+
+					String keyer = (String)itExtrato.next();
+					ttMovimentoPadrao ttMov = (ttMovimentoPadrao)mapaVariavel.get(keyer);
+
+					if(ttMov.nomePortador == ""){
+						ttMov.nomePortador = nomePortador;
+					}
+				}
+			} catch (Exception e) {}
+		}
+
+        if(!tipoFrancesinha.equals("002") && memFile.getFieldsSize() == 4 && nomePortador.equals("")){
             nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
         }
 		
@@ -11662,7 +11695,7 @@ public HashMap readFrancesinhaBradescoPDF(MemoryFile memFile, JSONObject jDados,
         
         try {
 
-            if(memFile.getFieldsSize() == 1){
+            if(memFile.getFieldsSize() == 1 && !dataMovimento.equals("")){
                 try{
                     ttMov2 = (ttMovimentoPadrao)mapaVariavel.get(chave + "-CTB");
                     if(ttMov2 != null){
