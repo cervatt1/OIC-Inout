@@ -25402,7 +25402,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 
 				//O portador eh lido na linha que sucede a linha que contem 'AGENCIA' e 'CONTA'
 				//Felipe - 18/04/23
-				if (lerPortador) {
+				if (lerPortador && nomePortador.equals("")) {
 					nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
 					lerPortador = false;
 				}
