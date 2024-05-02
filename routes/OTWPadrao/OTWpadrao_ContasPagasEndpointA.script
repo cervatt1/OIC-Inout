@@ -15760,7 +15760,7 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
     double valorPagamento    = 0.0;
     // 11/12/2019|0000|13013|807 ESTORNO DE D?BITO|23.068|285,50 C|0,00 C |  -> 7
 	int idataMovimento	= 0;
-	int ivalorDocumento	= 4;
+	int ivalorDocumento	= 2;
 	int indiceSujo = -1;
 
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
@@ -15784,8 +15784,13 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
 					leuIndice = true;
 					continue;
 				}
-				
+				if (line.contains("NOSSA EQUIPE DE") || line.contains("OUVIDORIA")|| line.contains("PERIODO") || line.contains("RELATORIO DE MOVIMENTACOES")) continue;
+
 				if(leuIndice){
+
+						complemento02 = memFile.getStringFieldRemoveEspCharsUpper(0);
+						logger.logInfo("complemento02" + complemento02);
+						
 
 						if(memFile.getFieldsSize() < 2 && !getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim()).equals("") ){
 							dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
@@ -15808,7 +15813,10 @@ public boolean readExtratoInfinitePayPDF(MemoryFile memFile, String nomePortador
 							nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1) + " " + memFile.getStringFieldRemoveEspCharsUpper(2);
 							nomePortador = "INFINITE PAY";
 						}
-					
+						if(nomeOrigem.isEmpty()){
+							nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(0);
+						}
+
 						if(dataMovimento.equals("")) continue;
 						
 						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
