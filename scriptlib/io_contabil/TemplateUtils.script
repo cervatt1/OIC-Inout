@@ -248,6 +248,11 @@ public class TemplateUtils {
 					
 		}
 
+		if (arquivoCompleto.contains("MEUS CARTOES DE CREDITO OU OFFICE BANKING")
+			&& arquivoCompleto.contains("BANRISUL S.A.") && arquivoCompleto.contains("ANUIDADE")){
+			return true;//BANRISUL2
+		}
+
 		return false;
 	}
 	

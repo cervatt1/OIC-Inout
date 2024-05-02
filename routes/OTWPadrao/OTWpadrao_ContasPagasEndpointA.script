@@ -15929,8 +15929,10 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 
 	String dataMovimentoAux  = "";
 	String anoData 			 = "";
+	String tipoCartao		 = "";
 
 	boolean naoLeMais = true;
+	boolean anoDataNomeArquivo = false;
 
 	int idataMovimento	= 0;
 	int inomeOrigem		= 1;
@@ -15948,25 +15950,62 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
     if(jDados.has("TIPOPLANILHA"))    tipoPlanilha    = jDados.optString("TIPOPLANILHA");
     if(jDados.has("NOMEPORTADOR"))    nomePortador    = jDados.optString("NOMEPORTADOR");
 	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
+	if(jDados.has("TIPOCARTAO")) 		tipoCartao = jDados.optString("TIPOCARTAO");
+	if(tipoCartao.equals("001")){
+		ivalorDocumento = 2;
+	}
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+		memFile.setFieldSeparator(";");
+		
 		cont++;
 
 		try {
+			if(!anoDataNomeArquivo && memFile.getStringFieldRemoveEspCharsUpper(0).contains("VENCIMENTO:")) anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(0), memFile.getStringFieldRemoveEspCharsUpper(0).lastIndexOf("/")).replaceAll("/", "");
+
+			if(nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*")){ 
+				anoDataNomeArquivo = true;
+				anoData = "";
+			}
+
+			if(anoDataNomeArquivo && anoData.equals("")) {
+				if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
+				anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
+				anoData = cutString(anoData, "-");
+			}
 
 			try{
-				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+				if (!anoDataNomeArquivo && 
+					!(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).length() == 5)
+				){
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+				}else if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).length() == 5){
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento)+"/"+anoData);
+				}else{
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim().substring(0,5)+"/"+anoData);
+				}
 			}catch(Exception e){ 
 				dataMovimento = "";
 				logger.logInfo("ERRO DATA MOVIMENTO: " + e.getMessage());
 			}
 
+			if(dataMovimento.equals("")) continue;
+
 			try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 			catch (Exception vlrd) { 
 				logger.logInfo("ERRO VALOR DOCUMENTO: " + vlrd.getMessage());
 				valorDocumento = 0; 
+			}
+
+			if(valorDocumento == 0 && !dataMovimento.equals("") && memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).contains(" ")){
+				try{
+					valorDocumento = Double.parseDouble(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).trim().split(" ")[0].replaceAll("\\.", "").replaceAll(",", ""))/100;
+				}catch (Exception vlrd) { 
+					logger.logInfo("ERRO VALOR DOCUMENTO: " + vlrd.getMessage());
+					valorDocumento = 0; 
+				}
 			}
 
 			if(!dataMovimento.equals("") && memFile.getFieldsSize() == 5 && valorDocumento == 0){
@@ -15982,10 +16021,13 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 				nomeOrigem = cutString(nomeOrigem, " ");
 				nomeOrigem = cutString(nomeOrigem, " ");
 				nomeOrigem = cutString(nomeOrigem, " ");
-			}else{
+			}else if(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).split(" ")[0].length() == 11 && 
+					 memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).split(" ")[0].matches("\\d+")){
 				nomeOrigem = "";
 				nomeOrigem = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem), 0, memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).lastIndexOf("-"));
 				nomeOrigem = cutString(nomeOrigem, " ");
+			}else{
+				nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
 			}
 
 			debitoCredito = "EXTRATO-DEBITO";
@@ -15995,11 +16037,12 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 			if (valorDocumento == 0) continue;
 
 
-			complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
-			nomePortador  = memFile.getStringFieldRemoveEspCharsUpper(inomePortador);
-			complemento01 = nomePortador;
-			complemento04 = nomeOrigem;
-
+			if(tipoCartao.equals("")){
+				complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
+				nomePortador  = memFile.getStringFieldRemoveEspCharsUpper(inomePortador);
+				complemento01 = nomePortador;
+				complemento04 = nomeOrigem;
+			}
 
 			// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
 			// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
