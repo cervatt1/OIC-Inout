@@ -17082,6 +17082,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 		if(line.toUpperCase().contains("CONTA:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(2).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(3).equals("")){
 			nomePortador = "CEF - " + memFile.getStringFieldRemoveEspCharsUpper(1) + " / " + memFile.getStringFieldRemoveEspCharsUpper(2) + " / " + memFile.getStringFieldRemoveEspCharsUpper(3);
 		}
+		
 		if(tipoPadrao.equals("010")){
 			String linhaLimpa = line.replaceAll("  ", " ");
 			if(linhaLimpa.contains("  ")){
@@ -17095,7 +17096,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 				}
 			}
 			String[] linhaArray = linhaLimpa.split(" ");
-			
+
 			dataMovimento = getCampoDate(linhaArray[0]);
 
 			documento = linhaArray[1];
@@ -17213,51 +17214,53 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
         } else {
 				// logger.logInfo("DTS " + dataString);
             try {
-				if(!tipoPadrao.equals("010")){ // ARRUMAR IDENTACAO, NÃO O FIZ PARA NAO SUJAR O COMMIT
+				
+				if(!tipoPadrao.equals("010")){
 
-                String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
-
-
-                if (dataString.equals("000000")) continue;
-                try {
-                    Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
-                    dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                    dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                } catch (Exception dt1) {
-                    try {
-                        Date dt = memFile.getDateField(idataMovimento);
-                        dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                        dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                    } catch (Exception dt2) {
-                        try {
-                            dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
-                            Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
-                            dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-                            dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-                        } catch (Exception dt2) { continue; }
-                    }
-                }
+					String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
 
 
+					if (dataString.equals("000000")) continue;
+					try {
+						Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
+						dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+						dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+					} catch (Exception dt1) {
+						try {
+							Date dt = memFile.getDateField(idataMovimento);
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt2) {
+							try {
+								dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
+								Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+								dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+								dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+							} catch (Exception dt2) { continue; }
+						}
+					}
 
-                if (dataMovimento.equals("")) continue;
-
-                valorDocumento  = 0;
-                debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).replaceAll("[^A-Za-z]", "").trim();
-                try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
-                catch (Exception vlrd) { valorDocumento = 0; }
-
-				//2401-026791
-				if(tipoPadrao.equals("001") && memFile.getFieldsSize() > 4 && tipoUmSemSaldo) valorDocumento = 1;
-
-                if (valorDocumento == 0) continue;
 
 
-                nomeOrigem      = "";
-				nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
-				if (nomeOrigem.contains("SALDO C/C")) continue;
-                documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
-                complemento02 = documento;
+					if (dataMovimento.equals("")) continue;
+
+					valorDocumento  = 0;
+					debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).replaceAll("[^A-Za-z]", "").trim();
+					try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
+					catch (Exception vlrd) { valorDocumento = 0; }
+
+					//2401-026791
+					if(tipoPadrao.equals("001") && memFile.getFieldsSize() > 4 && tipoUmSemSaldo) valorDocumento = 1;
+
+					if (valorDocumento == 0) continue;
+
+
+					nomeOrigem      = "";
+					nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+					if (nomeOrigem.contains("SALDO C/C")) continue;
+					documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
+					complemento02 = documento;
+				
 				}
 
 				//2401-026791
@@ -17310,7 +17313,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
                 .param(chaveExtrato)
                 .queryUnique();
 
-            	// Inserir caso Chave nao encontrada.
+				// Inserir caso Chave nao encontrada.
 
 
                 if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
