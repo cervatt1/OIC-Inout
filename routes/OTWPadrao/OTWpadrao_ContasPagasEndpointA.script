@@ -15980,7 +15980,6 @@ public HashMap readFaturaCartaoCredito_BanrisulPDF(MemoryFile memFile, JSONObjec
 			}
 
 			if(anoDataNomeArquivo && anoData.equals("")) {
-				if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
 				anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
 				anoData = cutString(anoData, "-");
 			}
@@ -16333,6 +16332,7 @@ public HashMap readFaturaCartaoCredito_SicoobPDFF(MemoryFile memFile, JSONObject
 	}
 	return mapaVariavel;
 }
+
 public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
 	JSONObject extratoEmpresa = new JSONObject();
 
@@ -16423,7 +16423,6 @@ public HashMap readFaturaCartaoCredito_BBPDF(MemoryFile memFile, JSONObject jDad
 				}
 
 				if(anoDataNomeArquivo && anoData.equals("")) {
-					if(nomeArquivo.toUpperCase().endsWith(".CSV")) nomeArquivo = nomeArquivo.substring(0, nomeArquivo.lastIndexOf("."));
 					anoData = nomeArquivo.substring(nomeArquivo.lastIndexOf(".")-7, nomeArquivo.lastIndexOf("."));
 					anoData = cutString(anoData, "-");
 				}
