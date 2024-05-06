@@ -1017,6 +1017,27 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		
 		//#2403-031659
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ApliBB_PDF")){
+			if( arquivoCompleto.contains("CDB / RDB E BB REAPLIC") && 
+				arquivoCompleto.contains("EXTRATOS") && 
+				arquivoCompleto.contains("DADOS CONSULTADOS") &&
+                arquivoCompleto.contains("BANCO DO BRASIL") && 
+                arquivoCompleto.contains("AUTOATENDIMENTO.BB.COM.BR") && 
+                arquivoCompleto.contains("SAC 0800 729 0722") && 
+                arquivoCompleto.contains("SERVICO DE ATENDIMENTO AO CONSUMIDOR") && 
+				arquivoCompleto.contains("BB CDB DI")){
+					
+                JSONObject jDados = new JSONObject();
+                jDados.put("CODEMPRESA", codEmpresa);
+                jDados.put("NOMEARQUIVO", nomeArquivo);
+                jDados.put("TIPOLANCAMENTO", tipoLancamento);
+                jDados.put("TIPOPLANILHA", "CDB / RDB e BB Reaplic");
+                jDados.put("TIPOPDFBB", "001");
+
+                readExtratoECartao("readExtrato_ApliBB_PDF", memFile, jDados, mapaVariavel, logger);
+                variaveis.put("tipoRetorno", "break");
+                return variaveis.toString();
+            }
+
 			if(cabecalhoPlanilha.contains("BB RENDE FACIL") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("-")
 				&& memFile.getStringFieldRemoveEspCharsUpper(1).contains("-")
 				&& arquivoCompleto.contains("HISTORICO DE MOVIMENTACAO") && arquivoCompleto.contains("IOF")){
