@@ -1233,6 +1233,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento04	= getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger);
 									complemento05	= getCampoString(complemento05,	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger);
 
+									nomeOrigem 		= nomeOrigem.trim() + " " + complemento01.trim();
+
 									complemento06	= getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger);
 									complemento07	= getCampoString(complemento07,	icomplemento07, line, zerar, roteiroCRM.optString("complemento07").toUpperCase(), memFile, logger);
 									complemento08	= getCampoString(complemento08,	icomplemento08, line, zerar, roteiroCRM.optString("complemento08").toUpperCase(), memFile, logger);
