@@ -1021,6 +1021,29 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento09	= getCampoString(complemento09,	icomplemento09, line, zerar, roteiroCRM.optString("complemento09").toUpperCase(), memFile, logger);
 									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, logger);
 									
+									if(tipoPlanilha.contains("ADIANT_MAXPAGO")){
+										try{
+											complemento07 = memFile.getStringFieldRemoveEspCharsUpper(10);
+										}catch(Exception e){
+											logger.logInfo("Err getCampoDate:"+e.getMessage());
+										}
+									}
+									if(tipoPlanilha.contains("SECUNDAVIACRED")){
+										try{
+											complemento07 = memFile.getStringFieldRemoveEspCharsUpper(5);
+										}catch(Exception e){
+											logger.logInfo("Err getCampoDate:"+e.getMessage());
+										}
+									}
+									if(tipoPlanilha.contains("SECUNDABRD")){
+										try{
+											complemento07 = memFile.getStringFieldRemoveEspCharsUpper(6);
+										}catch(Exception e){
+											logger.logInfo("Err getCampoDate:"+e.getMessage());
+										}
+									}
+									logger.logInfo("TPLN:"+tipoPlanilha +" |cmp7:"+complemento07);
+
 									if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR")) {
 										if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO01")) {
 											try{complemento01     = getDate(complemento01, icomplemento01, line, false, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);}
@@ -1893,17 +1916,30 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
 
 										//#202301-0023635
-										if (tipoPlanilha.contains("SECUNDABRD") || tipoPlanilha.contains("SECUNDAVIA") || tipoPlanilha.contains("ADIANT_HOSPEDAGEM")) {
+										if (tipoPlanilha.contains("SECUNDABRD") || tipoPlanilha.contains("SECUNDAVIA") || tipoPlanilha.contains("ADIANT_HOSPEDAGEM") || tipoPlanilha.contains("ADIANT_MAXPAGO") || tipoPlanilha.contains("SECUNDAVIACRED")) {
 											String campoData = complemento01;
 											if (tipoPlanilha.contains("ADIANT_HOSPEDAGEM")) {
 												campoData = memFile.getStringFieldRemoveEspCharsUpper(9);
 											}
+											logger.logInfo("DATACAMPO1:"+campoData);
+											if (tipoPlanilha.contains("SECUNDABRD") && rotuloArray[iv].contains("EXTRA-SAIDA")) campoData = complemento07;
+											if (tipoPlanilha.contains("ADIANT_MAXPAGO") && rotuloArray[iv].contains("VALOR EXTRA")) campoData = complemento07;
+											if (tipoPlanilha.contains("SECUNDAVIACRED") && rotuloArray[iv].contains("EXTRA-DATA")) campoData = complemento07;
+
+											logger.logInfo(
+												tipoPlanilha.contains("SECUNDABRD") +"&&"+ rotuloArray[iv].contains("EXTRA-SAIDA") +" | "+
+												tipoPlanilha.contains("ADIANT_MAXPAGO") +"&&"+ rotuloArray[iv].contains("VALOR EXTRA") +" | "+
+												tipoPlanilha.contains("SECUNDAVIACRED") +"&&"+ rotuloArray[iv].contains("EXTRA-DATA")
+											);
+											logger.logInfo("DATACAMPO2:"+campoData);
+											
 
 											logger.logDebug("campoData -> " + campoData);
 
 											ttTemp.dataMovimento = capturaDataExtra(campoData, logger);
 
 											logger.logDebug("ttTemp.dataMovimento -> " + ttTemp.dataMovimento);
+											logger.logInfo("ttTemp.dataMovimento -> " + ttTemp.dataMovimento);
 
 											if (!TemplateUtils.validaData(ttTemp.dataMovimento)) { //Data invalida
 												continue;
@@ -3219,375 +3255,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					if (roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("COMPLEMENTO06")) dataVencimentoTTMov = ttMov.complemento06; 
 				}	
 					
-				 
-				if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("QUESTOR")) {
-
-					JSONObject jDados = new JSONObject();
-					jDados.put("CODEMPRESA",     codEmpresa);
-					
-					// usando a filial do questor em duplicatas em aberto
-					if (roteiroCRMPrincipal.optString("Usa_Filial_Questor").toUpperCase().equals("TRUE"))  jDados.put("CODEMPRESA",     codEmpresa + "-%");
- 
-					if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR"))  jDados.put("DATAVENCIMENTO", dataVencimentoTTMov); 
-
-					
-					jDados.put("RAZAOSOCIAL",    razaoSocial);
-					jDados.put("NOMEORIGEM",     ttMov.nomeOrigem);
-					jDados.put("DOCUMENTO",      ttMov.documento);
-					jDados.put("DATAMOVIMENTO",  ttMov.dataMovimento);
-					jDados.put("PARCELADOC",     ttMov.parcelaDoc);
-					jDados.put("VALORDOCUMENTO", ttMov.valorDocumento);
-					jDados.put("VALORJUROS",     ttMov.valorJuros);
-					jDados.put("VALORMULTA",     ttMov.valorMulta);
-					jDados.put("VALORDESCONTO",  ttMov.valorDesconto);
-					jDados.put("TABELACONTABIL", tabelaContabil);
-					
-					
-					jDescricaoDupl    = buscarIODuplicata(jDados, dbIOCont, logger);
-
-					// #Fabrica(2019-05-20)
-					// Descomentar a proxima linha para testar a razaoSocial do movimento com a jDescricaoDupl.optString("RAZAOSOCIAL") que vem das duplicatas em aberto!
-					// if (jDescricaoDupl.optString("TIPO").equals("FISCAL")) jDescricaoDupl = validaRazaoSocial(jDescricaoDupl, razaoSocial);      //IDENTIFICAMOS UMA FALHA LOGICA
-					// if (jDescricaoDupl.optString("TIPO").equals("FISCAL")) jDescricaoDupl = validaRazaoSocial(jDescricaoDupl, ttMov.nomeOrigem); //USAR ESSE
-					// #Fabrica(2019-07-30)
-					// Descomentar a proxima linha para testar o codigo de filial do movimento com a jDescricaoDupl.optString("SITUACAO") que vem das duplicatas em aberto! OBS: Lembrando que deve existir regra de c?digo filial no CRM
-					// if(jDescricaoDupl.optString("TIPO").equals("FISCAL")) jDescricaoDupl = validaBaixaPorFilial(jDescricaoDupl, ttMov.codFilial);
-					// #Fabrica(2019-07-31)
-					// Descomentar a proxima linha para testar data de vencimento  a jDescricaoDupl.optString("DATAVENCIMENTO") que vem das duplicatas em aberto! OBS: Complemento06, deve estar lendo a data de vencimento da planilha financeira
-					
-					// if (jDescricaoDupl.optString("TIPO").equals("FISCAL")) {
-						// if (roteiroCRMPrincipal.has("validaFornecedorFiscal")) jDescricaoDupl.put("VALIDAFORNECEDORFISCAL", roteiroCRMPrincipal.optInt("validaFornecedorFiscal"));
-						// jDescricaoDupl = validaRazaoSocial(jDescricaoDupl, ttMov.nomeOrigem);
-					// }
-					
-					if (jDescricaoDupl.optString("TIPO").equals("FISCAL") && !roteiroCRMPrincipal.optString("validaFornecedorFiscal").equals("")) {
-						jDescricaoDupl.put("VALIDAFORNECEDORFISCAL", roteiroCRMPrincipal.optInt("validaFornecedorFiscal"));
-						jDescricaoDupl = validaRazaoSocial(jDescricaoDupl, ttMov.nomeOrigem);
-					}
-					
-					if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR"))  {
-						if(jDescricaoDupl.optString("TIPO").equals("FISCAL")) jDescricaoDupl = validaBaixaPorDataVencimento(jDescricaoDupl, dataVencimentoTTMov);
-					}
-
-					Date dtL = DateUtil.stringToDate(ttMov.dataMovimento, "dd/MM/yyyy");	// --- VERIFICAR
-					dataLote = DateUtil.dateToString(dtL, "yyyy-MM");
-
-					double valorSaldoDuplicata2 = 0;
-					if (jDescricaoDupl.has("VALORPARCELA")) valorSaldoDuplicata2 = DecimalUtil.toDecimal(jDescricaoDupl.optString("VALORPARCELA"));
-
-					valorSaldoDuplicata2 = DecimalUtil.toDecimal(String.format("%.2f",valorSaldoDuplicata2));
-					ttMov.valorDocumento = DecimalUtil.toDecimal(String.format("%.2f",ttMov.valorDocumento));
-
-					if(jDescricaoDupl.has("TIPO") && jDescricaoDupl.optString("TIPO").equals("FISCAL")) {
-					
-						if ((ttMov.valorDocumento - ttMov.valorDesconto) <= valorSaldoDuplicata2){
-							
-							if (roteiroCRMPrincipal.optString("Usa_Filial_Questor").toUpperCase().equals("TRUE"))  {
-								txtFiscal[0].append(cutString(jDescricaoDupl.optString("CODEMPRESA"), "-"));
-							}
-							else {
-								txtFiscal[0].append(jDescricaoDupl.optString("CODEMPRESA"));
-							}
-							
-							txtFiscal[0].append(";");
-							txtFiscal[0].append("1;");
-							txtFiscal[0].append(jDescricaoDupl.optString("CHAVEDUPLICATA"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("PARCELADOC"));
-							// quando o formato da parcela deve ser igual ao duplicatas em aberto (questor) comentar linha acima e descomentar a linha abaixo
-							//txtFiscal[0].append(jDescricaoDupl.optString("PARCELADOCORIGINAL")); 
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("DATAMOVIMENTO"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("DATAMOVIMENTO"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(cutString(jDescricaoDupl.optString("DUPLICATA"), 0, "-"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("VALORFINAL").replaceAll("\\.", ","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("VALORFINALJUROS").replaceAll("\\.", ","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("TABELACONTABIL"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("CODIGOFORNECEDOR"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("VALORFINALDESCONTO").replaceAll("\\.", ","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("VALORFINALMULTA").replaceAll("\\.", ","));
-							txtFiscal[0].append("\r\n");
-
-							geraFiscal = true;
-							
-							loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("OTTIMIZZA")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_TESTE_OTTIMIZZA_" + dataLote + "_" + ttMov.tipoLancamento;
-				
-							if (ttMov.nomeArquivo.toUpperCase().contains("_ID")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_ID" + cutString(ttMov.nomeArquivo.toUpperCase(), "_ID", "_") + "_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							ttMov.tipoPlanilha = "NAO LER";
-							mapaVariavel.put(key,ttMov);
-							continue;
-						} else { //Add dia 02/03/2021 - > Enviar dupli n encontradas p/ contabil questor
-							dupliNaoEncontContabil	= Boolean.parseBoolean(roteiroCRM.optString("dupliNaoEncontContabil").toLowerCase().trim());
-							contaTemp				= roteiroCRMPrincipal.optString("Conta_Dupl_Contabil");
-							
-							if(dupliNaoEncontContabil){
-								contaMovimento = contaTemp;
-								if(ttMov.tipoLancamento.contains("PAGAR"))	ttMov.contaDebito = contaTemp;
-								if(ttMov.tipoLancamento.contains("RECEBER"))ttMov.contaCredito = contaTemp;
-
-								histobj.put("contaMovimento", contaMovimento);
-								ttMov.historico = getHistoricoRegra(contaMovimento, ttMov.historico, ttMov.tipoLancamento, ttMov.documento, ttMov.nomeOrigem, histobj);
-							}else {
-								if(cabecalhoNaoEncontrada){
-									txtFornecedor.append("Codigo");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Fornecedor/Cliente");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Duplicata");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Data");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Valor bruto");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Valor liquido");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Banco");
-									txtFornecedor.append(";");
-									txtFornecedor.append("Obs:");
-									txtFornecedor.append("\r\n");
-									cabecalhoNaoEncontrada = false;
-								}
-								String valorLiquido = String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto + ttMov.valorMulta);
-								jDescricaoDupl.put("VALORLIQUIDO",  valorLiquido);
-								txtFornecedor.append(jDescricaoDupl.optString("CODEMPRESA"));
-								txtFornecedor.append(";");
-								txtFornecedor.append(razaoSocialDuplicata);
-								txtFornecedor.append(";");
-								txtFornecedor.append(ttMov.documento);
-								txtFornecedor.append(";");
-								txtFornecedor.append(ttMov.dataMovimento);
-								txtFornecedor.append(";");
-								txtFornecedor.append(String.format("%.2f", ttMov.valorDocumento));
-								txtFornecedor.append(";");
-								txtFornecedor.append(jDescricaoDupl.optString("VALORLIQUIDO").replaceAll("\\.",","));
-								txtFornecedor.append(";");
-								txtFornecedor.append(ttMov.nomePortador);
-								txtFornecedor.append(";");
-								txtFornecedor.append("Valor Duplicata " + String.format("%.2f", ttMov.valorDocumento) + " maior que saldo no Fiscal " + String.format("%.2f", valorSaldoDuplicata2));
-								txtFornecedor.append("\r\n");
-
-								jDescricaoDupl.put("TIPO","FORNECEDOR");
-
-								geraFiscal = true;
-								loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_" + dataLote + "_" + ttMov.tipoLancamento;
-								
-								if (ttMov.nomeArquivo.toUpperCase().contains("OTTIMIZZA")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_TESTE_OTTIMIZZA_" + dataLote + "_" + ttMov.tipoLancamento;
-								
-								if (ttMov.nomeArquivo.toUpperCase().contains("_ID")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_ID" + cutString(ttMov.nomeArquivo.toUpperCase(), "_ID", "_") + "_" + dataLote + "_" + ttMov.tipoLancamento;
-								
-								ttMov.tipoPlanilha = "NAO LER";
-								mapaVariavel.put(key,ttMov);
-								continue;
-							}
-						}
-					}
-				}
-
-				if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("MAKROWEB")) {
-					JSONObject jDados = new JSONObject();
-					jDados.put("CODEMPRESA",     codEmpresa);
-					jDados.put("RAZAOSOCIAL",    razaoSocial);
-					jDados.put("NOMEORIGEM",     ttMov.nomeOrigem);
-					jDados.put("DOCUMENTO",      ttMov.documento);
-					jDados.put("DATAMOVIMENTO",  ttMov.dataMovimento);
-					jDados.put("PARCELADOC",     ttMov.parcelaDoc);
-					jDados.put("VALORDOCUMENTO", ttMov.valorDocumento);
-					jDados.put("VALORJUROS",     ttMov.valorJuros);
-					jDados.put("VALORDESCONTO",  ttMov.valorDesconto);
-					jDados.put("VALORMULTA",  ttMov.valorMulta);
-					jDados.put("TABELACONTABIL", tabelaContabil);
-					jDescricaoDupl    = buscarIODuplicata(jDados, dbIOCont, logger);
-
-					Date dtL = DateUtil.stringToDate(ttMov.dataMovimento, "dd/MM/yyyy");	// --- VERIFICAR
-					dataLote = DateUtil.dateToString(dtL, "yyyy-MM");
-
-					if(jDescricaoDupl.has("TIPO") && jDescricaoDupl.optString("TIPO").equals("FISCAL")) {
-						ttMov.parcelaDoc     = jDescricaoDupl.optInt("PARCELADOC");
-						ttMov.valorDesconto  = DecimalUtil.toDecimal(String.format("%.2f", ttMov.valorDesconto));
-						ttMov.valorDocumento = DecimalUtil.toDecimal(String.format("%.2f", ttMov.valorDocumento));
-						ttMov.valorJuros 	 = DecimalUtil.toDecimal(String.format("%.2f", ttMov.valorJuros));
-						
-						String valorDescontoAux  = preparaDoublePrecisao(String.valueOf(ttMov.valorDesconto));
-						String valorDocumentoAux = preparaDoublePrecisao(String.valueOf(ttMov.valorDocumento));
-						String valorAcrecimoAux 	 = preparaDoublePrecisao(String.valueOf(ttMov.valorJuros+ttMov.valorMulta));
-						
-						double valorAux = ttMov.valorDocumento - ttMov.valorDesconto + ttMov.valorJuros + ttMov.valorMulta;
-						String valorCalcAux = "";
-						// #Fabrica(2019-08-06) @Vini
-						valorCalcAux = preparaDoublePrecisao(String.valueOf(DecimalUtil.toDecimal(String.format("%.2f", valorAux))));
-						
-						// if (!String.format("%.2f", ttMov.valorDocumento).equals(jDescricaoDupl.optString("VALORPARCELA"))) { //<--- antigo
-						if (ttMov.valorDocumento > jDescricaoDupl.optDouble("VALORPARCELA")) {
-							jDescricaoDupl.put("TIPO", "FORNECEDOR");
-						} else {
-						
-													
-
-							txtFiscal[0].append(StringUtil.leftPad(jDescricaoDupl.optString("CODIGOFORNECEDOR"), 14,  "0"));
-							txtFiscal[0].append(StringUtil.leftPad(cutString(ttMov.documento, 0, "-"), 8, "0"));
-							txtFiscal[0].append(StringUtil.leftPad(String.valueOf(ttMov.parcelaDoc), 2, "0"));
-							txtFiscal[0].append(StringUtil.leftPad(valorDocumentoAux.replaceAll("\\.","").replaceAll(",",""), 13, "0"));
-							txtFiscal[0].append(ttMov.dataMovimento.replaceAll("/",""));
-							txtFiscal[0].append(StringUtil.leftPad(valorDescontoAux.replaceAll("\\.","").replaceAll(",",""), 13, "0"));
-							txtFiscal[0].append(StringUtil.leftPad(valorAcrecimoAux.replaceAll("\\.","").replaceAll(",",""), 13, "0"));
-							txtFiscal[0].append(StringUtil.leftPad(valorCalcAux.replaceAll("\\.","").replaceAll(",",""), 13, "0"));
-							txtFiscal[0].append(StringUtil.leftPad(contaPortador, 9,  "0"));
-							txtFiscal[0].append("\r\n");
-
-							geraFiscal = true;
-							loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("OTTIMIZZA")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_TESTE_OTTIMIZZA_" + dataLote + "_" + ttMov.tipoLancamento;
-
-							if (ttMov.nomeArquivo.toUpperCase().contains("_ID")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_ID" + cutString(ttMov.nomeArquivo.toUpperCase(), "_ID", "_") + "_" + dataLote + "_" + ttMov.tipoLancamento;
-
-							ttMov.tipoPlanilha = "NAO LER";
-							mapaVariavel.put(key,ttMov);
-							continue;
-						}
-					}
-				}
-
-				if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("CORDILHEIRA")) {
-					JSONObject jDados = new JSONObject();
-					jDados.put("CODEMPRESA",     codEmpresa);
-					  
-					if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR"))  {
-						jDados.put("DATAVENCIMENTO", dataVencimentoTTMov);
-					}
-					
-					 jDados.put("RAZAOSOCIAL",    razaoSocial);
-					jDados.put("NOMEORIGEM",     ttMov.nomeOrigem);
-					jDados.put("DOCUMENTO",      ttMov.documento);
-					jDados.put("DATAMOVIMENTO",  ttMov.dataMovimento);
-					jDados.put("PARCELADOC",     ttMov.parcelaDoc);
-					jDados.put("VALORDOCUMENTO", ttMov.valorDocumento);
-					jDados.put("VALORJUROS",     ttMov.valorJuros);
-					jDados.put("VALORMULTA",     ttMov.valorMulta);
-					jDados.put("VALORDESCONTO",  ttMov.valorDesconto);
-					jDados.put("TABELACONTABIL", tabelaContabil);
-					jDescricaoDupl    = buscarIODuplicata(jDados, dbIOCont, logger);
-
-					Date dtL = DateUtil.stringToDate(ttMov.dataMovimento, "dd/MM/yyyy");	// --- VERIFICAR
-					dataLote = DateUtil.dateToString(dtL, "yyyy-MM");
-
-					double valorSaldoDuplicata2 = 0;
-					if (jDescricaoDupl.has("VALORPARCELA")) valorSaldoDuplicata2 = DecimalUtil.toDecimal(jDescricaoDupl.optString("VALORPARCELA"));
-
-					valorSaldoDuplicata2 = DecimalUtil.toDecimal(String.format("%.2f",valorSaldoDuplicata2));
-					ttMov.valorDocumento = DecimalUtil.toDecimal(String.format("%.2f",ttMov.valorDocumento));
-
-					if(jDescricaoDupl.has("TIPO") && jDescricaoDupl.optString("TIPO").equals("FISCAL")) {
-					
-						if ((ttMov.valorDocumento - ttMov.valorDesconto) <= valorSaldoDuplicata2){
-							if(geraCabecalhoCordilheira) {
-								txtFiscal[0].append("DATA DE VENCIMENTO;DATA DO PAGAMENTO;CNPJ DO CLIENTE;DOCUMENTO;NOME/RAZAO;NUMERO DA PARCELA;VALOR ORIGINAL;VALOR PAGO;VALOR JUROS;VALOR DESCONTO;FORMA DE PAGAMENTO;NUMERO DA NOTA");
-								txtFiscal[0].append("\r\n");
-								geraCabecalhoCordilheira = false;
-							}
-
-							txtFiscal[0].append(jDescricaoDupl.optString("DATAVENCIMENTO"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(ttMov.dataMovimento);
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(ttMov.cpfCnpj);
-							// quando o formato da parcela deve ser igual ao duplicatas em aberto (questor) comentar linha acima e descomentar a linha abaixo
-							//txtFiscal[0].append(jDescricaoDupl.optString("PARCELADOCORIGINAL")); 
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(cutString(ttMov.documento, 0, "-"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(ttMov.nomeOrigem);
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("PARCELADOC"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("VALORPARCELA").replaceAll("\\.",","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(String.format("%.2f", (ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto)).replaceAll("\\.",","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(String.format("%.2f", ttMov.valorJuros).replaceAll("\\.",","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(String.format("%.2f",ttMov.valorDesconto).replaceAll("\\.",","));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(jDescricaoDupl.optString("TABELACONTABIL"));
-							txtFiscal[0].append(";");
-							txtFiscal[0].append(ttMov.documento);
-							txtFiscal[0].append("\r\n");
-
-							geraFiscal = true;
-							loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("OTTIMIZZA")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_TESTE_OTTIMIZZA_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("_ID")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_ID" + cutString(ttMov.nomeArquivo.toUpperCase(), "_ID", "_") + "_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							ttMov.tipoPlanilha = "NAO LER";
-							mapaVariavel.put(key,ttMov);
-							continue;
-						} else {
-							if(cabecalhoNaoEncontrada){
-								txtFornecedor.append("Codigo");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Fornecedor/Cliente");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Duplicata");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Data");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Valor bruto");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Valor liquido");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Banco");
-								txtFornecedor.append(";");
-								txtFornecedor.append("Obs:");
-								txtFornecedor.append("\r\n");
-								cabecalhoNaoEncontrada = false;
-							}
-							String valorLiquido = String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto + ttMov.valorMulta);
-							jDescricaoDupl.put("VALORLIQUIDO",  valorLiquido);
-							txtFornecedor.append(jDescricaoDupl.optString("CODEMPRESA"));
-							txtFornecedor.append(";");
-							txtFornecedor.append(razaoSocialDuplicata);
-							txtFornecedor.append(";");
-							txtFornecedor.append(ttMov.documento);
-							txtFornecedor.append(";");
-							txtFornecedor.append(ttMov.dataMovimento);
-							txtFornecedor.append(";");
-							txtFornecedor.append(String.format("%.2f", ttMov.valorDocumento));
-							txtFornecedor.append(";");
-							txtFornecedor.append(jDescricaoDupl.optString("VALORLIQUIDO").replaceAll("\\.",","));
-							txtFornecedor.append(";");
-							txtFornecedor.append(ttMov.nomePortador);
-							txtFornecedor.append(";");
-							txtFornecedor.append("Valor Duplicata " + String.format("%.2f", ttMov.valorDocumento) + " maior que saldo no Fiscal " + String.format("%.2f", valorSaldoDuplicata2));
-							txtFornecedor.append("\r\n");
-
-							jDescricaoDupl.put("TIPO","FORNECEDOR");
-
-							geraFiscal = true;
-							loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("OTTIMIZZA")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_TESTE_OTTIMIZZA_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							if (ttMov.nomeArquivo.toUpperCase().contains("_ID")) loteFiscal[0] = nomeEmpresa + "_" + codEmpresa + "_" + "_PELO_FISCAL_ID" + cutString(ttMov.nomeArquivo.toUpperCase(), "_ID", "_") + "_" + dataLote + "_" + ttMov.tipoLancamento;
-							
-							ttMov.tipoPlanilha = "NAO LER";
-							mapaVariavel.put(key,ttMov);
-							continue;
-						}
-					}
-				}
 
 				// if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("CUCA-FRESCA")) {
 
