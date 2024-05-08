@@ -1021,7 +1021,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento09	= getCampoString(complemento09,	icomplemento09, line, zerar, roteiroCRM.optString("complemento09").toUpperCase(), memFile, logger);
 									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, logger);
 									
-									if(tipoPlanilha.contains("ADIANT_MAXPAGO")){
+									if(tipoPlanilha.contains("ADIANT_MAXPAGO")){ //
 										try{
 											complemento07 = memFile.getStringFieldRemoveEspCharsUpper(10);
 										}catch(Exception e){
@@ -1921,7 +1921,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											if (tipoPlanilha.contains("ADIANT_HOSPEDAGEM")) {
 												campoData = memFile.getStringFieldRemoveEspCharsUpper(9);
 											}
-											logger.logInfo("DATACAMPO1:"+campoData);
+											logger.logInfo("DATACAMPO1:"+campoData); //
 											if (tipoPlanilha.contains("SECUNDABRD") && rotuloArray[iv].contains("EXTRA-SAIDA")) campoData = complemento07;
 											if (tipoPlanilha.contains("ADIANT_MAXPAGO") && rotuloArray[iv].contains("VALOR EXTRA")) campoData = complemento07;
 											if (tipoPlanilha.contains("SECUNDAVIACRED") && rotuloArray[iv].contains("EXTRA-DATA")) campoData = complemento07;
@@ -1937,6 +1937,19 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											logger.logDebug("campoData -> " + campoData);
 
 											ttTemp.dataMovimento = capturaDataExtra(campoData, logger);
+
+											if(ttTemp.dataMovimento.equals("") && complemento07.length() == 5){
+												try {
+													Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+													int datanum = Integer.parseInt(complemento07);
+													Calendar calSerial = Calendar.getInstance();
+													calSerial.setTime(dt);
+													calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+													ttTemp.dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+												}catch (Exception dt2) {
+													continue;
+												}
+											}
 
 											logger.logDebug("ttTemp.dataMovimento -> " + ttTemp.dataMovimento);
 											logger.logInfo("ttTemp.dataMovimento -> " + ttTemp.dataMovimento);
