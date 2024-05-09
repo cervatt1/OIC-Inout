@@ -2116,6 +2116,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
             // ajuste 11/2020 @DiMaz
             if (ttMov.valorDocumento == 0) continue;
 
+            logger.logInfo("-----------------------------------------------------------------------------------------------------");
+            logger.logInfo("1.ttMov.dataMovimento: "+ ttMov.dataMovimento + " | 1.ttMov.nomeOrigem: "+ ttMov.nomeOrigem);
+            logger.logInfo("1.ttMov.complemento07: "+ ttMov.complemento07);
+            ttMov.dataMovimento = ttMov.dataMovimento.trim().replaceAll(" ","");
+            logger.logInfo("2.ttMov.dataMovimento: "+ ttMov.dataMovimento);
+            //if(ttMov.dataMovimento.length() < 10) ttMov.dataMovimento = "0"+ttMov.dataMovimento;  
+            logger.logInfo("2.ttMov.dataMovimento: "+ ttMov.dataMovimento);
+
 
             // #DOCUMENTACAO
             // EXTRATO COM EXTRATO
@@ -11010,7 +11018,7 @@ public String getCodigoClassificacao(String nomeOrigem, JSONObject objHistorico)
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
     if (!StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REGRA CLASSIFICACAO")) {
-        retornoClassificacao = "2.1.1.01 ";
+        retornoClassificacao = "2.1.1.01ï¿½";
     }
     return retornoClassificacao;
 }
@@ -14153,7 +14161,7 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 			if(tipo.equals("003") || tipo.equals("002") || tipo.equals("001")){
 				if(memFile.getFieldsSize()-1 < ivalorDocumento ) ivalorDocumento -= 1;
 					
-				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO HÃ? UMA LETRA NA COLUNA DO NOME ORIGEM;
+				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO Hï¿½? UMA LETRA NA COLUNA DO NOME ORIGEM;
                 if(memFile.getStringFieldRemoveEspCharsUpper(1).trim().length() == 1){
                     ivalorDocumento += 1;
 				}
