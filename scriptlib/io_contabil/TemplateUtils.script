@@ -251,7 +251,7 @@ public class TemplateUtils {
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
 		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
-			arquivoCompleto.contains("0800 887 0463"))) && (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
+			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
 			return true; //NUBANK
 		}
 		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
@@ -341,7 +341,7 @@ public class TemplateUtils {
             return true; //ITAU PADRAO 6
         }
 		
-		if (arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("ITAU") &&
+		if (arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("WWW.ITAU.COM.BR") &&
 			arquivoCompleto.contains("LANCAMENTO") && !arquivoCompleto.contains("MENSAL") && !arquivoCompleto.contains("SALDO RESUMIDO")
 			/*&& arquivoCompleto.contains("POSICAO DA") &&
 			arquivoCompleto.contains("CONTA:)"*/) {
@@ -355,6 +355,9 @@ public class TemplateUtils {
 		if(arquivoCompleto.contains("RELATORIO DE VENDAS") && arquivoCompleto.contains("INFINITEPAY") && arquivoCompleto.contains("0800 591 7207")){
 			return true; //INFINITE-PAY-CARTAO
 		}
+		if(arquivoCompleto.contains("XP INVESTIMENTOS") && arquivoCompleto.contains("NOTA DE CORRETAGEM")){
+            return true; //NOTAS DE CORRETAGEM
+        }
 		if(arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("BANCO ITAU S/A") && arquivoCompleto.contains("MOVIMENTACAO")){
             return true; //ITAUFRANCESINHA01
         }
