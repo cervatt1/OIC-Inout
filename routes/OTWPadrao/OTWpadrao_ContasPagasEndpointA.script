@@ -20610,6 +20610,8 @@ public boolean readExtratoAilosCiviaPDF(MemoryFile memFile, String nomePortador,
 						
 						nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
 						
+						ivalorDocumento = memFile.getFieldsSize()-2;
+
 						try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 						catch (Exception vlrd) { valorDocumento = 0; }
 						if(valorDocumento == 0) continue;
