@@ -21345,14 +21345,25 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
 				
 				//String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
 				
-				if (getCampoDate(dataString).equals("")) dataString = dataDDMM;
+				if (getCampoDate(dataString).equals("") && !(dataString.length() == 5)) dataString = dataDDMM;
 				
-				if (!dataString.equals("")) {
+				if (!dataString.equals("") && !(dataString.length() == 5)) {
 					String dataMovimentoAux	= getCampoDate(dataString);
 					if (dataMovimentoAux.contains("/")) {
 						dataMovimento		= getCampoDate(dataString);
 						dataLote			= getCampoDate(dataMovimento, "", "yyyy-MM");
 					}
+				}
+
+				if(dataString.length() == 5){
+					try {
+						Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+						int datanum = Integer.parseInt(dataString);
+						Calendar calSerial = Calendar.getInstance();
+						calSerial.setTime(dt);
+						calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+						dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+					}catch (Exception dt2) { }
 				}
 				
 				if(ivalorDocumento >=0){
