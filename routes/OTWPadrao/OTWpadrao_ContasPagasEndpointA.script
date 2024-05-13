@@ -18995,7 +18995,7 @@ public boolean readExtratoPinkPayPDF(MemoryFile memFile, JSONObject jDados, Data
 public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 	
 	// logger.logInfo("InterInterInter");
-	logger.logInfo("ENTROU NO READ 2 ");
+	// logger.logInfo("ENTROU NO READ 2 ");
 	
 	JSONObject extratoEmpresa = new JSONObject();
  
@@ -19044,7 +19044,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		//logger.logInfo("2 TIPO == "+tipoExtrato);
+		// logger.logInfo("2 TIPO == "+tipoExtrato);
 		
 		if (line.startsWith("SALDO")) continue;
 		if (line.startsWith("PAGINA")) continue;
@@ -19092,6 +19092,9 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 					dataAuxiliar = diaAuxiliar+"/"+mesAuxiliar+"/"+anoAuxiliar;
 					if (dataAuxiliar.contains("SALDO"))
 						dataAuxiliar = cutString(dataAuxiliar, 0, "SALDO");
+					
+					logger.logInfo("DT == "+dataAuxiliar);//#2402-029889
+					dataAuxiliar = cutString(dataAuxiliar, 0, dataAuxiliar.indexOf("/202")+5);
 					continue;
 				}
 				if(dataAuxiliar.matches("[0-9]{2}/[0-9]{2}/[0-9]{4}"))
@@ -19100,7 +19103,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 			
 			// logger.logInfo("DM "+idataMovimento+" -> "+dataMovimento+" MF DATA = "+memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 			
-			//logger.logInfo("DataMovimento: "+dataMovimento); //
+			// logger.logInfo("DataMovimento: "+dataMovimento); //
 			
 			if (dataMovimento.equals("")) continue;
 
@@ -19118,7 +19121,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				catch (Exception vlrd) { valorDocumento = 0; }
 			}
 			
-			//logger.logInfo("ValorDocumento: "+valorDocumento); //
+			logger.logInfo("ValorDocumento: "+valorDocumento); //
 
 			// logger.logInfo("VD "+ivalorDocumento+" -> "+valorDocumento);
 			if (valorDocumento == 0) continue;
@@ -19132,7 +19135,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				//complemento02   = documento;
 				complemento02  = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02).replaceAll("\"","").trim();
 			} else {
-				nomeOrigem = cutString(line, 0, "R$").replaceAll("\\|", " ");
+				nomeOrigem = StringUtil.removeSpecialCharsToUC(cutString(line, 0, "R$").replaceAll("\\|", " "));
 				complemento02  = memFile.getStringFieldRemoveEspCharsUpper(0) +" "+ memFile.getStringFieldRemoveEspCharsUpper(1);
 				complemento02 = complemento02.replaceAll("\\|", " ");
 			}
@@ -19166,9 +19169,9 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				//Verifica se a proxima linha contem apenas uma coluna (separadores validos -> ; e |)
 				boolean capturaNomeOrigemApos = !proximaLinha.matches(".*(;[^;]).*") && !proximaLinha.matches(".*(\\|[^\\|]).*");
 				if (capturaNomeOrigemApos || !(proximaLinha.contains(";") || proximaLinha.contains("|"))) {
-					nomeOrigem += " " + cutString(proximaLinha, 0, ";");
+					nomeOrigem += " " + StringUtil.removeSpecialCharsToUC(cutString(proximaLinha, 0, ";"));
 				} else if(!proximaLinha.contains("R$")){
-					nomeOrigem += " " + proximaLinha.replaceAll("\\|", " ");
+					nomeOrigem += " " + StringUtil.removeSpecialCharsToUC(proximaLinha.replaceAll("\\|", " "));
 				}
 				else {break;}
 			}
@@ -19178,7 +19181,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				continue;
 			}
 			
-			//logger.logInfo("NomeOrigem: "+nomeOrigem);
+			// logger.logInfo("NomeOrigem: "+nomeOrigem);
 			
 			
 			if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
@@ -19188,18 +19191,16 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 
 			chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 
-			
+			// logger.logInfo("DT - "+ dataMovimento +" | VD - "+ valorDocumento +" | NM - "+ nomeOrigem +" | DC - "+ debitoCredito);
+
 			// Buscar Extrato por Chave na Tabela IO_EXTRATO.
 			extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
 			.fields("CHAVE")
 			.param(chaveExtrato)
 			.queryUnique();
 
- 			logger.logInfo("DT - "+ dataMovimento +" | VD - "+ valorDocumento +" | NM - "+ nomeOrigem +" | DC - "+ debitoCredito + " | DCAux - " + debitoCreditoAux);
+ 		
 			if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
-
-				//logger.logInfo("DT - "+ dataMovimento +" | VD - "+ valorDocumento +" | NM - "+ nomeOrigem +" | DC - "+ debitoCredito + " | DCAux - " + debitoCreditoAux);
-
 				try {
 					dbIOCont.insert("IO_EXTRATO")
 					.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")

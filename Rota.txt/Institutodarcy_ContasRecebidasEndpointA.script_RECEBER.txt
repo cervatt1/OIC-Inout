@@ -1243,6 +1243,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									if (tipoPlanilha.equals("MOVIMENTO")) nomeOrigem = nomeOrigem + " - " + nomePortador;
 
+									documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
+
 									complemento01	= getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);
 									complemento02	= getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger);
 									complemento03	= getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger);
@@ -3649,7 +3651,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR")) {
 					dataVencimentoTTMov = ttMov.complemento09;
 				}
-				
+					
 				/*if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("MAKROWEB")) {
 					JSONObject jDados = new JSONObject();
 					jDados.put("CODEMPRESA",     codEmpresa);

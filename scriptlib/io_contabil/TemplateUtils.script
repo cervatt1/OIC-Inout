@@ -392,7 +392,7 @@ public class TemplateUtils {
 			return true;//FRANCESINHA SAFRA
 		}
 		if(arquivoCompleto.contains("SAC - 0800 647 2200") && 
-			arquivoCompleto.contains("OUVIDORIA - 0800 644 1100 ")){
+			arquivoCompleto.contains("OUVIDORIA - 0800 644 1100 ") && arquivoCompleto.contains("COOPERATIVA: CIVIA")){
 				return true;//AILOS CIVIA
 		}
 		if(arquivoCompleto.contains("BANCO INTER") && arquivoCompleto.contains("CPF/CNPJ") && arquivoCompleto.contains("0800 940 9999") && 
@@ -517,6 +517,12 @@ public class TemplateUtils {
 		
 		if (arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") && arquivoCompleto.contains("0800 762 7777") &&
 			arquivoCompleto.contains("NOSSO NUMERO") && arquivoCompleto.contains("AGENCIA/CONTA")){ //FRANCESINHASANTANDER 2
+			return true;
+		}
+		
+		if (arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("AGENCIA") &&
+				arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("PERIODO") && arquivoCompleto.contains("0800 726 2125") &&
+				arquivoCompleto.contains("0800 723 5007") && arquivoCompleto.contains("0800 726 0322") && arquivoCompleto.contains("0800 771 0301")){ // SANTANDER PADRAO 01
 			return true;
 		}
 		
