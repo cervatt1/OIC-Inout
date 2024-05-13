@@ -19176,8 +19176,8 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				else {break;}
 			}
 			
-			if(line.replaceAll("\\|", " ").contains("FALE COM A GENTE") || line.startsWith("SAC:") || line.contains("PERIODO") || line.contains("TIPO") 
-				|| line.replaceAll("\\|", " ").contains("SOLICITADO EM") || (line.contains("DE") && line.contains("CIENCIA")) || memFile.getFieldsSize() < 3){
+			if((line.replaceAll("\\|", " ").contains("FALE COM A GENTE") || line.startsWith("SAC:") || line.contains("PERIODO") || line.contains("TIPO") 
+				|| line.replaceAll("\\|", " ").contains("SOLICITADO EM") || (line.contains("DE") && line.contains("CIENCIA"))) && memFile.getFieldsSize() < 3){
 				continue;
 			}
 			
@@ -21212,7 +21212,7 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
 
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA").trim();
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO").trim();
-    if(jDados.has("ANOAUX"))  			anoAux  = jDados.optString("ANOAUX").trim();
+	if(jDados.has("ANOAUX"))  			anoAux  = jDados.optString("ANOAUX").trim();
 	
 	//logger.logInfo("Tipo: "+tipoExtrato);
 
@@ -21334,13 +21334,19 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
 				inomeOrigem		= 1;
 				idataMovimento	= 0;
 				icomplemento02	= 2;
-
-				String[] dataDDMMarray	 = {};
-				dataDDMMarray = memFile.getStringFieldRemoveEspCharsUpper(0).trim().split(" ");
-				dataDDMM = dataDDMMarray[0]+dataDDMMarray[1]+getMonth(dataDDMMarray[2])+anoAux;
+				
+				//2405-037750 - condicao adicionada pq estava causando erro quando nao dava para separar a data por espaco
 				String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
-
+				if(dataString.contains(" ")){
+					String[] dataDDMMarray	 = {};
+					dataDDMMarray = memFile.getStringFieldRemoveEspCharsUpper(0).trim().split(" ");
+					dataDDMM = dataDDMMarray[0]+dataDDMMarray[1]+getMonth(dataDDMMarray[2])+anoAux;
+				}
+				
+				//String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
+				
 				if (getCampoDate(dataString).equals("")) dataString = dataDDMM;
+				
 				if (!dataString.equals("")) {
 					String dataMovimentoAux	= getCampoDate(dataString);
 					if (dataMovimentoAux.contains("/")) {
