@@ -12054,6 +12054,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 	int idocumento      = -1;
 	int ivalorDocumento	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
 	int icomplemento02	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG)
+	int yix	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG)
 
 	boolean naoLeMais = false;	
 	
@@ -12099,7 +12100,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 			line.contains("DOC.COOP") && line.contains("VLR.BOLETO") && line.contains("ABATIM.JUROS/MULTA") && line.contains("VLR.PAGO"))){
 			for (int i = 0; i < memFile.getFieldsSize(); i++) {
 				if( memFile.getStringFieldRemoveEspCharsUpper(i).contains("VENCIMENTO")) idataMovimento = i;
-				if(	memFile.getStringFieldRemoveEspCharsUpper(i).contains("PAGTO/BAIXA") || 
+				if(	memFile.getStringFieldRemoveEspCharsUpper(i).contains("VALOR NOMINAL") || 
 					memFile.getStringFieldRemoveEspCharsUpper(i).contains("VLR.BOLETO")) ivalorDocumento = i;
 				if( memFile.getStringFieldRemoveEspCharsUpper(i).contains("SITUACAO")) icomplemento02 = i;
 				if( (memFile.getStringFieldRemoveEspCharsUpper(i).contains("DOCUMENTO") ||
@@ -12116,6 +12117,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 		}
 		//Criado For para ler 2 blocos de lçtos
 		for(int y = 0; y < 2; y++){	
+			yix = y;
 			try {
 				// logger.logInfo("y ->>" + y);
 				if(y == 0){
@@ -12204,11 +12206,6 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 
 					if (valorDocumento == 0.0) continue;
 					
-					if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
-					if (valorDocumento < 0) {
-						debitoCredito = "EXTRATO-DEBITO";
-						valorDocumento = Math.abs(valorDocumento);
-					}
 				}
 				//logger.logInfo(nomeOrigem + segmentoAilos + cont + ": IF1: DM" + dataMovimento + " |VD " + valorDocumento + " iVD:"+ ivalorDocumento + " |Svd" + memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento) + " |DC " + debitoCredito);
 				
@@ -12280,16 +12277,12 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 
 					if (valorDocumento == 0) continue;
 					
-					if (valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
-					if (valorDocumento < 0) {
-						debitoCredito = "EXTRATO-DEBITO";
-						valorDocumento = Math.abs(valorDocumento);
-					}
 				}
+				debitoCredito = "EXTRATO-CREDITO";
 
 				contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 
-				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + String.format("%d", yix) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
 				 // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
             // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
@@ -12306,7 +12299,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
                     * No campo complemento(02) = Venda
                     * No campo Valor do movimento = Posi絥s indicadas no roteiro
             */
-            chave = lote + contLinhaTexto;
+            chave = lote + chaveExtrato;
             key	= chave  + "-CTB";
             //logger.logDebug("###1319### "+line);
 
