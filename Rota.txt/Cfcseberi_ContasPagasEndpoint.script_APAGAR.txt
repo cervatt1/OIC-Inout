@@ -4289,7 +4289,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
  									
 									// calcula se o valor a ser baixado somando os segmentos eh maior que o valor pago pelo cliente
 									// quando isto ocorrer, deve-se ajustar no ultimo segmento o valor
-									 if ((valorTotalBaixado - ttMov.valorDocumento) <= 0.02 && (valorTotalBaixado - ttMov.valorDocumento) > 0) {
+									 if ((valorTotalBaixado - ttMov.valorDocumento) <= 0.0201 && (valorTotalBaixado - ttMov.valorDocumento) > 0) {
 										 valorBaixar = valorBaixar  - (valorTotalBaixado - ttMov.valorDocumento);
 										 ttDoc.valorDocumento = ttDoc.valorDocumento  - (valorTotalBaixado - ttMov.valorDocumento);
 									 }
@@ -5389,54 +5389,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				js.put("COMPLEMENTO09", ttMov.complemento09);
 				js.put("COMPLEMENTO10", ttMov.complemento10);
 				js.put("NOMEARQUIVO", ttMov.nomeArquivo);
-				
-				if(tipoLancamento.contains("PAGAR")){
-					if (roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toUpperCase().equals("TRUE")) {
-						if (roteiroCRMPrincipal.optString("erpContabilidade").equals("LEDWARE") 
-							|| roteiroCRMPrincipal.optString("erpContabilidade").equals("ALTERDATA")
-							|| roteiroCRMPrincipal.optString("erpContabilidade").equals("CONTMATIC")) {
-							if (ttMov.complemento05.equals("JUROS") && !ttMov.contaJuros.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaJuros);
-								//#2303-000922
-								//js.put("CONTACREDITO", ttMov.contaDebito);
-								js.put("CONTACREDITO", ttMov.contaCredito);
-							}
-							if (ttMov.complemento05.equals("MULTA") && !ttMov.contaMulta.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaMulta);
-								//#2303-000922
-								//js.put("CONTACREDITO", ttMov.contaDebito);
-								js.put("CONTACREDITO", ttMov.contaCredito);
-							}
-							if (ttMov.complemento05.equals("DESCONTO") && !ttMov.contaDesconto.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaDebito);
-								js.put("CONTACREDITO", ttMov.contaDesconto);
-							}
-						}
-					
-					}
-				}
-				if(tipoLancamento.contains("RECEBER")){
-					if (roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toUpperCase().equals("TRUE")) {
-						if (roteiroCRMPrincipal.optString("erpContabilidade").equals("LEDWARE") 
-							|| roteiroCRMPrincipal.optString("erpContabilidade").equals("ALTERDATA")
-							|| roteiroCRMPrincipal.optString("erpContabilidade").equals("CONTMATIC")) {
-							if (ttMov.complemento05.equals("JUROS") && !ttMov.contaJuros.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaDebito);
-								js.put("CONTACREDITO", ttMov.contaJuros);
-							}
-							if (ttMov.complemento05.equals("MULTA") && !ttMov.contaMulta.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaDebito);
-								js.put("CONTACREDITO", ttMov.contaMulta);
-							}
-							if (ttMov.complemento05.equals("DESCONTO") && !ttMov.contaDesconto.equals("")) {
-								js.put("CONTADEBITO", ttMov.contaDesconto);
-								//#2303-000922
-								//js.put("CONTACREDITO", ttMov.contaCredito);
-								js.put("CONTACREDITO", ttMov.contaDebito);
-							}
-						}
-					}
-				}
 				
 				recordF = findMovimentoPorChave(dbIOCont, ttMov.chave+ "-CTB");
 				
