@@ -4523,6 +4523,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				mapaOficial.put(key,ttMov2);
 				ttMov3.classificacao = ttMov2.classificacao;
 				mapaOficial.put(keyAc,ttMov3);
+			//logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);		
 			}
 		}
 		if(contRegra == -1){
@@ -12117,7 +12118,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 		}
 		//Criado For para ler 2 blocos de lçtos
 		for(int y = 0; y < 2; y++){	
-			yix = y;
+			yix = y+cont;
 			try {
 				// logger.logInfo("y ->>" + y);
 				if(y == 0){
@@ -12282,7 +12283,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 
 				contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 
-				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + String.format("%d", yix) + "-" + nomePortador + "-" + contLinhaExtrato;
+				chaveExtrato = String.format("%.2f", valorDocumento) + String.format("%d", yix) + "-" + nomePortador + "-" + contLinhaExtrato + codEmpresa + "-" +  dataMovimento + "-" + nomeOrigem;
 				
 				 // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
             // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
@@ -12299,7 +12300,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
                     * No campo complemento(02) = Venda
                     * No campo Valor do movimento = Posi絥s indicadas no roteiro
             */
-            chave = lote + chaveExtrato;
+            chave = chaveExtrato + lote;
             key	= chave  + "-CTB";
             //logger.logDebug("###1319### "+line);
 

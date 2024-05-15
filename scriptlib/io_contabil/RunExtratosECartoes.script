@@ -5425,7 +5425,16 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Santander_PDF") && //2312-024677 - Novo layout - Padrao 6
 		cabecalhoPlanilha.contains("INTERNET BANKING") &&
 		cabecalhoPlanilha.contains("AGENCIA E CONTA") &&
-		cabecalhoPlanilha.contains("DESCRI"))
+		cabecalhoPlanilha.contains("DESCRI")) ||
+
+		(arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
+		arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+		arquivoCompleto.contains("4004-2125") &&
+		arquivoCompleto.contains("0800 762 7777") &&
+		arquivoCompleto.contains("0800 771 0401") &&
+		arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+		arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE") &&
+		arquivoCompleto.contains("DAS 9H AS 18H"))
 
 	) {
 

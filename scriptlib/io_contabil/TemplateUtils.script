@@ -250,8 +250,9 @@ public class TemplateUtils {
 	}
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
-		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
-			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
+		if (((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
+			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58")))
+			&& !arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL")) {
 			return true; //NUBANK
 		}
 		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
