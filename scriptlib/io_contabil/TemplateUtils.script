@@ -250,8 +250,8 @@ public class TemplateUtils {
 	}
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
-		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
-			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
+		if (((arquivoCompleto.contains("NU PAGAMENTOS S.A.") && arquivoCompleto.contains("NU FINANCEIRA S.A.")) &&
+			arquivoCompleto.contains("0800 887 0463")) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
 			return true; //NUBANK
 		}
 		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
@@ -527,7 +527,8 @@ public class TemplateUtils {
 		
 		if (arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("AGENCIA") &&
 				arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("PERIODO") && arquivoCompleto.contains("0800 726 2125") &&
-				arquivoCompleto.contains("0800 723 5007") && arquivoCompleto.contains("0800 726 0322") && arquivoCompleto.contains("0800 771 0301")){ // SANTANDER PADRAO 01
+				arquivoCompleto.contains("0800 723 5007") && arquivoCompleto.contains("0800 726 0322") && arquivoCompleto.contains("0800 771 0301") &&
+				!arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE")){ // SANTANDER PADRAO 01
 			return true;
 		}
 		

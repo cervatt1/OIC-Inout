@@ -2028,7 +2028,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		cabecalhoPlanilha.contains("DESCRI"))
 
 	) {
-
+		logger.logInfo("ENTROU SANTANESSSSSS");
 		boolean achouTipo01 = false;
 		JSONObject jDados = new JSONObject();
 		// //logger.logInfoInfo("ENTROU SANT");
@@ -2076,7 +2076,16 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOLAYOUT","001");
 		}
 
-		if(cabecalhoPlanilha.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("SALDO DO DIA") && !achouTipo01){
+		if (cabecalhoPlanilha.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("SALDO DO DIA") && 
+			(arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
+			arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+			arquivoCompleto.contains("4004-2125") &&
+			arquivoCompleto.contains("0800 762 7777") &&
+			arquivoCompleto.contains("0800 771 0401") &&
+			arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+			arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE") &&
+			arquivoCompleto.contains("DAS 9H AS 18H"))
+		){
 			nomePortador2 = cutString(cabecalhoPlanilha, "CONTA:", "?");
 			jDados.put("TIPOLAYOUT", "003");
 		}

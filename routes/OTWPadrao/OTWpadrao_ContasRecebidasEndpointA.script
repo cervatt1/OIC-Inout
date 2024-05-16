@@ -2408,7 +2408,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			
 			
 			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
-			
+			logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
 								
@@ -23801,7 +23801,11 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 					if(chaveExtrato.length() > 100) chaveExtrato = cutString(chaveExtrato, 0, 99);
 
 					if(tipoLayout.equals("001")){
-						nomePortador = cutString(nomePortador, "CONTA: ", "PE").trim();
+						if(!nomePortador.contains("CONTA: ") && !nomePortador.contains("PE")){
+							nomePortador = cutString(nomePortador, "CONTA ", " ").trim();
+						}else{
+							nomePortador = cutString(nomePortador, "CONTA: ", "PE").trim();
+						}
 					}
 
 					// Buscar Extrato por Chave na Tabela IO_EXTRATO.
