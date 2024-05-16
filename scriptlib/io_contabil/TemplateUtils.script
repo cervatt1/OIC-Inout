@@ -250,9 +250,8 @@ public class TemplateUtils {
 	}
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
-		if (((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
-			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58")))
-			&& !arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL")) {
+		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A") || (arquivoCompleto.contains("OUVIDORIA:") &&
+			arquivoCompleto.contains("0800 887 0463"))) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
 			return true; //NUBANK
 		}
 		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
@@ -381,6 +380,11 @@ public class TemplateUtils {
 			&& !arquivoCompleto.contains("TELE ATENDIMENTO")){
 			return true; //UNICRED1
 		}*/
+			// gui - 13/05/2024 -> Ajuste feito para o padrão 01 ser lido pelo novo conversor.
+		if(((arquivoCompleto.contains("EXTRATO DE CONTA CORRENTE") && arquivoCompleto.contains("OUVIDORIA") &&
+				arquivoCompleto.contains("0800 646 5151") && arquivoCompleto.contains("TELE ATENDIMENTO")) && !arquivoCompleto.contains("UNICRED VALE"))){
+			return true; //UNICRED PADRAO 01
+		}
 		
 
 		if(arquivoCompleto.contains("OUVIDORIA: 0800 591 5120") &&
@@ -542,6 +546,11 @@ public class TemplateUtils {
 		if (arquivoCompleto.contains("RELATORIO DE TITULOS") && arquivoCompleto.contains("BANCO/AGENCIA/CONTA") && arquivoCompleto.contains("CARTORIO") &&
 			arquivoCompleto.contains("QUANTIDADE:") && arquivoCompleto.contains("RESUMO PARCIAL:") && arquivoCompleto.contains("RESUMO GERAL:")) {
 			return true; //FRANCESINHA UNICREDI
+		}
+		
+		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("VALOR DO TITULO") &&
+			arquivoCompleto.contains("RAZAO SOCIAL DO BENEFICIARIO")){
+			return true; //COMPROVANTE SICREDI
 		}
 
 		if (arquivoCompleto.contains("%$&") || arquivoCompleto.contains("!%") || arquivoCompleto.contains("$!%&") || arquivoCompleto.contains("# $%") 
