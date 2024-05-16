@@ -49,7 +49,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			
 			if (methodName.contains(tipoARodar)) {
 				//logger.logInfoDebug(String.format("Invoking method %s...", methodName));
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, nomePortador, jDados, dbIOCont, logger);
 				//logger.logInfoDebug("RESPONSE -> " + response);
@@ -93,7 +93,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
 				
@@ -132,7 +132,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
 				
@@ -220,7 +220,7 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
@@ -257,7 +257,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
