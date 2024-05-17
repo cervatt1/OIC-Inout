@@ -19683,8 +19683,8 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 					.param(0)
 					.execute();
 				} catch (Exception sqlInsertException) {
-					logger.logDebug("PROBLEMA NO INSERT " + line);
-					logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
+					logger.logInfo("1 PROBLEMA NO INSERT " + line);
+					logger.logError("1 Error inserting to IO_EXTRATO", sqlInsertException);
 					continue;
 				}
 			}
@@ -19802,8 +19802,8 @@ public boolean readExtratoItauConsolidadoPDF(MemoryFile memFile, String nomePort
 				.param(0)
 				.execute();
 			} catch (Exception sqlInsertException) {
-				logger.logDebug("PROBLEMA NO INSERT");
-				logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
+				logger.logInfo("PROBLEMA NO INSERT 2");
+				logger.logError("2 - Error inserting to IO_EXTRATO", sqlInsertException);
 				continue;
 			}
 		} catch (Exception ex) {
