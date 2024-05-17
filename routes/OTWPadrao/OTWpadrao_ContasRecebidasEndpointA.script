@@ -2408,7 +2408,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			
 			
 			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
-			logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
+			// logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
 								
@@ -11375,7 +11375,7 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
     int icomplemento02  = 9;
     int icomplemento03  = 0;
     int ivalorDesconto  = 7;
-    int ivalorMulta     = 8;
+    int ivalorMulta     = -1;
     int contComplemento03 = 0;
 
     int cont = 0;
@@ -11468,8 +11468,8 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
             try{valorJuros = memFile.getDoubleField(ivalorJuros);}
             catch (Exception vlrd) { valorJuros = 0; }
 
-            try{valorMulta= memFile.getDoubleField(ivalorMulta);}
-            catch (Exception vlrd) { valorMulta = 0; }
+            //try{valorMulta= memFile.getDoubleField(ivalorMulta);}
+            //catch (Exception vlrd) { valorMulta = 0; }
 
             try{valorDesconto= memFile.getDoubleField(ivalorDesconto);}
             catch (Exception vlrd) { valorDesconto = 0; }
@@ -11479,7 +11479,7 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
             
             valorDocumento = Math.abs(valorDocumento);
             valorJuros = Math.abs(valorJuros);
-            valorMulta = Math.abs(valorMulta);
+            //valorMulta = Math.abs(valorMulta);
             valorDesconto = Math.abs(valorDesconto);
 
             // logger.logInfo("VALOR == "+valorDocumento+" | DATINHA == "+dataMovimento+" | NO == "+nomeOrigem);
