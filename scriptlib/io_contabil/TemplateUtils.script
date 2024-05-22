@@ -564,7 +564,10 @@ public class TemplateUtils {
 		if (arquivoCompleto.equals("[]")) {
 			return true;
 		}
-		if (arquivoCompleto.length() < 40) {
+		/* gui -> 20/05/2024
+		Ajuste feito de 40 char para 150 char para tratar o chamado 2405-038508 e futuros casos parecidos.
+		*/
+		if (arquivoCompleto.length() < 150) {
 			return true;
 		}
         

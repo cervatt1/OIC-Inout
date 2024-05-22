@@ -49,7 +49,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			
 			if (methodName.contains(tipoARodar)) {
 				//logger.logInfoDebug(String.format("Invoking method %s...", methodName));
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, nomePortador, jDados, dbIOCont, logger);
 				//logger.logInfoDebug("RESPONSE -> " + response);
@@ -93,7 +93,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
 				
@@ -132,7 +132,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
 				
@@ -220,7 +220,7 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
@@ -257,7 +257,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
@@ -425,7 +425,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		
 		//2308-014054
 		////// INTER PADRAO 2 /////////////////////////////////////
-		if (cabecalhoPlanilha.contains("CPF/CNPJ") && cabecalhoPlanilha.contains("BANCO INTER") &&
+		if (cabecalhoPlanilha.contains("CPF/CNPJ") && (cabecalhoPlanilha.contains("BANCO INTER") || cabecalhoPlanilha.contains("BANCO|INTER") || cabecalhoPlanilha.contains("BANCO;INTER")) &&
 			cabecalhoPlanilha.contains("PERIODO") && nomePortador2.equals("") && !nomeArquivo.toUpperCase().contains("XLSX")){
 				
 			tipoPlanilha  = "EXTRATO-INTER-2";
@@ -904,6 +904,24 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
+		
+		////// EXTRATO - BRADESCO PDF - 3 //////////////////////////////////////////////////////////////////
+		if(cabecalhoPlanilha.contains("BRADESCO NET EMPRESA") && cabecalhoPlanilha.contains("EXTRATO DE: AGENCIA:")){
+			//logger.logInfo("ENTROU IF BRADESCO 3");
+
+			if(line.contains("EXTRATO DE: ")){
+				nomePortador2 = cutString(line, "CONTA: ");
+				//logger.logInfo("NOME PORTADOR -> " + nomePortador2);
+			} 
+			
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
+
+			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
+			return variaveis.toString();
+		}
 	}
 	
 	// 2307-010554
@@ -1136,7 +1154,13 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				cabecalhoPlanilhaAux = cutString(cabecalhoPlanilha, "CONTA ATUAL", "EXTRATO"); 
 			}
 			
-			nomePortador2 = "BANCO DO BRASIL - " + cutString(cabecalhoPlanilhaAux, "CONTA CORRENTE", "PERIODO");
+			if(cutString(cabecalhoPlanilhaAux, "CONTA CORRENTE", "PERIODO").contains("-")){
+				String npAux = cutString(cabecalhoPlanilhaAux, "CONTA CORRENTE", "PERIODO");
+				nomePortador2 = "BANCO DO BRASIL - " + cutString(npAux, 0, npAux.indexOf("-")+1);
+			}else{
+				nomePortador2 = "BANCO DO BRASIL - " + cutString(cabecalhoPlanilhaAux, "CONTA CORRENTE", "PERIODO");				
+			}
+			
 			
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
@@ -2028,7 +2052,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		cabecalhoPlanilha.contains("DESCRI"))
 
 	) {
-		logger.logInfo("ENTROU SANTANESSSSSS");
+
 		boolean achouTipo01 = false;
 		JSONObject jDados = new JSONObject();
 		// //logger.logInfoInfo("ENTROU SANT");
@@ -2076,24 +2100,23 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOLAYOUT","001");
 		}
 
-		if (cabecalhoPlanilha.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("SALDO DO DIA") && 
-			(arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
-			arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
-			arquivoCompleto.contains("4004-2125") &&
-			arquivoCompleto.contains("0800 762 7777") &&
-			arquivoCompleto.contains("0800 771 0401") &&
-			arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
-			arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE") &&
-			arquivoCompleto.contains("DAS 9H AS 18H"))
-		){
+		if(cabecalhoPlanilha.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("SALDO DO DIA") && !achouTipo01){
 			nomePortador2 = cutString(cabecalhoPlanilha, "CONTA:", "?");
 			jDados.put("TIPOLAYOUT", "003");
 		}
 		////logger.logInfoInfo("cabecalhoPlanilha -> " + cabecalhoPlanilha);
-		if(cabecalhoPlanilha.contains("CLIENTE") && cabecalhoPlanilha.contains("PERIODO") && cabecalhoPlanilha.contains("BANCO SANTANDER INTERNATIONAL")){
-			nomePortador2 = "SANTANDER INTERNATIONAL " + cutString(cabecalhoPlanilha, "PERIODO", "-");
-			jDados.put("TIPOLAYOUT", "004");
-		}
+		if (cabecalhoPlanilha.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("SALDO DO DIA") && 
+				(arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") &&
+				arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+				arquivoCompleto.contains("4004-2125") &&
+				arquivoCompleto.contains("0800 762 7777") &&
+				arquivoCompleto.contains("0800 771 0401") &&
+				arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") &&
+				arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE") &&
+				arquivoCompleto.contains("DAS 9H AS 18H")) ){
+				nomePortador2 = cutString(cabecalhoPlanilha, "CONTA:", "?");
+				jDados.put("TIPOLAYOUT", "003");
+			}
 
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -2535,6 +2558,24 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			
 			mapaVariavel = readExtratoECartao("readFrancesinha_BBPDF", memFile, jDados, mapaVariavel, logger);
 			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+	
+	
+	////// EXTRATO - BRADESCO PDF - 3 //////////////////////////////////////////////////////////////////
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Bradesco3_PDF")) {
+		if(cabecalhoPlanilha.contains("BRADESCO NET EMPRESA") && cabecalhoPlanilha.contains("EXTRATO DE: AGENCIA:")){
+
+			//logger.logInfo("ENTROU IF BRADESCO 3");
+			
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
+
+			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
 	}
@@ -5928,12 +5969,13 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				memFile.getLines().toString().toUpperCase().contains("COBRANCA CAUCIONADA")
 			) {
 				//logger.logInfoInfo("FRANCESINHA BANRISUL TXT RUN");
-				tipoPlanilha = "FRANCESINHA-BANRISUL";
+				tipoPlanilha = "FRANCESINHA-BANRISUL-TXT";
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("TIPOPLANILHA", tipoPlanilha);
 				
 				readExtratoECartao("readFrancesinhaBanrisulTXT", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno", "break");
