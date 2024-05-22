@@ -11,6 +11,7 @@ tomcat/
 winservice/
 *.zip
 *.bat
+.vscode
 
 # Ignora todos os arquivos em scriptlib, exceto o especificado
 scriptlib/__tarefa-robo__io_contabil/

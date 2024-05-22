@@ -954,9 +954,25 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataMovimento   = "";
 											// dataLote        = "";
 										}
+
+										if(dataMovimento.equals("") || dataMovimento.length() < 10){
+											dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim();
+											dataMovimento = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim(), 0, dataMovimento.indexOf("."));
+											logger.logInfo("ANTES DO TRY:"+dataMovimento);
+											try {
+												Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+												int datanum = Integer.parseInt(dataMovimento);
+												Calendar calSerial = Calendar.getInstance();
+												calSerial.setTime(dt);
+												calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+												dataMovimento = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+											}catch (Exception dt2) {
+												logger.logInfo("ERRO -> "+dt2.getMessage());
+											}
+										}
 									}
 									
-									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+dataMovimento);
+									// logger.logInfo("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+dataMovimento + " LINE:"+line);
 									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
 									
