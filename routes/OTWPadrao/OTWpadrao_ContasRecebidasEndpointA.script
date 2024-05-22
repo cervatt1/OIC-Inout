@@ -11460,7 +11460,7 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
             //logger.logInfo("DATA === "+dataMovimento+" | DTSTRING == "+dataString+" | CP == "+complemento01);
             
             if (dataMovimento.equals("")) continue;
-            if (!complemento03.contains("LIQUIDACAO")) continue;
+            if (!complemento03.contains("LIQUIDA")) continue;
 
             try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
             catch (Exception vlrd) { valorDocumento = 0; }
@@ -23296,7 +23296,8 @@ public boolean readExtratoEfiPDF(MemoryFile memFile, String nomePortador, JSONOb
 			//2312-023958
             documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
 
-	        contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
+			contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
+			
 			chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 			// Buscar Extrato por Chave na Tabela IO_EXTRATO.
 			extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
