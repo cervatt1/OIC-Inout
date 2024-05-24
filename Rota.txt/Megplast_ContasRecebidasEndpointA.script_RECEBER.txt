@@ -1235,7 +1235,18 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										if (zerarColAlternativo.contains("complemento10"))  complemento10   = "";
 									}
 									
-									nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
+									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("DATA MOVIMENTO") && !dataMovimento.equals("")) isLinhaPrincipal = true;
+									
+									if(tipoPlanilha.equals("MOVIMENTO")){
+										if(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("") && !memFile.getStringFieldRemoveEspCharsUpper(inomePortador).equals("")){
+											nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
+											continue;
+										}
+									}
+									
+									if(!tipoPlanilha.equals("MOVIMENTO")){
+										nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
+									}
 									nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
 									documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
 
