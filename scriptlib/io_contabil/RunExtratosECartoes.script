@@ -48,8 +48,8 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoDebug(String.format("Invoking method %s...", methodName));
 				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, nomePortador, jDados, dbIOCont, logger);
 				//logger.logInfoDebug("RESPONSE -> " + response);
@@ -93,7 +93,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
 				
@@ -132,7 +132,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
 				
@@ -220,7 +220,7 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
@@ -257,7 +257,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
@@ -273,24 +273,25 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 
 public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, MemoryFile memFile, JSONObject roteiroCRM, DataBase dbIOCont, InoutLogger logger) throws Exception {
 
-	String line           = "";
-    String anoData        = "";
-	String dirName        = "";
-	String jStatus        = "";
-	String extensao       = "";
-	String codEmpresa     = "";
-	String nomeArquivo    = "";
-	String nomeEmpresa    = "";
-	String nomePortador   = "";
-	String tipoPlanilha   = "";
-	String complemento01  = "";
-	String complemento02  = "";
-	String nomePortador2  = "";
-	String tipoLancamento = "";
+	String line              = "";
+    String anoData           = "";
+	String dirName           = "";
+	String jStatus           = "";
+	String extensao          = "";
+	String codEmpresa        = "";
+	String nomeArquivo       = "";
+	String nomeEmpresa       = "";
+	String nomePortador      = "";
+	String tipoPlanilha      = "";
+	String complemento01     = "";
+	String complemento02     = "";
+	String nomePortador2     = "";
+	String tipoLancamento    = "";
 	String arquivoCompleto   = "";
 	String cabecalhoPlanilha = "";
+	String complemento09     = "";
 	
-	String retornoValidacao =  "";
+	String retornoValidacao  =  "";
 	// String retornoValidacao =  "";
     
 	
@@ -306,6 +307,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 	if (variaveis.has("tipoPlanilha"))   tipoPlanilha   = variaveis.optString("tipoPlanilha");
 	if (variaveis.has("complemento01"))  complemento01  = variaveis.optString("complemento01");
 	if (variaveis.has("complemento02"))  complemento02  = variaveis.optString("complemento02");
+	if (variaveis.has("complemento09"))  complemento09  = variaveis.optString("complemento09");
 	if (variaveis.has("nomePortador2"))  nomePortador2  = variaveis.optString("nomePortador2");
 	nomePortador2 = nomePortador2.trim();
 	if (variaveis.has("tipoLancamento")) tipoLancamento = variaveis.optString("tipoLancamento");
@@ -1140,7 +1142,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		// Nome Portador  ->  "BANCO DO BRASIL {AGENCIA} {CONTA}"
 		// //logger.logInfoInfo("cabecalho == "+cabecalhoPlanilha);
 		if ((cabecalhoPlanilha.contains("CLIENTE - CONTA ATUAL") || cabecalhoPlanilha.contains("CLIENTE - CONTA ANTERIOR")) && 
-			(cabecalhoPlanilha.contains("DT. BALANCETE") || cabecalhoPlanilha.contains("BALANCETE MOVIMENTO") || 
+			(cabecalhoPlanilha.contains("DT. BALANCETE") || cabecalhoPlanilha.contains("DT.. BALANCETE") || cabecalhoPlanilha.contains("BALANCETE MOVIMENTO") || 
 			 cabecalhoPlanilha.contains("BALANCETE;MOVIMENTO") || cabecalhoPlanilha.contains("BALANCETE|MOVIMENTO"))) {// 2403-030954 - Nicholas - 12/03/2024
 			////logger.logInfoInfo("CP - " + cabecalhoPlanilha);
 			
@@ -3568,7 +3570,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	}
 	
 	////// Extrato - ITAU PDF //////////////////////////////////////////////////////////////////
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ITAU_PDF") && !arquivoCompleto.contains("CREDISAN COOPERATIVA DE CREDITO") && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ITAU_PDF") && !arquivoCompleto.contains("RETIRADA DE RECURSOS PAIS (SAQUE)") && !arquivoCompleto.contains("CREDISAN COOPERATIVA DE CREDITO") && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
 		// //logger.logInfoDebug("ITAU -> PDF " + line);
 		/*O TIPO 002 NAO ESTA PASSANDO NESTE IF, POIS O TEXTO TIAU EMPRESA VEIO EM UMA IMAGEM NO PADRAO NOVO
 		COMO ALTERNATIVA TALVEZ SEJA NECESSARIO VIR NO NOME DO ARQUIVO ITAU
@@ -3773,7 +3775,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		if(cabecalhoPlanilha.contains("NOME") && memFile.getStringFieldRemoveEspCharsUpper(0).startsWith("AG") && 
 			memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-2).contains("CON") && arquivoCompleto.contains("ITAU") && 
 			memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1).contains("-") &&
-			nomePortador2.equals("") && !cabecalhoPlanilha.contains("SICOOB")){
+			nomePortador2.equals("") && !cabecalhoPlanilha.contains("SICOOB") && !cabecalhoPlanilha.contains("LANCAMENTOS NACIONAIS")){
 			
 			nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize() - 1).replaceAll("\\|", "");
 
@@ -4067,6 +4069,46 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOCARTAO", "001");
 
 			mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_BanrisulPDF", memFile, jDados, mapaVariavel, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+	
+	////// FATURA CARTAO CREDITO ITAU PDF //////////////////////////////////////////////////////////////////
+	if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_Itau_PDF")){
+		logger.logInfo("LN FATURA CARTAO CREDITO ITAU RUN = "+line);
+		if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("FECHADA")){
+			String complemento09 = memFile.getStringFieldRemoveEspCharsUpper(1);
+			logger.logInfo("CP09 = "+complemento09);
+			variaveis.put("complemento09", complemento09);
+			variaveis.put("tipoRetorno",   "continue");
+			return variaveis.toString();
+		}
+		if(memFile.getStringFieldRemoveEspCharsUpper(2).contains("CONTA CORRENTE")){
+			nomePortador2 = cutString(memFile.getStringFieldRemoveEspCharsUpper(2), "CORRENTE");
+			variaveis.put("nomePortador2", nomePortador2);
+			variaveis.put("tipoRetorno", "continue");
+			return variaveis.toString();
+		}
+
+		if (cabecalhoPlanilha.contains("LANCAMENTOS NACIONAIS") && 
+			cabecalhoPlanilha.contains("LANCAMENTOS INTERNACIONAIS") && 
+			cabecalhoPlanilha.contains("SALDO DA FATURA ANTERIOR")){
+
+			JSONObject jDados = new JSONObject();
+
+			logger.logInfo("DATA NO COMPLEMENTO 09 -> RUN " + variaveis.optString("complemento09"));
+			logger.logInfo("NOME PORTADOR NA RUN -> " + nomePortador2);
+
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			jDados.put("DATA", variaveis.optString("complemento09"));
+			jDados.put("NOMEPORTADOR", nomePortador2);
+			jDados.put("TIPOPLANILHA", "FATURACARTAOCREDITOITAU");
+			jDados.put("NOMEEMPRESA", nomeEmpresa);
+
+			mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_ItauPDF", memFile, jDados, mapaVariavel, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
@@ -5635,6 +5677,8 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			if ((line.contains("COOP") && line.contains("CRED") || (line.contains("C.C.I.L.A") || line.contains("C.C.P.I"))) &&  
 				line.contains("EXTRATO") && line.contains("CONTA") && line.contains("CORRENTE")) {
 				tipoPlanilha = "EXTRATOSICREDI";
+				
+				logger.logInfo("ENTROU SICREDI TXT RUN");
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);

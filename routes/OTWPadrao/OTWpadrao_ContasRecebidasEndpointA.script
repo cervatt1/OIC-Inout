@@ -24040,7 +24040,7 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 							nomePortador = cutString(nomePortador, "CONTA: ", "PE").trim();
 						}
 					}
-
+					
 					// Buscar Extrato por Chave na Tabela IO_EXTRATO.
 					extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
 					.fields("CHAVE")

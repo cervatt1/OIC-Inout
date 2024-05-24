@@ -716,4 +716,80 @@ public class TemplateUtils {
 		return dataMovimento;
 	}
 	
+	public List<String> addBancoLidos (List<String> bancosLidos, String complemento08, String nomePortador){
+		try {
+			String banco = "";
+			if (!complemento08.equals("")) {
+				banco = "BANCO: "+complemento08+" ";
+			}
+			if (!nomePortador.equals("EM BRANCO")) {
+				banco += nomePortador;
+			}
+			// logger.logInfo("Leu o banco " + banco);
+			if (!bancosLidos.toString().contains(banco)) {
+				bancosLidos.add(banco);
+			}
+		} catch (Exception e) {
+			logger.logInfo("Bcc metodo " + e.getMessage());
+		}
+		return bancosLidos;
+	}
+
+	public List<String> addArquivosLidosLista (List<String> arquivosLidosLista, String nomeArquivo){
+		try{
+			if(!arquivosLidosLista.toString().contains(nomeArquivo)){
+				arquivosLidosLista.add(nomeArquivo);
+			}
+		}catch(Exception Al){logger.logInfo("CATCH arquivosLidos metodo -> " + Al.getMessage());}
+		
+		return arquivosLidosLista;
+	}
+	
+	public String buscaClassificacao (double valorDesconto, double valorJuros, double valorMulta, int contador, String erpContabilidade, String tipoLancamento){
+		String classificacao = "";
+		if(tipoLancamento.contains("PAGAR")){
+
+			if (valorDesconto == 0 && valorJuros == 0) classificacao = "X";
+			if (valorDesconto == 0 && valorJuros > 0)  classificacao = "C";
+			if (valorDesconto >  0 && valorJuros == 0) classificacao = "D";
+			if (valorDesconto >  0 && valorJuros > 0)  classificacao = "V";
+
+			if ((contador > 1 || valorMulta > 0) && classificacao.equals("X")) classificacao = "C";
+			if (contador > 1 && classificacao.equals("D")) classificacao = "V";
+		}
+		if(tipoLancamento.contains("RECEBER")){
+			if (valorDesconto == 0 && valorJuros == 0) classificacao = "X";
+			if (valorDesconto == 0 && valorJuros > 0)  classificacao = "D";
+			if (valorDesconto >  0 && valorJuros == 0) classificacao = "C";
+			if (valorDesconto >  0 && valorJuros > 0)  classificacao = "V";
+
+			if ((contador > 1 || valorMulta > 0) && classificacao.equals("X")) classificacao = "D";
+			if (contador > 1 && classificacao.equals("C")) classificacao = "V";
+		}
+
+		if (erpContabilidade.contains("DOMINIO")) {
+			if(tipoLancamento.contains("PAGAR")){
+
+				if (valorDesconto == 0 && (valorJuros + valorMulta) == 0) classificacao = "X";
+				if (valorDesconto == 0 && (valorJuros + valorMulta) > 0)  classificacao = "V";
+				if (valorDesconto >  0 && (valorJuros + valorMulta) == 0) classificacao = "V";
+				if (valorDesconto >  0 && (valorJuros + valorMulta) > 0)  classificacao = "V";
+
+				if ((contador > 1 || valorMulta > 0) && classificacao.equals("X")) classificacao = "V";
+				if (contador > 1 && classificacao.equals("D")) classificacao = "V";
+			}
+			if(tipoLancamento.contains("RECEBER")){
+				if (valorDesconto == 0 && (valorJuros + valorMulta) == 0) classificacao = "X";
+				if (valorDesconto == 0 && (valorJuros + valorMulta) > 0)  classificacao = "V";
+				if (valorDesconto >  0 && (valorJuros + valorMulta) == 0) classificacao = "V";
+				if (valorDesconto >  0 && (valorJuros + valorMulta) > 0)  classificacao = "V";
+
+				if ((contador > 1 || valorMulta > 0) && classificacao.equals("X")) classificacao = "V";
+				if (contador > 1 && classificacao.equals("C")) classificacao = "V";
+			}
+		}
+		
+		return classificacao;
+	}
+	
 }
