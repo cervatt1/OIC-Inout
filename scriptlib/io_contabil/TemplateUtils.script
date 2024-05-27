@@ -349,7 +349,7 @@ public class TemplateUtils {
 		}
 		if(arquivoCompleto.contains("DATA") && arquivoCompleto.contains("AG/ORIGEM") &&
 			/* && arquivoCompleto.contains("LIMITE DA CONTA CONTRATADO")*/ //2311-022345 comentado
-			arquivoCompleto.contains("0800 728 0728")){
+			(arquivoCompleto.contains("0800 728") && arquivoCompleto.contains("0728"))){
 			return true; //ITAU 2
 		}
 		if(arquivoCompleto.contains("RELATORIO DE VENDAS") && arquivoCompleto.contains("INFINITEPAY") && arquivoCompleto.contains("0800 591 7207")){

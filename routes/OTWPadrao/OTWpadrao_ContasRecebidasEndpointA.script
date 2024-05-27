@@ -2407,7 +2407,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
  			if (restoLinha == 0) putStatus(dirName, "03--Etapa 3 de 4 - " + String.valueOf(contRegra) + "--" + tipoLancamento + ".status", jStatus, logger);
 			
 			
-			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
+			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | TPLAN:"+ ttMov.tipoLancamento + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
 			// logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
@@ -2431,8 +2431,10 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			String integraFiscal = roteiroCRM.optString("Integracao_fiscal").toUpperCase();
 			String integraContrato = roteiroCRM.optString("Integracao_contratos").toUpperCase();
 
-			if(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO")) continue;
-			if(ttMov.tipoLancamento.contains("RECEBER") && ttMov.debitoCredito.contains("EXTRATO-DEBITO")) continue;
+			 logger.logInfo("ttMov.tipoLancamento.contains -> "+ttMov.tipoLancamento + " |ttMov.debitoCredito.contains -> "+ttMov.debitoCredito );
+			//if(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO")) continue;
+			//if(ttMov.tipoLancamento.contains("RECEBER") && ttMov.debitoCredito.contains("EXTRATO-DEBITO")) continue;
+			 logger.logInfo("22222222222222222222222222OISWFHAOWEFHUWHUHFWHWFHFHOFIWFHWFH");
 			// logger.logInfo("PORTAS1 " + cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"));
 			// logger.logInfo("PORTAS2 " + ttMov.nomePortador);
 			if (ttMov.nomePortador.toUpperCase().contains("OTT_OUD") && ttMov.nomePortador.toUpperCase().contains("CEF")) ttMov.nomePortador = cutString(ttMov.nomePortador.toUpperCase(), 0, "OTT_") + " " + cutString(ttMov.nomePortador.toUpperCase(), ttMov.nomePortador.toUpperCase().indexOf(cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"))+cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_").length()+1);

@@ -2407,7 +2407,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
  			if (restoLinha == 0) putStatus(dirName, "03--Etapa 3 de 4 - " + String.valueOf(contRegra) + "--" + tipoLancamento + ".status", jStatus, logger);
 			
 			
-			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
+			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | TPLAN:"+ ttMov.tipoLancamento + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);
 			// logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
@@ -2431,6 +2431,9 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			String integraFiscal = roteiroCRM.optString("Integracao_fiscal").toUpperCase();
 			String integraContrato = roteiroCRM.optString("Integracao_contratos").toUpperCase();
 
+			//logger.logInfo("ttMov.tipoLancamento.contains -> "+ttMov.tipoLancamento + " |ttMov.debitoCredito.contains -> "+ttMov.debitoCredito + " |duif"+
+			//				ttMov.tipoLancamento.contains("PAGAR")   +"&&"+ ttMov.debitoCredito.contains("EXTRATO-CREDITO") + "|RES"+(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO"))
+			//);
 			if(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO")) continue;
 			if(ttMov.tipoLancamento.contains("RECEBER") && ttMov.debitoCredito.contains("EXTRATO-DEBITO")) continue;
 			// logger.logInfo("PORTAS1 " + cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"));
@@ -4523,7 +4526,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				mapaOficial.put(key,ttMov2);
 				ttMov3.classificacao = ttMov2.classificacao;
 				mapaOficial.put(keyAc,ttMov3);
-			//logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);		
+			logger.logInfo("TRESDEQUATROX -> TPPLAN: " + ttMov.tipoPlanilha + " | NORIGEM:"+ ttMov.nomeOrigem + " | NPORTADOR:"+ ttMov.nomePortador + " | VLRDCM:" + ttMov.valorDocumento + " | DTMOV:" + ttMov.dataMovimento + " | TPLC:" + ttMov.tipoLancamento + " | DEBCRED:" + ttMov.debitoCredito);		
 			}
 		}
 		if(contRegra == -1){
@@ -17749,6 +17752,7 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
+		logger.logInfo("EXIBINDO:"+tipoPadrao);
 
 		if (line.contains("SALDO") && line.contains("ANTERIOR")) continue;
 		if (line.contains("SALDO") && line.contains("DIA")) continue;
@@ -17976,8 +17980,12 @@ public boolean readExtratoCaixaPDF(MemoryFile memFile, String nomePortador, JSON
 
 
 				if(tipoPadrao.equals("003")){
-					if(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains("-")) debitoCredito = "EXTRATO-DEBITO";
-					if(!memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains("-")) debitoCredito = "EXTRATO-CREDITO";
+					if( memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains("D") ||
+						memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).contains("-")){ 
+						debitoCredito = "EXTRATO-DEBITO";
+					}else{ 
+						debitoCredito = "EXTRATO-CREDITO";
+					}
 				}
 				else if (tipoPadrao.equals("004")) {
 					if (complemento03.contains("D")) debitoCredito = "EXTRATO-DEBITO";
@@ -19329,7 +19337,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 			
 			// logger.logInfo("DM "+idataMovimento+" -> "+dataMovimento+" MF DATA = "+memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 			
-			// logger.logInfo("DataMovimento: "+dataMovimento); //
+			logger.logInfo("DataMovimento: "+dataMovimento); //
 			
 			if (dataMovimento.equals("")) continue;
 
@@ -28928,13 +28936,20 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
                 valorDocumento = 0;
                 continue;
             }
+			if(valorDocumento==0){
+				try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento-1));}
+				catch (Exception vlrd) {
+					valorDocumento = 0;
+					continue;
+				}	
+			}
 			
 			//logger.logInfo("LOG VALOR DOCUMENTO - " + valorDocumento);
 			
 			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(idebitoCredito);
 			
-            if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
-			if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
+            if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
+			if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
 			
 			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
             complemento02 = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
