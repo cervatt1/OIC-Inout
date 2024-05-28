@@ -2431,10 +2431,10 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			String integraFiscal = roteiroCRM.optString("Integracao_fiscal").toUpperCase();
 			String integraContrato = roteiroCRM.optString("Integracao_contratos").toUpperCase();
 
-			 logger.logInfo("ttMov.tipoLancamento.contains -> "+ttMov.tipoLancamento + " |ttMov.debitoCredito.contains -> "+ttMov.debitoCredito );
+			 //logger.logInfo("ttMov.tipoLancamento.contains -> "+ttMov.tipoLancamento + " |ttMov.debitoCredito.contains -> "+ttMov.debitoCredito );
 			//if(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO")) continue;
 			//if(ttMov.tipoLancamento.contains("RECEBER") && ttMov.debitoCredito.contains("EXTRATO-DEBITO")) continue;
-			 logger.logInfo("22222222222222222222222222OISWFHAOWEFHUWHUHFWHWFHFHOFIWFHWFH");
+			 //logger.logInfo("22222222222222222222222222OISWFHAOWEFHUWHUHFWHWFHFHOFIWFHWFH");
 			// logger.logInfo("PORTAS1 " + cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"));
 			// logger.logInfo("PORTAS2 " + ttMov.nomePortador);
 			if (ttMov.nomePortador.toUpperCase().contains("OTT_OUD") && ttMov.nomePortador.toUpperCase().contains("CEF")) ttMov.nomePortador = cutString(ttMov.nomePortador.toUpperCase(), 0, "OTT_") + " " + cutString(ttMov.nomePortador.toUpperCase(), ttMov.nomePortador.toUpperCase().indexOf(cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"))+cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_").length()+1);

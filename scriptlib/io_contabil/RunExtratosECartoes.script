@@ -465,16 +465,17 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 public String validacaoPDF(String anoData, String complemento01, String complemento02, String line, DataBase dbIOCont, JSONObject variaveis, JSONObject roteiroCRM, String arquivoCompleto, String cabecalhoPlanilha, String tipoLancamento, String nomeEmpresa, String codEmpresa, String nomeArquivo, String nomeArquivoAuxiliar, MemoryFile memFile, HashMap mapaVariavel, String nomePortador, String nomePortador2, String tipoPlanilha, InoutLogger logger) throws Exception {
 	
-	 ////// COMPROVANTE SICREDI PDF //////////////////////////////////////////////////////////////////
+	////// COMPROVANTE SICREDI PDF //////////////////////////////////////////////////////////////////
 	if(roteiroCRM.optString("Planilhas_Padroes").contains("Sicredi_Comprovantes_PDF")){
-		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("VALOR DO TITULO") &&
-			arquivoCompleto.contains("RAZAO SOCIAL DO BENEFICIARIO")){
+		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("ASSOCIADO") &&
+			arquivoCompleto.contains("COOPERATIVA")){
 
-			if(memFile.getStringFieldRemoveEspCharsUpper(2).contains("CONTA CORRENTE")){
-				nomePortador = "SICREDI " + memFile.getStringFieldRemoveEspCharsUpper(3);
+			if(memFile.getStringFieldRemoveEspCharsUpper(1).contains("CONTA CORRENTE")){
+				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
+				nomePortador = cutString(nomePortador, "CORRENTE").replaceAll(":", "");
 			}
 
-			tipoPlanilha = "SICREDI COMPROVANTE";
+			tipoPlanilha = "SICREDI COMPROVANTE"; //Dps eh mudado o tipo planilha
 
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
