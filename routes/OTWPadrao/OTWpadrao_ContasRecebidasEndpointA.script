@@ -16147,7 +16147,8 @@ public HashMap readFaturaCartaoCredito_BradescoPDF(MemoryFile memFile, JSONObjec
 
 		cont++;
 		try {
-			logger.logInfo("DUIF:"+nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*") +" |NOMEARQ:"+nomeArquivo);
+			
+			//logger.logInfo("DUIF:"+nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*") +" |NOMEARQ:"+nomeArquivo);
 			if(nomeArquivo.matches(".*\\b(0[1-9]|1[0-2])-(19|20)\\d{2}\\b\\..*")){ 
 				anoDataNomeArquivo = true;
 				anoData = "";
@@ -16163,8 +16164,10 @@ public HashMap readFaturaCartaoCredito_BradescoPDF(MemoryFile memFile, JSONObjec
 				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento-1).trim()+"/"+anoData);
 			}
 
+			//if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("MES:")) anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(1), "/");
 			if(!anoDataNomeArquivo && memFile.getStringFieldRemoveEspCharsUpper(0).contains("MES:")) anoData = cutString(memFile.getStringFieldRemoveEspCharsUpper(1), "/");
-
+			
+			//if(memFile.getStringFieldRemoveEspCharsUpper(0).trim().contains("DATA DE VENCIMENTO:")){
 			if(!anoDataNomeArquivo && memFile.getStringFieldRemoveEspCharsUpper(0).trim().contains("DATA DE VENCIMENTO:")){
 				try{
 					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).trim());
