@@ -19253,6 +19253,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
     String strValorDocumento = "";
     String contLinhaExtrato  = "";
 	String tipoExtrato 		 = "";
+	String mesesString 		 = "JANEIRO,FEVEREIRO,MARCO,ABRIL,MAIO,JUNHO,JULHO,AGOSTO,SETEMBRO,OUTUBRO,NOVEMBRO,DEZEMBRO";
 
     double valorDocumento    = 0.0;
  	int idataMovimento	= 0;
@@ -19261,6 +19262,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 	int inomeOrigem		= 2;
 	int ivalorDocumento	= 3;
 	int icomplemento02  = 0;
+	boolean pularcabecalho = false;
 	
     nomePortador = "EXTRATO INTER - "+nomePortador.replaceAll("\\|", " ");
 
@@ -19298,12 +19300,42 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 			ivalorDocumento = 1;
 			inomeOrigem		= 0;
 		}
+
+		if( !tipoExtrato.equals("003") && line.contains("FALE") && line.contains("COM") && line.contains("GENTE")) pularcabecalho = true;
+
+		if( !tipoExtrato.equals("003") && (Arrays.asList(mesesString.split(",")).contains(memFile.getStringFieldRemoveEspCharsUpper(2).trim()) && 
+			!memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("")) ){ 
+			pularcabecalho = false;
+		}
+
+		if( !tipoExtrato.equals("003") && pularcabecalho) continue;
+
+		if( !tipoExtrato.equals("003") &&
+			!Arrays.asList(mesesString.split(",")).contains(memFile.getStringFieldRemoveEspCharsUpper(2).trim())  &&
+			memFile.getFieldsSize() < 3 ){
+			try {
+				dbIOCont.update("IO_EXTRATO")
+					.fields("HISTORICO")
+					.where("CHAVE = ? ")
+					.param(nomeOrigem + " " + memFile.getStringFieldRemoveEspCharsUpper(0) + " " + memFile.getStringFieldRemoveEspCharsUpper(1))
+					.param(chaveExtrato)
+					.execute();
+			} catch (Exception sqlUpdateException) {
+			}
+			continue;
+		}
 		
+		nomeOrigem = "";
+		for(int i = 0; i < ivalorDocumento; i++){
+			nomeOrigem += " "+memFile.getStringFieldRemoveEspCharsUpper(i);
+		}
+		nomeOrigem = nomeOrigem.trim();
 		//if(line.contains("DE") && line.matches("^[0-9].*")){
 				//String colunaData = line.replaceAll("|", " ");
 			//}
 			
 			//logger.logInfo("DataC: "+colunaData);
+		if(tipoExtrato.contains("003") && line.contains("OUVIDORIA: 0800 940 7772")) continue;
         
 		try {
 			//String colunaData = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
@@ -19327,7 +19359,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 					if (dataAuxiliar.contains("SALDO"))
 						dataAuxiliar = cutString(dataAuxiliar, 0, "SALDO");
 					
-					logger.logInfo("DT == "+dataAuxiliar);//#2402-029889
+					// logger.logInfo("DT == "+dataAuxiliar);//#2402-029889
 					dataAuxiliar = cutString(dataAuxiliar, 0, dataAuxiliar.indexOf("/202")+5);
 					continue;
 				}
@@ -19337,7 +19369,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 			
 			// logger.logInfo("DM "+idataMovimento+" -> "+dataMovimento+" MF DATA = "+memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 			
-			logger.logInfo("DataMovimento: "+dataMovimento); //
+			// logger.logInfo("DataMovimento: "+dataMovimento); //
 			
 			if (dataMovimento.equals("")) continue;
 
@@ -19355,13 +19387,13 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 				catch (Exception vlrd) { valorDocumento = 0; }
 			}
 			
-			logger.logInfo("ValorDocumento: "+valorDocumento); //
+			//logger.logInfo("ValorDocumento: "+valorDocumento); //
 
 			// logger.logInfo("VD "+ivalorDocumento+" -> "+valorDocumento);
 			if (valorDocumento == 0) continue;
 
 
-			nomeOrigem      = "";
+			/*nomeOrigem      = "";
 			if(ivalorDocumento == 2){
 				nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\\:","").replaceAll("\"","").replaceAll("\\?","").trim() + " " + memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\\:","").replaceAll("\"","").replaceAll("\\?","").trim();
 				//documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
@@ -19408,7 +19440,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 					nomeOrigem += " " + StringUtil.removeSpecialCharsToUC(proximaLinha.replaceAll("\\|", " "));
 				}
 				else {break;}
-			}
+			}*/
 			
 			if((line.replaceAll("\\|", " ").contains("FALE COM A GENTE") || line.startsWith("SAC:") || line.contains("PERIODO") || line.contains("TIPO") 
 				|| line.replaceAll("\\|", " ").contains("SOLICITADO EM") || (line.contains("DE") && line.contains("CIENCIA"))) && memFile.getFieldsSize() < 3){
