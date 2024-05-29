@@ -16189,7 +16189,8 @@ public HashMap readFaturaCartaoCredito_BradescoPDF(MemoryFile memFile, JSONObjec
 			try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 			catch (Exception vlrd) { valorDocumento = 0; }
 
-			debitoCredito = "EXTRATO-DEBITO";
+			if(tipoLancamento.contains("PAGAR")) debitoCredito = "EXTRATO-DEBITO";
+			if(tipoLancamento.contains("RECEBER")) debitoCredito = "EXTRATO-CREDITO";
 
 			valorDocumento = Math.abs(valorDocumento);
 
@@ -28657,8 +28658,6 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 	String debitoCreditoAux  = "";
 	String tipoExtrato		 = "";
 	String lote       	 	 = "";
-	String tipoLancamento 	 = "";
-	String tipoPlanilha 	 = "";
 
 	String line 			 = "";
     String contLinhaExtrato  = "";
@@ -28684,8 +28683,6 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
 	if(jDados.has("NOMEPORTADOR")) nomePortador = jDados.optString("NOMEPORTADOR");
 	if(jDados.has("TIPOEXTRATO"))  tipoExtrato  = jDados.optString("TIPOEXTRATO");
-    if(jDados.has("TIPOLANCAMENTO")) 	 tipoLancamento = jDados.optString("TIPOLANCAMENTO");
-    if(jDados.has("TIPOPLANILHA"))    	 tipoPlanilha    = jDados.optString("TIPOPLANILHA");
 	
 	if (anoData.contains("/")) anoData = cutString(anoData, "/");
 	
@@ -28697,7 +28694,6 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 
 	String nomeOrigemAuxiliar = "";
     while (memFile.hasNextLine()) {
-		logger.logInfo("TIPOOO:"+tipoExtrato);
 		
 		// logger.logInfo("LIN -> " + line);
 		if(tipoExtrato.equals("001")){
@@ -28778,7 +28774,7 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 			}
 			
 			// logger.logInfo("MF idt -> " + memFile.getStringFieldRemoveEspCharsUpper(idataMovimento) + " |MF vd-> " + memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento));
-			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("NUMERO DA CONTA")) nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
+			// if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA CORRENTE:")) nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
 			
 			String dataStr = (memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 			
@@ -28931,8 +28927,16 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 			try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
 			catch (Exception vlrd) {
                 valorDocumento = 0;
-                continue;
+                // continue;
             }
+			
+			if(valorDocumento==0){
+				try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento-1));}
+				catch (Exception vlrd) {
+					valorDocumento = 0;
+					continue;
+				}	
+			}
 			
 			//logger.logInfo("LOG VALOR DOCUMENTO - " + valorDocumento);
 			
