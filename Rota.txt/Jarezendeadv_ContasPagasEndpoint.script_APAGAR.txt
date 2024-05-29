@@ -635,6 +635,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					// =======================  ========================   =======================
 					// =======================  VARIAVEIS PERSONALIZADAS   =======================
 					// =======================  ========================   =======================
+                    boolean VDProxLine = false;
 
 
 					JSONObject objetoParametro = new JSONObject();
@@ -1189,7 +1190,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										dataLote	  = getCampoDate(dataMovimento, "", "yyyy-MM");
 									}
 									
-									if (!tipoPlanilha.contains("OTTCARTAO")) {
+									if (!tipoPlanilha.contains("OTTCARTAO") && !tipoPlanilha.contains("MOVIMENTO")) {
 										// #Fabrica(2019-05-20)
 										try{
 											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
@@ -1199,6 +1200,15 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataMovimento   = "";
 											// dataLote        = "";
 										}
+									}
+
+									if (tipoPlanilha.contains("MOVIMENTO") && !VDProxLine) {
+										try{
+											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
+											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+										}catch(Exception e){
+                                            logger.logInfo("ERRO getDate():"+e.getMessage());
+                                        }
 									}
 									
 									 
@@ -1235,10 +1245,25 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										if (zerarColAlternativo.contains("complemento09"))  complemento09   = "";
 										if (zerarColAlternativo.contains("complemento10"))  complemento10   = "";
 									}
-									
-									nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
-									nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
-									documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
+									if(!tipoPlanilha.contains("MOVIMENTO")){
+									    nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
+                                        nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
+                                        documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
+									}
+                                    if(!VDProxLine && tipoPlanilha.contains("MOVIMENTO") && line.contains("AG.") && line.contains("C/C")){
+									    nomePortador	= cutString(memFile.getStringFieldRemoveEspCharsUpper(1),"C/C").trim();
+                                        continue;
+                                    }
+									if(tipoPlanilha.contains("MOVIMENTO") && !VDProxLine){
+                                        nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
+                                        documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
+									}
+                                    if(tipoPlanilha.contains("MOVIMENTO") && VDProxLine){
+                                        documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger);
+                                        nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(1);
+                                        if( memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).trim().equals("") && 
+                                            memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento-1).trim().equals("")) continue;
+                                    }
 
 									complemento01	= getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger);
 									complemento02	= getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger);
@@ -1306,10 +1331,19 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										try{valorMulta = Math.abs(memFile.getDoubleField(ivalorMulta));}
 										catch(Exception vlrm) {valorMulta = 0;}
 									}
+
+                                    if( memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).trim().equals("") && 
+                                        memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento-1).trim().equals("")){
+                                        VDProxLine = true;
+                                        continue;
+                                    }
 									
 									//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
 									if(ivalorDocumento >=0){
-										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
+										try{
+                                            valorDocumento = memFile.getDoubleField(ivalorDocumento);
+                                            if(tipoPlanilha.contains("MOVIMENTO")) VDProxLine = false;
+                                        }
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
 									
