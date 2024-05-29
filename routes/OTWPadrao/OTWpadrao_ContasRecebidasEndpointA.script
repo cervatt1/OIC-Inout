@@ -28938,9 +28938,10 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 				}	
 			}
 			
-			//logger.logInfo("LOG VALOR DOCUMENTO - " + valorDocumento);
+			//logger.logInfo("LOG VALOR DOCUMENTO - " + valorDocumento); 
 			
-			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(idebitoCredito);
+			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1);
+			logger.logInfo("debitoCreditoAux:" + debitoCreditoAux); 
 			
             if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
 			if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
