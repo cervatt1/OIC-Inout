@@ -19301,15 +19301,24 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 
 		if( !tipoExtrato.equals("003") && line.contains("FALE") && line.contains("COM") && line.contains("GENTE")) pularcabecalho = true;
 
-		if( !tipoExtrato.equals("003") && (Arrays.asList(mesesString.split(",")).contains(memFile.getStringFieldRemoveEspCharsUpper(2).trim()) && 
-			!memFile.getStringFieldRemoveEspCharsUpper(2).trim().equals("")) ){ 
+		String mesDoLancamento = memFile.getStringFieldRemoveEspCharsUpper(2).trim();
+		if(!Arrays.asList(mesesString.split(",")).contains(mesDoLancamento)){
+			try{
+				mesDoLancamento = line.split(" ")[2];
+			}catch(Exception e){
+				mesDoLancamento = "";
+			}
+		}
+
+		if( !tipoExtrato.equals("003") && (Arrays.asList(mesesString.split(",")).contains(mesDoLancamento) && 
+			!mesDoLancamento.trim().equals("")) ){ 
 			pularcabecalho = false;
 		}
 
 		if( !tipoExtrato.equals("003") && pularcabecalho) continue;
 
 		if( !tipoExtrato.equals("003") &&
-			!Arrays.asList(mesesString.split(",")).contains(memFile.getStringFieldRemoveEspCharsUpper(2).trim())  &&
+			!Arrays.asList(mesesString.split(",")).contains(mesDoLancamento)  &&
 			memFile.getFieldsSize() < 3 ){
 			try {
 				dbIOCont.update("IO_EXTRATO")
@@ -25300,7 +25309,7 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 				// complemento03 = "";
 				// if (debitoCredito.equals("")) debitoCredito = "EXTRATO-DEBITO"; //202303-0026660 JWR vai dar problema retirar essa linha
 				
-				//#2305-004552 e #2305-004348. Alguns casos n?o era identificado se o registro era d?bito ou cr?dito.
+				//#2305-004552 e #2305-004348. Alguns casos não era identificado se o registro era débito ou crédito.
 				if(debitoCredito.equals("")){
 					if (memFile.getStringFieldRemoveEspCharsUpper(1).startsWith("CR ")) debitoCredito = "EXTRATO-CREDITO";
 					
@@ -25321,6 +25330,8 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 					if (memFile.getStringFieldRemoveEspCharsUpper(1).startsWith("CHQ CMP")) debitoCredito = "EXTRATO-DEBITO";
 						
 					if (memFile.getStringFieldRemoveEspCharsUpper(1).contains("CHQ") && memFile.getStringFieldRemoveEspCharsUpper(1).startsWith("DEV")) debitoCredito = "EXTRATO-DEBITO";
+					
+					if (memFile.getStringFieldRemoveEspCharsUpper(1).contains("OUTROS CREDITOS")) debitoCredito = "EXTRATO-CREDITO";
 
 				}
 				
@@ -25348,7 +25359,9 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 				
 				//logger.logInfo("LOG SUBSTRING - " + memFile.getStringFieldRemoveEspCharsUpper(idocumento).substring(tamanhoCampoDoc));
 
-				if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).substring(tamanhoCampoDoc).equals("-")){
+				//2402-028413 - 2 lancamentos pegavam o valor como nomeOrigem pq o documento termina com -
+				//if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).substring(tamanhoCampoDoc).equals("-")){
+				if(memFile.getStringFieldRemoveEspCharsUpper(idocumento).substring(tamanhoCampoDoc).equals("-") && memFile.getFieldsSize() > 4){
 
 					documento = memFile.getStringFieldRemoveEspCharsUpper(idocumento) + " " + memFile.getStringFieldRemoveEspCharsUpper(idocumento + 1);
 					inomeOrigemAux = inomeOrigem + 1;
@@ -25365,7 +25378,7 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 				}
 				
 				
-				//#2308-013175 - Concatena??o de Strings que estavam quebrando no conversor
+				//#2308-013175 - Concatenação de Strings que estavam quebrando no conversor
 				//if (memFile.getFieldsSize() > 3 && tipoLayout.equals("002") && !memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize() - 2).replaceAll(",", "").replaceAll(".", "").matches("[0-9]*"))
 				if (memFile.getFieldsSize() > 3 && tipoLayout.equals("002") && !memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize() - 2).contains(strValorDocumento))
 					nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim() + " " + memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize() - 2); //
@@ -28728,7 +28741,7 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
     while (memFile.hasNextLine()) {
 		
 		// logger.logInfo("LIN -> " + line);
-		if(tipoExtrato.equals("001")){
+	if(tipoExtrato.equals("001")){
         try {
             line = memFile.nextLine();
 			line = StringUtil.removeSpecialCharsToUC(line);
@@ -28972,7 +28985,7 @@ public boolean readExtratoBRBPDF(MemoryFile memFile, JSONObject jDados, DataBase
 			
 			//logger.logInfo("LOG VALOR DOCUMENTO - " + valorDocumento);
 			
-			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1);
+			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-3);
 			
             if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
 			if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
