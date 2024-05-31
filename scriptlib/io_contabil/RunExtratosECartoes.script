@@ -680,7 +680,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		
 	}*/
 	////// Extrato - NORDESTE PDF/////////////////////////////////////////////////////////// REFATORADO
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Nordeste_PDFXX") &&
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Nordeste_PDF") &&
 		cabecalhoPlanilha.contains("PERIODO") && cabecalhoPlanilha.contains("TITULAR") 	&& 
 		//cabecalhoPlanilha.contains("SALDO ANTERIOR") && (cabecalhoPlanilha.contains("DETALHAMENTO DO EXTRATO") || 
 		(cabecalhoPlanilha.contains("SALDO ANTERIOR") || (cabecalhoPlanilha.contains("CONTA CORRENTE:") && cabecalhoPlanilha.contains("PERIODO:"))) && (cabecalhoPlanilha.contains("DETALHAMENTO DO EXTRATO") || 
@@ -1429,6 +1429,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
 			jDados.put("TIPOEXTRATO", "001");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			jDados.put("TIPOPLANILHA",   "EXTRATO-BRB");
 
 			// //logger.logInfoInfo("NOME PORTADOR BRB -> "+ nomePortador2);
 
@@ -1450,6 +1452,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
 			jDados.put("TIPOEXTRATO", "002");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			jDados.put("TIPOPLANILHA",   "EXTRATO-BRB");
 			
 			// //logger.logInfoInfo("LOG NOME PORTADOR - " + nomePortador2);
 
@@ -3569,7 +3573,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
-	
+	logger.logInfo("ARQUIVO COMPLETO -> " + arquivoCompleto);
 	////// Extrato - ITAU PDF //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ITAU_PDF") && !arquivoCompleto.contains("RETIRADA DE RECURSOS PAIS (SAQUE)") && !arquivoCompleto.contains("CREDISAN COOPERATIVA DE CREDITO") && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
 		// //logger.logInfoDebug("ITAU -> PDF " + line);
@@ -5166,6 +5170,50 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				mapaVariavel = readExtratoECartao("readFrancesinha_BBExcel", memFile, jDados, mapaVariavel, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+			}
+		}
+		
+		
+		////// FATURA CARTAO CREDITO - ITAU EXCEL //////////////////////////////////////////////////////////////////
+		if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_Itau_EXCEL")){
+
+			//logger.logInfo("LINHA -> " + line);
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("FECHADA")){
+				complemento01 = memFile.getStringFieldRemoveEspCharsUpper(2);
+				variaveis.put("complemento01", complemento01);
+				variaveis.put("tipoRetorno",   "continue");
+				return variaveis.toString();
+			}
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(4).contains("AGENCIA / CONTA:")){
+				nomePortador2 = cutString(memFile.getStringFieldRemoveEspCharsUpper(4), " CONTA:");
+				variaveis.put("nomePortador2", nomePortador2);
+				variaveis.put("tipoRetorno", "continue");
+				return variaveis.toString();
+			}
+
+
+			if (cabecalhoPlanilha.contains("LANCAMENTOS NACIONAIS") && 
+				cabecalhoPlanilha.contains("LANCAMENTOS INTERNACIONAIS") && 
+				cabecalhoPlanilha.contains("SALDO DA FATURA ANTERIOR")){
+
+				JSONObject jDados = new JSONObject();
+
+				// logger.logInfo("DATA NO COMPLEMENTO 01 -> RUN " + complemento01);
+				// logger.logInfo("NOME PORTADOR RUN -> " + nomePortador2);
+
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				jDados.put("DATA", complemento01);
+				jDados.put("NOMEPORTADOR", nomePortador2);
+				jDados.put("TIPOPLANILHA", "FATURACARTAOCREDITOITAU");
+				jDados.put("NOMEEMPRESA", nomeEmpresa);
+
+				mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_Itau_Excel", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}

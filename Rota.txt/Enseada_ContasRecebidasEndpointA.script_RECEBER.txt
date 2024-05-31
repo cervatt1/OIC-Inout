@@ -905,7 +905,10 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									if (!tipoPlanilha.contains("OTTCARTAO")) {
 										if (tipoPlanilha.contains("PROVISAO")) {
-											if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGE") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("HEADER") && memFile.getStringFieldRemoveEspCharsUpper(4).contains("NORMAL")) {
+											if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGE") && 
+												memFile.getStringFieldRemoveEspCharsUpper(0).contains("HEADER") && 
+												(memFile.getStringFieldRemoveEspCharsUpper(4).contains("NORMAL") || 
+												memFile.getStringFieldRemoveEspCharsUpper(4).contains("EXTRA"))) {
 												// logger.logDebug("LINHA DA DATA " + line);
 												String dataTeste = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento);
 												
