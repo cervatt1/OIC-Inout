@@ -14781,9 +14781,6 @@ public boolean readExtratoBancoDoBrasilPDF(MemoryFile memFile, String nomePortad
 public boolean readExtratoBancoDoBrasil2PDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {	
 	JSONObject extratoEmpresa = new JSONObject();
 
-	logger.logDebug("BB PDF 2 ---------------------------");
-
-
     // Inicializacao de Variaveis
     String codEmpresa        = "";
     String nomeArquivo       = "";
@@ -14957,31 +14954,34 @@ public boolean readExtratoBancoDoBrasil2PDF(MemoryFile memFile, String nomePorta
                 //logger.logInfo("LOG CATCH- " + stringTeste);
             }
 
-            //logger.logInfo("LOG VALOR - " + valorDocumento);
+            logger.logInfo("LOG VALOR - " + valorDocumento);
             if (valorDocumento == 0) continue;
             // if(memFile.getFieldsSize() == 2)
                 // nomeOrigem		= complemento08 + " " + memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
             
             
-            //logger.logInfo(" VD -> " + valorDocumento + " NO COMPLETO -> " + nomeOrigem + "Data - " + dataMovimento);
+            logger.logInfo(" VD -> " + valorDocumento + " NO COMPLETO -> " + nomeOrigem + "Data - " + dataMovimento);
             contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
             chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
-
+			logger.logInfo("CHAVEEXTRATo -> " + chaveExtrato + "\n" + " np -> " + nomePortador + "\n" + " CONTLInha -> " + contLinhaExtrato + " DEBTO -> " + debitoCredito);
+           
             // Buscar Extrato por Chave na Tabela IO_EXTRATO.
             extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
             .fields("CHAVE")
             .param(chaveExtrato)
             .queryUnique();
-
+			
+			logger.logInfo("SHR ExtratoEmpresa-> " + extratoEmpresa.toString());
             // Inserir caso Chave nao encontrada.
             if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
+				logger.logInfo("TENTOU INSERIR NO BANCO");
                 try {
                     dbIOCont.insert("IO_EXTRATO")
                     .fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
                     .param(chaveExtrato)
                     .param(codEmpresa)
                     .param(dataMovimento)
-                    .param(nomePortador)
+                    .param(cutString(nomePortador, 0, 100))
                     .param(nomeOrigem)
                     .param(nomeArquivo.toUpperCase())
                     .param(complemento02)
