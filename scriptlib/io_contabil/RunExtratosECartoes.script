@@ -541,6 +541,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-HSBC");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			readExtratoECartao("readExtratoHSBCPDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
@@ -680,7 +681,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		
 	}*/
 	////// Extrato - NORDESTE PDF/////////////////////////////////////////////////////////// REFATORADO
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Nordeste_PDFXXX") &&
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Nordeste_PDF") &&
 		cabecalhoPlanilha.contains("PERIODO") && cabecalhoPlanilha.contains("TITULAR") 	&& 
 		//cabecalhoPlanilha.contains("SALDO ANTERIOR") && (cabecalhoPlanilha.contains("DETALHAMENTO DO EXTRATO") || 
 		(cabecalhoPlanilha.contains("SALDO ANTERIOR") || (cabecalhoPlanilha.contains("CONTA CORRENTE:") && cabecalhoPlanilha.contains("PERIODO:"))) && (cabecalhoPlanilha.contains("DETALHAMENTO DO EXTRATO") || 
@@ -836,6 +837,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			//logger.logInfoDebug("AMAZONIA PDF2");
@@ -893,6 +895,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			//#2312-024394 - Envio de nome da contabilidade e empresa para validacao do envio do campo DOCUMENTO
 			jDados.put("NOMECONTABILIDADE", roteiroCRM.optString("contabilidade").toUpperCase());
 			jDados.put("NOMEEMPRESA", nomeEmpresa.toUpperCase());
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			//Comentado parte da validação abaixo por conta de instabilidades no chamado #2401-026567
 			if((arquivoCompleto.contains("BRADESCO INTERNET BANKING") /*|| (cabecalhoPlanilha.contains("EXTRATO MENSAL / POR PERIODO") */&& !arquivoCompleto.contains("BRADESCO CELULAR")) || arquivoCompleto.contains("DEMONSTRATIVO DE INVESTIMENTOS")){
@@ -920,6 +923,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -1287,6 +1291,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("NOMEPORTADOR", nomePortador);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				// //logger.logInfoInfo("NOME PORTADOR UNICRED -> "+ nomePortador);
 				//if(arquivoCompleto.contains("SISTEMA DE AUTOMACAO UNICRED") || cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
@@ -1340,6 +1345,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINHA", line);
 			
 			readExtratoECartao("readExtratoUnicred2PDF", memFile, jDados, dbIOCont, logger);
@@ -1360,6 +1366,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			
@@ -1479,6 +1486,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ABC");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoABCPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1498,6 +1506,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ABC");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoABCPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1530,6 +1539,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			// //logger.logInfoInfo("AGUI " + anoData);
 			
@@ -1569,6 +1579,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BIB");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoBIBPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1631,6 +1642,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			// //logger.logInfoInfo("NOME PORTADOR DE XP INVENTIMENTOS -> "+ nomePortador);
@@ -1654,6 +1666,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			// //logger.logInfoInfo("NOME PORTADOR DE XP INVENTIMENTOS -> "+ nomePortador);
@@ -1678,6 +1691,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			
@@ -1741,6 +1755,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", 	codEmpresa);
 		jDados.put("NOMEARQUIVO", 	nomeArquivo);
 		jDados.put("LINE", 			line);
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 		////logger.logInfoInfo("NOME PORTADOR MERCADO PAGO -> "+ nomePortador2);
 
@@ -1769,6 +1784,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("LINE", line);
 					
 				readExtratoECartao("readExtratoContaSimplesPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1782,6 +1798,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("LINE", line);
 					
 				readExtratoECartao("readExtratoContaSimples2PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1803,6 +1820,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("CABECALHOPLANILHA", cabecalhoPlanilha);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			readExtratoECartao("readExtratoCoraPDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -1820,6 +1838,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("LINE", line);
 			
 			readExtratoECartao("readExtratoBtgPDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -1875,6 +1894,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ASAAS");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			readExtratoECartao("readExtratoAsaasPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
@@ -1914,6 +1934,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA",  	codEmpresa);
 		jDados.put("NOMEARQUIVO", 	nomeArquivo);
 		jDados.put("TIPOPLANILHA", 	"EXTRATO-NUBANK");
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		jDados.put("LINHA", line);
 		
 		readExtratoECartao("readExtratoNubankPDF", memFile, "NUBANK-PDF", jDados, dbIOCont, logger);
@@ -1932,6 +1953,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SISPRIME-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoSisprimePDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -1952,6 +1974,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-PAYBROKERS-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoPaybrokersPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2128,6 +2151,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("TIPOPLANILHA", "EXTRATO-SANTANDER");
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		//logger.logInfoInfo("NOME PORTADOR SANTANDER -> "+ nomePortador2);
 		readExtratoECartao("readExtratSantanderPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 		variaveis.put("tipoRetorno",   "break");
@@ -2144,6 +2168,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-UBP-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoUBPPDF", memFile, "", jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2196,6 +2221,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SICREDI");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoSicrediPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			
@@ -2339,6 +2365,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOPLANILHA", "EXTRATO-CEF");
 			jDados.put("TIPOPADRAO", tipoPadrao);
 			jDados.put("LINHA", line);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			// //logger.logInfoDebug("NP FINAL -> "+nomePortador2);
 			if(tipoPadrao.equals("")){
@@ -2401,6 +2428,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("LINE", line);
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		readExtratoECartao("readExtratoMovilepayPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 		variaveis.put("tipoRetorno", "break");
 		return variaveis.toString();
@@ -2445,6 +2473,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("TIPOPLANILHA", "EXTRATO-VIACREDI");
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		
 		// //logger.logInfoInfo("NOME PORTADOR VIACREDI -> "+ nomePortador2); 
 
@@ -2580,6 +2609,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2711,6 +2741,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			// //logger.logInfoInfo("AGUI " + anoData);
 			
@@ -2849,6 +2880,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoUniprime2PDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -2879,6 +2911,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoUniprimePDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3007,6 +3040,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoVotorantimPDF", memFile, "BANCO VOTORANTIM", jDados, dbIOCont, logger);
 			variaveis.put("nomePortador2",  "BANCO VOTORANTIM");
@@ -3023,6 +3057,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA:", "INFORMACOES");
 
@@ -3046,6 +3081,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("LINE", line);
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		
 		// //logger.logInfoInfo("NOME PORTADOR VOTORANTIM -> "+ nomePortador);
 
@@ -3068,6 +3104,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			if(line.contains("C/C:")){
 				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(7).replaceAll(";", "") +" "+ memFile.getStringFieldRemoveEspCharsUpper(8).replaceAll(";", "");
@@ -3200,6 +3237,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SICOOB");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			if(cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS")){ //2311-021100
 				readExtratoECartao("readExtratoSicoob2PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			} else{
@@ -3271,6 +3309,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-C6BANK");
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
  
 				readExtratoECartao("readExtratoC6BankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "continue");
@@ -3284,6 +3323,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-C6BANK");
 				jDados.put("TIPO", "002");
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoC6BankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "continue");
@@ -3324,6 +3364,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-PAGBANK-PDF");
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 				readExtratoECartao("readExtratoPagbankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -3567,6 +3608,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-CREDISIS");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoCredisisPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3615,6 +3657,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TP-ITAU", "002");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoItauPdf2", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3639,6 +3682,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				// jDados.put("TESTE", nomePortador2);
 				readExtratoECartao("readExtratoItauPdf2", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -3676,6 +3720,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("nomePortador2", nomePortador2);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			//logger.logInfoInfo("Itau1");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3713,6 +3758,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TIPO", "001");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			// jDados.put("TESTE", nomePortador2);
 			//logger.logInfoInfo("Itau2");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -3729,6 +3775,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("TIPO", "002");
 			
 			if (cabecalhoPlanilha.contains("SALDO DISPONIVEL EM CONTA")) {
@@ -3769,6 +3816,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			jDados.put("ANODATA", anoData);
 
 			readExtratoECartao("readExtratoItauPdf3", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -3789,6 +3837,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TIPO", "999");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			//logger.logInfoInfo("Itau4");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3949,6 +3998,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("ANODATA", anoData);
+		jDados.put("TIPOLANCAMENTO", tipoLancamento);
 		jDados.put("LINE", line);
 
 		readExtratoECartao("readExtratoOmieCashPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -4241,6 +4291,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SQUID-PDF");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoSquidPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -4720,6 +4771,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoHSBCExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4778,6 +4830,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBTGExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4797,6 +4850,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBMGExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4883,6 +4937,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			readExtratoECartao("readExtratoGrafenoExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -4905,6 +4960,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoHDTExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4929,6 +4985,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO04", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -4980,6 +5037,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO01", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4995,6 +5053,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO02", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();			
@@ -5014,6 +5073,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("ANOAUX", pegaAnoAux);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO03", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5078,6 +5138,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("LINE", line);
 				
 				readExtratoECartao("readExtratoMercadoPagoExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -5391,6 +5452,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoBancoNordesteExcel", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5409,6 +5471,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoBMPMoneyPlusExcel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5444,6 +5507,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				tipoPlanilha = "EXTRATO-BRADESCO-TXT";			
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				//logger.logInfoInfo("Vai ate o read do Bradesco txt");
 				readExtratoECartao("readExtratoBradescoTxt", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -5466,6 +5530,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoBBMTxt", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5502,6 +5567,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoAmazoniaTxt", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5559,6 +5625,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				if(nomePortador2.equals("BANESTES")){
 					nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(1);
 					// //logger.logInfoDebug("AGENCIA -> "+nomePortador2);
@@ -5595,7 +5662,8 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 		////// EXTRATO - Extrato_Daycoval_Excel //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Daycoval_Excel")) {
-			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("AGENCIA:") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:")){
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("AGENCIA:") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:") &&
+			!memFile.getStringFieldRemoveEspCharsUpper(0).contains("EXTRATO DE")){
 				nomePortador2 = "EXTRATO-DAYCOVAL " + line.replaceAll("\\|" , "");
 				// //logger.logInfoDebug("NP2 daycoval -> " + nomePortador2);
 				// //logger.logInfoInfo("NP2 daycoval 1");
@@ -5665,6 +5733,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBancoBrasilExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5697,6 +5766,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoSquidExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5713,6 +5783,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoSicoobTxt", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6312,6 +6383,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoBancoDoBrasilDoc2", memFile, "BANCO DO BRASIL", jDados, dbIOCont, logger);
 				// readExtratoECartao("readExtratoBancoDoBrasilDoc", memFile, "BANCO DO BRASIL", jDados, dbIOCont, logger);
@@ -6435,6 +6507,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEPORTADOR", nomePortador);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoUnicredDefault", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6448,6 +6521,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			
 			readExtratoECartao("readExtratoUNICREDTxt", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -6558,6 +6632,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoSicrediDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6624,6 +6699,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoCEFHtml", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -6658,6 +6734,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBradescoDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6898,6 +6975,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 					jDados.put("NOMEARQUIVO", nomeArquivo);
 					jDados.put("LINE", line);
 					jDados.put("TIPOLAYOUT", "002");
+					jDados.put("TIPOLANCAMENTO", tipoLancamento);
 					
 					readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 					variaveis.put("tipoRetorno",   "break");
@@ -6981,6 +7059,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("LINE", line);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				
 				readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6999,6 +7078,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				jDados.put("LINE", line);
 				
 				readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -7215,6 +7295,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoCEFDefaultNovo", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7247,6 +7328,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoCEFExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7265,6 +7347,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBaneseExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7287,6 +7370,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoSicoobDefaultNovo", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7309,6 +7393,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoViacrediExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				
@@ -7334,6 +7419,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				if(line.contains("EXTRATO MENSAL:")) jDados.put("ANO", cutString(line,"EXTRATO MENSAL:").replaceAll("\\|","").trim());
 				if(line.contains("EXTRATO MOVIMENTACAO")) jDados.put("ANO", cutString(line, line.lastIndexOf("/")-1).trim());
@@ -7384,6 +7470,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("LINE", line);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoAbcExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7399,6 +7486,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoArbiExcel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -7434,6 +7522,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoBanparaExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7530,6 +7619,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoUniprimeExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7545,6 +7635,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoSisprime", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -7598,6 +7689,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoTribancoExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7649,6 +7741,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("LINE", line);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoSofisaExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7718,6 +7811,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 				readExtratoECartao("readExtratoC6Excel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7745,6 +7839,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				readExtratoECartao("readExtratoPagseguroExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();

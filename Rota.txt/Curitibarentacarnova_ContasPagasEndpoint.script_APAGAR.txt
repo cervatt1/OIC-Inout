@@ -1121,8 +1121,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									if (!tipoPlanilha.contains("OTTCARTAO")) {
 										// #Fabrica(2019-05-20)
 										try{
-											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											 
+											if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("&")){
+												dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("&",""));
+											}else{
+												dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
+											}
 											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
 										}catch(Exception e){
 											// dataMovimento   = "";

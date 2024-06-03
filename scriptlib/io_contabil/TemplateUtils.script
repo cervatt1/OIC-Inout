@@ -126,15 +126,31 @@ public class TemplateUtils {
 	}
 	
 	public static StringBuilder geraLinhaFiscalContabit(JSONObject jDescricaoDupl, ttMovimentoPadrao ttMov) {
-		return  new StringBuilder()
-				.append(jDescricaoDupl.optString("CPFCNPJ")).append(",")
-				.append(jDescricaoDupl.optString("EMISSAO")).append(",")
-				.append(ttMov.dataMovimento).append(",")
-				.append(String.format("%.2f",ttMov.valorMulta)).append(",")
-				.append(String.format("%.2f", ttMov.valorJuros)).append(",")
-				.append(String.format("%.2f",ttMov.valorDesconto)).append(",")
-				.append(String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto)).append(",")
-				.append(jDescricaoDupl.optString("DUPLICATA")).append("\r\n");
+		StringBuilder sb = new StringBuilder();
+		// int cont = 0;
+		// if(cont == 0){
+			// sb.append("CNPJ/CPF,DATA EMISSAO,DATA PAGAMENTO,VALOR MULTA,VALOR JUROS,VALOR DESCONTO,VALOR PAGO,DOCUMENTO,CAIXA/BANCO\r\n");
+		// }
+		
+			sb.append(jDescricaoDupl.optString("CPFCNPJ")).append(",")
+			.append(jDescricaoDupl.optString("EMISSAO")).append(",")
+			.append(ttMov.dataMovimento).append(",")
+			.append(String.format("%.2f",ttMov.valorMulta)).append(",")
+			.append(String.format("%.2f", ttMov.valorJuros)).append(",")
+			.append(String.format("%.2f",ttMov.valorDesconto)).append(",")
+			.append(String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto)).append(",")
+			.append(jDescricaoDupl.optString("DUPLICATA")).append(",");
+			if(ttMov.tipoLancamento.contains("PAG")){
+				sb.append(ttMov.contaCredito).append("\r\n");
+			}
+			if(ttMov.tipoLancamento.contains("REC")){
+				sb.append(ttMov.contaDebito).append("\r\n");
+			}
+			
+		
+		
+		return sb;		
+				
 	}
 	
 	
@@ -383,7 +399,15 @@ public class TemplateUtils {
 			// gui - 13/05/2024 -> Ajuste feito para o padrão 01 ser lido pelo novo conversor.
 		if(((arquivoCompleto.contains("EXTRATO DE CONTA CORRENTE") && arquivoCompleto.contains("OUVIDORIA") &&
 				arquivoCompleto.contains("0800 646 5151") && arquivoCompleto.contains("TELE ATENDIMENTO")) && !arquivoCompleto.contains("UNICRED VALE"))){
-			return true; //UNICRED PADRAO 01
+			return true; //UNICRED 01 TIPO PADRAO
+		}
+		
+		/* gui - 28/05/2024 -> Ajuste para validar algumas diferenças de cabeçalho do padrao 01 do UNICRED;
+											Chamado -> 	2405-039580                                   */
+		if(arquivoCompleto.contains("UNICRED - INTERNET BANKING") && arquivoCompleto.contains("UNICRED.COM.BR") &&
+			!arquivoCompleto.contains("UNICRED VALE" /*padrao 3*/) && !arquivoCompleto.contains("UNICRED EVOLUCAO LTDA" /*padrao 2*/)){
+			
+			return true; //UNICRED 01 TIPO INTERNET BANKING
 		}
 		
 
@@ -528,7 +552,7 @@ public class TemplateUtils {
 		if (arquivoCompleto.contains("INTERNET BANKING EMPRESARIAL") && arquivoCompleto.contains("AGENCIA") &&
 				arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("PERIODO") && arquivoCompleto.contains("0800 726 2125") &&
 				arquivoCompleto.contains("0800 723 5007") && arquivoCompleto.contains("0800 726 0322") && arquivoCompleto.contains("0800 771 0301") &&
-				!arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE") && !arquivoCompleto.contains("VER EXTRATO 365 DIAS")){ // SANTANDER PADRAO 01
+				!arquivoCompleto.contains("VALORES DEDUZIDOS DO SALDO DISPONIVEL PARA CONTAS SEM LIMITE")  && !arquivoCompleto.contains("VER EXTRATO 365 DIAS")){ // SANTANDER PADRAO 01
 			return true;
 		}
 		
@@ -549,10 +573,10 @@ public class TemplateUtils {
 			return true; //FRANCESINHA UNICREDI
 		}
 		
-		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("VALOR DO TITULO") &&
+		/*if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("VALOR DO TITULO") &&
 			arquivoCompleto.contains("RAZAO SOCIAL DO BENEFICIARIO")){
 			return true; //COMPROVANTE SICREDI
-		}
+		}*/
 
 		if (arquivoCompleto.contains("%$&") || arquivoCompleto.contains("!%") || arquivoCompleto.contains("$!%&") || arquivoCompleto.contains("# $%") 
 			|| arquivoCompleto.contains("$*&-") || arquivoCompleto.contains("%$$&$$") || arquivoCompleto.contains("#$#%") || arquivoCompleto.contains("%&*") 

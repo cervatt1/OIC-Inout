@@ -15239,6 +15239,7 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
 	String[] salvaLinha		 = {};
 
     boolean naoLeMais = false;
+    boolean pulaProxLine = false;
 
     double valorDocumento    = 0.0;
     double valorJuros        = 0.0;
@@ -15281,6 +15282,11 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
         line = StringUtil.removeSpecialCharsToUC(line);
 
 		if(tipoPDFBB.equals("001")){
+			if(line.contains("SALDO ANTERIOR")) pulaProxLine = true;
+			if(pulaProxLine) {
+				pulaProxLine = false;
+				continue;
+			}
 			cont++;
 			if(line.contains("PERIODO")) anoPerido = "/"+memFile.getStringFieldRemoveEspCharsUpper(1).split("/")[memFile.getStringFieldRemoveEspCharsUpper(1).split("/").length-1];
 			if(line.contains("SALDO FINAL")) break;
@@ -15310,6 +15316,7 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
 					salvaLinha = lancamentoArr;
 					credDebRepetidor = 0;
 				}
+			logger.logInfo("LINHA:"+line );
 
 				if(dataMovimento.equals("") || !dataAuxiliar.equals("")) continue; 
 			}catch(Exception e){
@@ -15322,7 +15329,7 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
 			}
 			nomeOrigem = nomeOrigem.trim();
 
-			logger.logInfo("LINHA:"+line + " |linhaSalva"+salvaLinha[1]);
+			//logger.logInfo("LINHA:"+line + " |linhaSalva"+salvaLinha[1]);
 
 			if(nomeOrigem.contains("VALOR LIQUIDO")) continue;
 
@@ -15339,6 +15346,7 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
 			}catch(Exception e){
 				logger.logInfo("Err Double.parseDouble: " + e.getMessage());
 			}
+			if(valorDocumento == 0) continue;
 
 			credDebRepetidor++;
 
@@ -15351,7 +15359,7 @@ public HashMap readExtrato_ApliBB_PDF(MemoryFile memFile, JSONObject jDados, Has
 
 
 				lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
-				chave = lote + contLinhaTexto;
+				chave = contLinhaTexto + lote;
 				key = chave  + "-CTB";
 
 				ttMovimentoPadrao ttMov2 = new ttMovimentoPadrao();
