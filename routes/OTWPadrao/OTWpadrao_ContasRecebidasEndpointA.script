@@ -12289,7 +12289,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 	int idocumento      = -1;
 	int ivalorDocumento	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG) 
 	int icomplemento02	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG)
-	int yix	= -1;	//(VALOR POSITIVO RC, NEGATIVO PG)
+	int yix	= -1;
 
 	boolean naoLeMais = false;	
 	
@@ -12519,7 +12519,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 
 				chaveExtrato = String.format("%.2f", valorDocumento) + String.format("%d", yix) + "-" + nomePortador + "-" + contLinhaExtrato + codEmpresa + "-" +  dataMovimento + "-" + nomeOrigem;
 				
-				 // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
+				// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
             // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
             contLinhaTexto = String.valueOf(cont);
             contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 04, "0");
