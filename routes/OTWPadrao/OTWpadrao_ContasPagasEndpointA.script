@@ -25859,9 +25859,11 @@ public boolean readExtratoSicrediPDF(MemoryFile memFile, String nomePortador, JS
 		if (naoLeMais) continue;
         if (memFile.getFieldsSize() == 2) continue;
 		//if (memFile.getFieldsSize() == 1) {
+		
         if (memFile.getFieldsSize() == 1 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("SALDO")) { //2310-019873
 			// logger.logInfo("MFSC " + memFile.getStringFieldRemoveEspCharsUpper(0));
-			nomeOrigem += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
+			nomeOrigem += " " + StringUtil.removeSpecialCharsToUC(memFile.getStringFieldRemoveEspCharsUpper(0)).replace("\u0000", "E");
+			
 			try {
 				dbIOCont.update("IO_EXTRATO")
 				.fields("HISTORICO")
@@ -25895,14 +25897,14 @@ public boolean readExtratoSicrediPDF(MemoryFile memFile, String nomePortador, JS
                 // logger.logInfo("BTL -> 5737|  -> " + line  + "|  -> " + memFile.getFieldsSize()  );
                 if (memFile.getFieldsSize() == 4) {
                     nomeOrigem      = "";
-                    nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+                    nomeOrigem		= StringUtil.removeSpecialCharsToUC(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replace("\u0000", "E").replaceAll("\"","").replaceAll("\\?","")).trim();
 
                     valorDocumento  = 0;
                     try{valorDocumento = memFile.getDoubleField(ivalorDocumento - 1);}
                     catch (Exception vlrd) { valorDocumento = 0; }
                 } else {
                     nomeOrigem      = "";
-                    nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+                    nomeOrigem		= StringUtil.removeSpecialCharsToUC(memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replace("\u0000", "E").replaceAll("\"","").replaceAll("\\?","")).trim();
                     
                     documento		= memFile.getStringFieldRemoveEspCharsUpper(idocumento).replaceAll("\"","").trim();
 
