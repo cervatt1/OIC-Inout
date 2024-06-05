@@ -12391,7 +12391,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 						logger.logInfo("ENTROU");
 						
 						ivalorDocumento = 12;
-						idataMovimento = 16;
+						idataMovimento = memFile.getFieldsSize()-2;
 						try{dataMovimento=getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 						}catch(Exception e){ logger.logInfo("Erro datamov: "+e); }
 						
@@ -12526,6 +12526,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
             consolidaClass = contLinhaTexto;
 
 			classificacao = dataMovimento + "0" + consolidaClass;
+			if(dataMovimento.equals("") || valorDocumento == 0) continue;
 
             lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
 

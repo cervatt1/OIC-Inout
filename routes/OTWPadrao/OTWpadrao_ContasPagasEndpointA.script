@@ -25974,6 +25974,365 @@ public boolean readExtratoSicrediPDF(MemoryFile memFile, String nomePortador, JS
     return true;
 }
 
+public HashMap readSicrediComprovantesPDF(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
+	JSONObject extratoEmpresa = new JSONObject();
+
+    // Inicializacao de Variaveis
+    String codEmpresa        = "";
+    String nomeArquivo       = "";
+    String nomeEmpresa       = "";
+    String chaveExtrato      = "";
+
+    String documento         = "";
+    String nomeOrigem        = "";
+	String nomePortador      = "";
+    String dataMovimento     = "";
+    String dataLote          = "";
+    String complemento01     = "";
+    String complemento02     = "";
+    String complemento03     = "";
+    String debitoCredito     = "";
+    String cpfCnpj           = "";
+    String historico         = "";
+    String tipoLancamento    = "";
+    String tipoPlanilha      = "";
+
+    String contLinhaTexto    = "";
+    String consolidaClass    = "";
+    String classificacao     = "";
+    String chave             = "";
+    String key               = "";
+    String lote              = "";
+	String modelo			 = "";
+
+	boolean naoLeMais = true;
+	boolean linhaTipo = false;
+
+    double valorDocumento    = 0.0;
+    double valorJuros        = 0.0;
+    double valorDesconto     = 0.0;
+    double valorMulta        = 0.0;
+    double valorPagamento    = 0.0;
+
+    int cont = 0;
+
+    if(jDados.has("CODEMPRESA"))		codEmpresa = jDados.optString("CODEMPRESA");
+    if(jDados.has("NOMEARQUIVO"))		nomeArquivo = jDados.optString("NOMEARQUIVO");
+    if(jDados.has("NOMEEMPRESA"))       nomeEmpresa = jDados.optString("NOMEEMPRESA");
+    if(jDados.has("TIPOLANCAMENTO")) 	tipoLancamento = jDados.optString("TIPOLANCAMENTO");
+    if(jDados.has("TIPOPLANILHA"))    	tipoPlanilha  = jDados.optString("TIPOPLANILHA");
+	if(jDados.has("NOMEPORTADOR"))   	nomePortador  = jDados.optString("NOMEPORTADOR");
+	
+	//Tipo planilha = nome do tipo do comprovante
+
+	while (memFile.hasNextLine()) {
+        String line = memFile.nextLine();
+        line = StringUtil.removeSpecialCharsToUC(line);
+
+        cont++;
+
+        try {
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(1).contains("CONTA CORRENTE")){
+				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
+				nomePortador = cutString(nomePortador, "CORRENTE").replaceAll(":", "");
+				
+				nomeOrigem = "";
+				valorDocumento = 0.0;
+				dataMovimento = "";
+				valorPagamento = 0.0;
+				documento = "";
+				complemento01 = "";
+				complemento02 = "";
+				complemento03 = "";
+				linhaTipo = true;
+				continue;
+			}
+
+			if(tipoPlanilha.equals("SICREDI COMPROVANTE")) linhaTipo = true; //Para pegar no primeiro lancamento
+
+
+			if(linhaTipo){
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).equals("BOLETOS") || memFile.getStringFieldRemoveEspCharsUpper(0).equals("BOLETO")){
+					modelo = "BOLETOS";
+				}else if(memFile.getStringFieldRemoveEspCharsUpper(0).equals("TRIBUTOS")){
+					modelo = "TRIBUTOS";
+				}else if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("COMPROVANTE DE PAGAMENTO DE DARF")){
+					modelo = "COMPROVANTE DE PAGAMENTO DE DARF";
+				}else if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTAS DE CONSUMO")){
+					modelo = "CONTAS DE CONSUMO";
+				}else if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("FGTS")){
+					modelo = "PAGAMENTO DE TRIBUTOS FGTS";
+				}
+				linhaTipo = false;
+			}
+
+			if(modelo.equals("BOLETOS")){
+
+			    tipoPlanilha = "BOLETOS";
+				
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("RAZAO SOCIAL DO BENEFICIARIO")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("CNPJ DO BENEFICIARIO")){
+					complemento02 = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA DO PAGAMENTO")){
+					try{
+						dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(1);
+						dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					} catch (Exception vlrd) {
+						dataMovimento = "";
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR DO TITULO")){
+					try{
+						valorDocumento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorDocumento = 0;
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR PAGO")){
+					try{
+						valorPagamento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorPagamento = 0;
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DESCRICAO") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGAMENTO") && !nomeOrigem.equals("") &&
+					valorDocumento != 0 && !dataMovimento.equals("")){
+					documento = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("[^0-9]", ""); //Retira tudo que nao for numero
+					complemento03 = memFile.getStringFieldRemoveEspCharsUpper(1);
+					naoLeMais = false;
+				}
+
+			} else if(modelo.equals("COMPROVANTE DE PAGAMENTO DE DARF")){
+				
+				tipoPlanilha = "COMPROVANTE DE PAGAMENTO DE DARF";
+				
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("COMPROVANTE DE PAGAMENTO DE DARF")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(0);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA DO PAGAMENTO")){
+					try{
+						dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(1);
+						dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					} catch (Exception vlrd) {
+						dataMovimento = "";
+					}
+				}
+
+                if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("NUMERO DO DOCUMENTO")){
+                    documento = memFile.getStringFieldRemoveEspCharsUpper(1);
+                }
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR TOTAL")){
+					try{
+						valorDocumento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorDocumento = 0;
+					}
+
+					if(!nomeOrigem.equals("") && valorDocumento != 0 && !dataMovimento.equals("")){
+                        naoLeMais = false;
+					}
+
+				}
+				
+			} else if(modelo.equals("CONTAS DE CONSUMO")){
+
+				tipoPlanilha = "CONTAS DE CONSUMO";
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("NOME DA EMPRESA")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA DO PAGAMENTO")){
+					try{
+						dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(1);
+						dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					} catch (Exception vlrd) {
+						dataMovimento = "";
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR TOTAL")){
+					try{
+						valorDocumento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorDocumento = 0;
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("TIPO DE PAGAMENTO")){
+					complemento01 = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DESCRICAO") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGAMENTO") && !nomeOrigem.equals("") &&
+					valorDocumento != 0 && !dataMovimento.equals("")){
+					complemento02 = memFile.getStringFieldRemoveEspCharsUpper(1);
+					naoLeMais = false;
+				}
+				
+			} else if(modelo.equals("PAGAMENTO DE TRIBUTOS FGTS")){
+
+				tipoPlanilha = "PAGAMENTO DE TRIBUTOS FGTS";
+				
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGAMENTO DE TRIBUTOS FGTS")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(0);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA DO PAGAMENTO")){
+					try{
+						dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(1);
+						dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					} catch (Exception vlrd) {
+						dataMovimento = "";
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR")){
+					try{
+						valorDocumento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorDocumento = 0;
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("COMPETENCIA")){
+					complemento01 = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DESCRICAO") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGAMENTO") && !nomeOrigem.equals("") &&
+					valorDocumento != 0 && !dataMovimento.equals("")){
+					complemento02 = memFile.getStringFieldRemoveEspCharsUpper(1);
+					naoLeMais = false;
+				}
+
+			} else if(modelo.equals("TRIBUTOS")){
+
+				tipoPlanilha = "TRIBUTOS";
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("TIPO DE DOCUMENTO")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DATA DO PAGAMENTO")){
+					try{
+						dataMovimento = memFile.getStringFieldRemoveEspCharsUpper(1);
+						dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					} catch (Exception vlrd) {
+						dataMovimento = "";
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("VALOR TOTAL")){
+					try{
+						valorDocumento = memFile.getDoubleField(1);
+					}
+					catch (Exception vlrd) {
+						valorDocumento = 0;
+					}
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("NUMERO DO DOCUMENTO")){
+					documento = memFile.getStringFieldRemoveEspCharsUpper(1);
+				}
+
+				if(memFile.getStringFieldRemoveEspCharsUpper(0).contains("DESCRICAO") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("PAGAMENTO") && !nomeOrigem.equals("") &&
+				valorDocumento != 0 && !dataMovimento.equals("")){
+					complemento01 = memFile.getStringFieldRemoveEspCharsUpper(1);
+					naoLeMais = false;
+				}
+			}
+
+            if(naoLeMais) continue;
+
+			//Para gerar um lancamento apenas quando chegar na linha que captura a ultima informacao necessaria
+			naoLeMais = true;
+
+            valorJuros = 0.0;
+            valorDesconto = 0.0;
+            if(valorDocumento > 0 && valorPagamento > 0){
+                if(valorPagamento > valorDocumento) valorJuros = DecimalUtil.toDecimal(String.format("%.2f", valorPagamento - valorDocumento));
+                if(valorPagamento < valorDocumento) valorDesconto = DecimalUtil.toDecimal(String.format("%.2f", valorDocumento - valorPagamento));
+            }
+
+             // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
+            // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
+            contLinhaTexto = String.valueOf(cont);
+            contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 04, "0");
+            consolidaClass = contLinhaTexto;
+
+			classificacao = dataMovimento + "0" + consolidaClass;
+
+
+
+            lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
+
+            chave = lote + contLinhaTexto;
+            key	= chave  + "-CTB";
+
+            ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
+            if (ttMov2 == null) {
+                ttMov2 = new ttMovimentoPadrao();
+            }
+            ttMov2.lote		 	    = lote;
+            ttMov2.documento   	    = documento;
+            ttMov2.codEmpresa 	    = codEmpresa;
+            ttMov2.nomeEmpresa      = nomeEmpresa;
+            ttMov2.dataMovimento    = dataMovimento;
+            ttMov2.tipoMovimento    = "CTB";
+            ttMov2.tipoLancamento   = tipoLancamento;
+            ttMov2.historico		= "";
+            ttMov2.valorDocumento   = valorDocumento;
+            ttMov2.valorDesconto    = valorDesconto;
+            ttMov2.valorMulta  	    = 0;
+            ttMov2.valorJuros  	    = valorJuros;
+            ttMov2.contaJuros    	= "";
+            ttMov2.contaMulta		= "";
+            ttMov2.contaDesconto  	= "";
+            ttMov2.nomePortador     = nomePortador;
+            ttMov2.centroCusto  	= "";
+            ttMov2.nomeOrigem 	    = nomeOrigem;
+            ttMov2.cpfCnpj          = cpfCnpj;
+            ttMov2.chave            = chave + "-CTB";
+            ttMov2.classificacao    = classificacao;
+            ttMov2.tipoPlanilha     = tipoPlanilha;
+
+            ttMov2.complemento01	= complemento01;
+            ttMov2.complemento02	= complemento02;
+            ttMov2.complemento03	= complemento03;
+            ttMov2.complemento04	= "";
+            ttMov2.complemento05	= "";
+            ttMov2.complemento06	= "";
+            ttMov2.complemento07	= "";
+            ttMov2.complemento08	= "";
+            ttMov2.complemento09	= "";
+            ttMov2.complemento10	= "";
+            ttMov2.nomeArquivo		= nomeArquivo;
+            ttMov2.naturezaContabil  = "D";
+            ttMov2.contaDebito       = "";
+            ttMov2.contaCredito      = "";
+            mapaVariavel.put(key,ttMov2);
+
+        } catch (Exception ex) {
+        }
+
+    }
+    return mapaVariavel;
+}
 
 /*#############################################@ EXTRATO-SICREDI-TXT @##############################################*/
 public boolean readExtratoSicrediTxt(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
