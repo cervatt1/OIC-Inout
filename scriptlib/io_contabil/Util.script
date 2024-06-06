@@ -1328,6 +1328,23 @@ public String getCampoDate(String dataString, String patternIn){
 	
 }
 public String getCampoDate(String dataString, String patternIn, String patternOut){
+	/**
+	 * captura em casos de data serial considerando situacoes com minutos 
+	 */
+	if(dataString.matches("^\\d{5}.*")){
+		String dataStringSerial = dataString;
+		if(dataStringSerial.contains(",")) dataStringSerial = cutString(dataString, 0, ",");
+		if(dataStringSerial.contains(".")) dataStringSerial = cutString(dataString, 0, ".");
+		try {
+			Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
+			int datanum = Integer.parseInt(dataStringSerial);
+			Calendar calSerial = Calendar.getInstance();
+			calSerial.setTime(dt);
+			calSerial.add(Calendar.DAY_OF_YEAR, datanum -2);
+			dataStringSerial = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
+			return dataStringSerial;
+		}catch (Exception dt2) { }
+	}
 	
 	String dataStringOriginal = dataString;
 	

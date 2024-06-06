@@ -548,8 +548,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 	}
 	
-	// EXTRATO - PDF - First Capital
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_FirstCapital_PDF")) {
+	// EXTRATO - PDF - Pin Bank
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinBank_PDF")) {
 		if (arquivoCompleto.contains("REFERENCIA") &&
 			arquivoCompleto.contains("ACESSOACONTA.COM.BR") &&
 			arquivoCompleto.contains("EXTRATO CONTA DE PAGAMENTO/LANCAMENTOS") /*&&
@@ -560,7 +560,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-FIRST-CAPITAL");
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
-			readExtratoECartao("readExtratoFirstCapitalPDF", memFile, jDados, dbIOCont, logger);
+			readExtratoECartao("readExtratoPinBankPDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
@@ -582,7 +582,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
-	
+
 	////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 	// //logger.logInfoDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
 	// //logger.logInfoInfo("LIN - "+line);
