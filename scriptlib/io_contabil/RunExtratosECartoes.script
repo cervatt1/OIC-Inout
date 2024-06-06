@@ -583,6 +583,23 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 	}
 
+	// EXTRATO - PDF - BS CASH
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BSCASH_PDF")) {
+		if (arquivoCompleto.contains("DATA|DCTO.|OPERACAO|HISTORICO|MOVIMENTACAO (R$)|SALDO (R$), SALDO ANTERIOR") &&
+			arquivoCompleto.contains("DATA DA GERACAO DO DOCUMENTO:") &&
+			arquivoCompleto.contains("RECEBIMENTO DE TRANSFERENCIA ENTRE CONTAS")){
+				
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "EXTRATO-STARBANK");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			readExtratoECartao("readExtratoBSCashPDF", memFile, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+
 	////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 	// //logger.logInfoDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
 	// //logger.logInfoInfo("LIN - "+line);
