@@ -565,6 +565,23 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
+
+	// EXTRATO - PDF - Star Bank
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_STARBANK_PDF")) {
+		if (arquivoCompleto.contains("STARK BANK S.A.") &&
+			arquivoCompleto.contains("VALOR / TARIFA (R$)") &&
+			arquivoCompleto.contains("SALDO (R$)")){
+				
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "EXTRATO-STARBANK");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			readExtratoECartao("readExtratoStarBankPDF", memFile, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
 	
 	////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 	// //logger.logInfoDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
