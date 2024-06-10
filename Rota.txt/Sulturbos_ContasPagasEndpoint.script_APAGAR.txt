@@ -674,6 +674,10 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					// =======================  VARIAVEIS PERSONALIZADAS   =======================
 					// =======================  ========================   =======================
 
+					double valorJurosExtra		= 0;
+					double valorDescontoExtra	= 0;
+					double valorDeducoes		= 0;
+					double valorAcrescimos		= 0;
 
 					JSONObject objetoParametro = new JSONObject();
 
@@ -724,294 +728,67 @@ public JSONArray run(InoutLogger logger) throws Exception {
 							try {
 								String line = memFile.nextLine();
 								line = StringUtil.removeSpecialCharsToUC(line);
-								
-								// logger.logDebug("Line -> "+tipoPlanilha + "<<>>" + porAba + "<<>>" + cutString(line,0,30));
-								// logger.logInfo("TP = "+tipoPlanilha+" | LN = "+line);
-								// JWR colocado para nao ocorrer mais casos de lentidao absurda em planilhas que nao conseguiram ler nenhum lancamento ate a linha 500
-								contAuxiliar ++;
-								
-								contadorCabecalho++;
-								if (contadorCabecalho<15) {
-									cabecalhoPlanilha.append(line).append(" "); 
-									cabecalhoRegra.append(stringNormalizer(line.replaceAll("\\|","").replaceAll("\"","").replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replaceAll("  ", " "), true)).append(" "); 
-								}
-								else {
-									cabecalhoPlanilha = new StringBuilder();
-									
-									// ganha performance nao tendo que ler a planilha vezes pelo template se nao for roteiro secundario 
-									if (mantemArquivo.equals("SIM") && tipoPlanilha.equals("MOVIMENTO") && abaConvertida > 2) ignoraAbas = true;
-								}
-								// logger.logDebug("PUTSTATUS 550");
-								if (cont < 10)   putStatus(dirName, "02--Etapa 2 de 4--" + tipoLancamento + "-" + cont + ".status", jStatus, logger);  
-								
-								// JWR colocado para nao ocorrer mais casos de lentidao absurda em planilhas que nao conseguiram ler nenhum lancamento ate a linha 500
-								if (cont == 0 && contAuxiliar == 500 && !nomeArquivo.toUpperCase().contains("FILTRO_")) {
-									break;
-								}
-								   
+
+								if (cont < 10)  putStatus(dirName, "02--Etapa 2 de 4--" + tipoLancamento + ".status", jStatus, logger);    
+
+
 
 								////////////////////////////////////////////////////////////////////////////////
 								///////////////////////////////////////////////////////////// INICIO DOS PADROES
 								////////////////////////////////////////////////////////////////////////////////
-								
-								JSONObject jDadosPadrao = new JSONObject();
-								jDadosPadrao.put("TIPOLANCAMENTO", tipoLancamento).put("NOMEEMPRESA",nomeEmpresa)
-											.put("CODEMPRESA", codEmpresa).put("CONTABILIDADE", roteiroCRM.optString("contabilidade"))
-											.put("NOMEARQUIVO", nomeArquivo);
-								//--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-								//LEITURA PADRAO ARQUIVOS .OMC
-								//--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--								
-								if (nomeArquivo.toUpperCase().contains(".OMC")) {
- 
-									tipoPlanilha = "EXTRATO";
-									jDadosPadrao.put("TIPOPLANILHA",   tipoPlanilha);
-									
-									// logger.logInfo("2 de 4 = NA = "+nomeArquivo);
- 
-									mapaVariavel = readOttimizzaMeuCaixa(memFile, dbIOCont, jDadosPadrao, mapaVariavel, logger);
-									jStatus = new JSONObject();
-									putStatus(dirName, "",  new JSONObject(), logger);
-									// salva arquivo no hasmap para posterior eliminacao 
-									ttArq    = (ttArquivo)mapaArquivo.get(nomeArquivo);
-									if (ttArq          == null) {
-										ttArq          = new ttArquivo();
-										ttArq.arquivo  = nomeArquivo;
-										
-									}
-									// if(roteiroCRM.optString("empresa").toUpperCase().contains("POSTOBRAGA")){//yuri
-										cruzaExtrato = "FALSE";
-										Cruza_Extrato_com_Extrato = "FALSE";
-									// }
-									
-									mapaArquivo.put(nomeArquivo,ttArq);
-									temOMC = true;
-									// double tempoInicio1 = System.currentTimeMillis();
-									// logger.logDebug("Tempo Rota2; " + String.format("%.2f", (System.currentTimeMillis() - tempoInicio1) / 1000));
-									break;
-								}
 
-								//--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
+
+								//--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~----~
 								//LEITURA PADRAO ARQUIVOS .OFX
 								//--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--
-								
-								// quando se mantem o arquivo, somente devem ser processados arquivos padroes
-								// planilhas do rotiero movimento (principal), OFX e demais devem ficar para a rota normal
-								// logger.logDebug("NAOFX NO TEMPLATES " + nomeArquivo.toUpperCase() + " | " + mantemArquivo + " | " +tipoProduto);
 								if (nomeArquivo.toUpperCase().contains(".OFX")) {
-									
-									if (!mantemArquivo.equals("SIM") || !tipoProduto.equals("OIC_PACOTE")) {
-										tipoPlanilha = "EXTRATO-OFX";
-										
+									tipoPlanilha = "EXTRATO-OFX";     putStatus(dirName, "02--Etapa 2 de 4--" + tipoLancamento + ".status", new JSONObject(), logger);
+									JSONObject jDados = new JSONObject();
+									jDados.put("CODEMPRESA", codEmpresa);
+									jDados.put("TIPOLANCAMENTO", tipoLancamento);
+									jDados.put("NOMEEMPRESA",    nomeEmpresa);
+									jDados.put("NOMEARQUIVO",    nomeArquivo);
+									if (roteiroCRM.optString("Aloca_Checknum").toUpperCase().equals("TRUE")) jDados.put("CHECKNUM", "CHECKNUM");	//usar para retornar o documento do OFX no complemento02
+									readOFXDefault(memFile, jDados, dbIOCont, logger);
+									jStatus = new JSONObject();
+									putStatus(dirName, "", jStatus, logger);
+									break;
+								} // Fim  -> Captura de Dados quando Tipo Planilha -> ".OFX"
+								// ----------------------------------------------------------------------------------------------------------
 
-										// quando o OFX vem em apenas 1 linha todas as informacoes
-										// quebramos linha e geramos um novo arquivo para gerar como um ofx normal
-										if (line.contains("ACCTID")) {
-											String fileOfx = dirName + "/" + nomeArquivo.toLowerCase().replaceAll(".ofx","_2.ofx");
-											FileWriter writer = new FileWriter(fileOfx);
-											writer.writeNewFile(line.replaceAll("><",">\r\n<"));	
-										}
-										putStatus(dirName, "02--Etapa 2 de 4--" + tipoLancamento + ".status", new JSONObject(), logger);     putStatus(dirName, "02--Etapa 2 de 4--" + tipoLancamento + ".status", jStatus, logger);
-										jDadosPadrao.put("CODEMPRESA", codEmpresa).put("TIPOLANCAMENTO", tipoLancamento)
-													.put("NOMEEMPRESA", nomeEmpresa).put("NOMEARQUIVO", nomeArquivo);
-										if (roteiroCRM.optString("Aloca_Checknum").toUpperCase().equals("TRUE")) jDadosPadrao.put("CHECKNUM", "CHECKNUM");	//usar para retornar o documento do OFX no complemento02
-										readOFXDefault(memFile, jDadosPadrao, dbIOCont, logger);
-										jStatus = new JSONObject();
-										// logger.logDebug("PUTSTATUS 615");
-										putStatus(dirName, "",  new JSONObject(), logger);
-										temOFX = true;
-					
-										break;
-									}
-									
-									// quando FOR OFX e estiver rodando pelo template
-									// e a empresa for OIC pacote rodar pela especifica, entao foi dado um break para agili
-									if (mantemArquivo.equals("SIM") && tipoProduto.equals("OIC_PACOTE")) {
-										break;
-									}
-									
-								}
-								
-								// quando se mantem o arquivo, somente devem ser processados arquivos padroes
-								// planilhas do roteiro movimento (principal), OFX e demais devem ficar para a rota normal
-								// if(codEmpresa.equals("3673")){
-									// logger.logDebug("mAATEMPLATE " + mantemArquivo + " | " + tipoProduto + " | " + apagaArquivo + " | " + roteiroCRM.optString("Planilhas_Padroes") + " | " + tipoPlanilha + " | " + tipoProduto);									
-								// }
- 								/*if (!roteiroCRM.optString("Planilhas_Padroes").equals("") && apagaArquivo != null  || (mantemArquivo.equals("SIM") && !tipoProduto.equals("OIC_PACOTE"))) {
-								// if (!roteiroCRM.optString("Planilhas_Padroes").equals("") && abaConvertida == 0)  // PROBLEMAS COM PLANILHAS PADROES EM MAIS DE UMA ABA!
-
- 
-									JSONObject variaveis = new JSONObject();
-									variaveis.put("line", 			line);
-									variaveis.put("anoData", 		anoData); 
-									variaveis.put("dirName", 		dirName);
-									variaveis.put("jStatus", 		jStatus);
-									variaveis.put("extensao", 		extensao);
-									variaveis.put("codEmpresa", 	codEmpresa);
-									variaveis.put("nomeArquivo", 	nomeArquivo);
-									variaveis.put("nomeEmpresa", 	nomeEmpresa);
-									variaveis.put("nomePortador", 	nomePortador);
-									variaveis.put("tipoPlanilha", 	tipoPlanilha);
-									variaveis.put("complemento01", 	complemento01);
-									variaveis.put("complemento02", 	complemento02);
-									variaveis.put("nomePortador2", 	nomePortador2);
-									variaveis.put("tipoLancamento", tipoLancamento);
-									variaveis.put("cabecalhoPlanilha", cabecalhoPlanilha.toString());																		
-																		
-									String retornaPadroes = verificaExtratos(variaveis, mapaVariavel, memFile, roteiroCRM, dbIOCont, logger);
-									
-									//logger.logDebug("CHAMOU O TEMPLATE " + retornaPadroes);
- 
-									JSONObject objRetorno = new JSONObject(retornaPadroes);
-									if (objRetorno.has("tipoRetorno")) {
-										anoData        = objRetorno.optString("anoData");
-										retornaPadroes = objRetorno.optString("tipoRetorno");
-										nomePortador   = objRetorno.optString("nomePortador").trim();
-										complemento01  = objRetorno.optString("complemento01").trim();
-										nomePortador2  = objRetorno.optString("nomePortador2").trim();
-									}
-									// logger.logDebug("NP2 == "+nomePortador2);
-									if (retornaPadroes.equals("continue")) continue;
-									if (retornaPadroes.equals("break"))   {
-										jStatus = new JSONObject();
-										logger.logDebug("PUTSTATUS 657");
-										putStatus(dirName, "", jStatus, logger);
-										break;
-									}
-								}*/
-								if (!cabecalhoPlanilha.toString().equals("") && (!roteiroCRM.optString("Planilhas_Padroes").equals("") && apagaArquivo != null  || (mantemArquivo.equals("SIM") && !tipoProduto.equals("OIC_PACOTE")))) {
-								// if (!roteiroCRM.optString("Planilhas_Padroes").equals("") && abaConvertida == 0)  // PROBLEMAS COM PLANILHAS PADROES EM MAIS DE UMA ABA!
-
-									JSONObject variaveis = new JSONObject();
-									variaveis.put("line", line).put("anoData", anoData).put("dirName", dirName).put("jStatus", jStatus)
-											 .put("extensao", extensao).put("codEmpresa", codEmpresa).put("nomeArquivo", nomeArquivo)
-											 .put("nomeEmpresa", nomeEmpresa).put("nomePortador", nomePortador).put("tipoPlanilha", tipoPlanilha)
-											 .put("complemento01", complemento01).put("complemento02", complemento02).put("complemento09", complemento09)
-											 .put("nomePortador2", nomePortador2).put("tipoLancamento", tipoLancamento)
-											 .put("cabecalhoPlanilha", cabecalhoPlanilha.toString());									
-									
-									// if (codEmpresa.contains("104")) {
-										// roteiroCRM.put("Planilhas_Padroes", "Extrato_C6Bank_PDF");
-									// }
-									
-									// if(codEmpresa.contains("73")) logger.logInfo("nome do arquivo " + nomeArquivo);
-									
-									// logger.logInfo("LN TEMPLATE = "+line);
-									
-									retornaPadroes = verificaExtratos(variaveis, mapaVariavel, memFile, roteiroCRM, dbIOCont, logger);
-									
-									
-									// logger.logDebug("retorna padroes -> " + retornaPadroes);
-									
-									
-									// logger.logDebug("CHAMOU O TEMPLATE " + retornaPadroes);
- 
-									JSONObject objRetorno = new JSONObject(retornaPadroes);
-									if (objRetorno.has("tipoRetorno")) {
-										anoData        = objRetorno.optString("anoData");
-										retornaPadroes = objRetorno.optString("tipoRetorno");
-										nomePortador   = objRetorno.optString("nomePortador").trim();
-										complemento01  = objRetorno.optString("complemento01").trim();
-										nomePortador2  = objRetorno.optString("nomePortador2").trim();
-										complemento09  = objRetorno.optString("complemento09").trim();
-									}
-									
-									// logger.logDebug("NP23 " + nomePortador + " | " + nomePortador2);
-									
-									// logger.logDebug("NP2 ==== "+nomePortador2);
-									if (retornaPadroes.equals("continue")) continue;
-									if (retornaPadroes.equals("break"))   {
-										jStatus = new JSONObject();
-										putStatus(dirName, "", jStatus, logger);
-										break;
-									}
-								}
-
-								//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~-
+								//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
 								//                      LEITURA PADRAO DE DUPLICATAS
-								//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~-
-								if(roteiroCRM.optString("Integracao_fiscal").toUpperCase().contains("TRUE") && !mantemArquivo.equals("SIM")){
+								//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
+								if(roteiroCRM.optString("Integracao_fiscal").toUpperCase().contains("TRUE")){
 
- 
-									jDadosPadrao.put("erpContabilidade", roteiroCRMPrincipal.optString("erpContabilidade"))
-												.put("LINE", line).put("PRIMEIRAVEZ", primeiraVezDuplicata).put("DIRNAME", dirName)
-												.put("TIPOPLANILHA", tipoPlanilha).put("TIPOLANCAMENTO", tipoLancamento);
-									
-									if (!numSeparadorDuplicata.equals("")) jDadosPadrao.put("NUMSEPARADOR", numSeparadorDuplicata);
-									
-									if (!roteiroCRM.optString("usarComplementoParcela").toUpperCase().contains("NAO USAR")) {
-										jDadosPadrao.put("CONTROLAPARCELA",  true);  
+                                    JSONObject jDados               = new JSONObject();
 
-									} 
- 
-									primeiraVezDuplicata = leituraDuplicataPadrao(jDadosPadrao, memFile, mapaVariavel, dbIOCont, logger);
+                                    jDados.put("erpContabilidade",  roteiroCRM.optString("erpContabilidade"));
+                                    jDados.put("CODEMPRESA",        codEmpresa);
+                                    jDados.put("NOMEARQUIVO",       nomeArquivo);
+                                    jDados.put("LINE",              line);
+                                    jDados.put("PRIMEIRAVEZ",       primeiraVezDuplicata);   jDados.put("DIRNAME",      		dirName);
+                                    jDados.put("TIPOPLANILHA",      tipoPlanilha);
+                                    jDados.put("TIPOLANCAMENTO",    tipoLancamento);
+                                    
+                                    primeiraVezDuplicata = leituraDuplicataPadrao(jDados, memFile, mapaVariavel, dbIOCont, logger);
 
-									if(!primeiraVezDuplicata){
-										jStatus = new JSONObject();
-										// logger.logDebug("PUTSTATUS 687");
-										putStatus(dirName, "", jStatus, logger);
-										break;
-									}
+                                    if(!primeiraVezDuplicata){
+                                        jStatus = new JSONObject();
+									    putStatus(dirName, "", jStatus, logger);
+                                        break;
+                                    }
 								} 
-								
-								if (cont < 2) {
-									// logger.logDebug(StringUtil.removeSpecialCharsToUC(memFile.getLines().toString()));
-									if (TemplateUtils.verificaConciliacao(StringUtil.removeSpecialCharsToUC(memFile.getLines().toString()))) {
-										mapaConciliacao = leituraConciliacao(mapaConciliacao, memFile, logger);
-										fazConciliacao = true;
-										break;
-									}
-								}
+								// ----------------------------------------------------------------------------------------------------------
 
-								//implementa leitura do arquivo de participantes lcdpr
-								if (roteiroCRMPrincipal.optString("erpContabilidade").contains("DOMINIO") && !mantemArquivo.equals("SIM")) {
-									if (fazLcdpr.equals("TRUE") && cont < 2) {
-										if (memFile.getLines().toString().toUpperCase().contains("RELACAO DE PARTICIPANTES DA ATIVIDADE RURAL")){
-											mapaParticipante = leituraLivroCaixaDigitalProdutorRural(mapaParticipante, memFile, logger);
-											break;
-										}
-									}
-									/// BUSCA COTNRATOS EM ABERTO (RECEBIMENTOS) PARA BAIXA DE CONTRATOS IMOBILIARIOS
-									if(roteiroCRM.optString("Integracao_contratos").toUpperCase().contains("TRUE")) {
-										
-										if (line.contains("DOCUMENTO") && 
-											line.contains("EMISSAO") && 
-											line.contains("V. PARCELA") && 
-											line.contains("DEVOLUCAO") && 
-											line.contains("SALDO") && 
-											line.contains("SITUACAO")) {
-											
-
-											tipoPlanilha = "DUPLICATA-DOMINIO"; 
-
-											if(primeiraVezDuplicata) limparIODuplicataTipoPlanilha(codEmpresa, dbIOCont, tipoPlanilha, logger);
-
-											JSONObject jIndices = new JSONObject();
-												
-											jIndices.put("IVENCIMENTO", 9).put("INOMEORIGEM", 4).put("IDUPLICATA", 4).put("IVALORPARCELA", 12)
-													.put("CODEMPRESA", codEmpresa).put("TIPOPLANILHA", tipoPlanilha);
-
-											primeiraVezDuplicata = inserirIODuplicata_DominioPlanilha02(jIndices, memFile, dbIOCont, logger);
-											primeiraVezDuplicata = false;
-											jStatus = new JSONObject();
-											// logger.logDebug("PUTSTATUS 730");
-											putStatus(dirName, "", jStatus, logger);
-
-											break;
-										}
-									}
-								}
-																
-								
-									
 								////////////////////////////////////////////////////////////////////////////////
 								//////////////////////////////////////////////////////////////// FIM DOS PADROES
 								////////////////////////////////////////////////////////////////////////////////
 								
 								// #DOCUMENTACAO
 								// lipeza de variaveis e de indices ao mudar de TIPOPLANILHA
-								// logger.logDebug("CPTS " + cabecalhoPlanilha.toString());
 								JSONObject jDadosObj = new JSONObject();
-								if(!tipoPlanilha.equals(getTipoPlanilha(cabecalhoPlanilha.toString() + " " + line, tipoPlanilha, StringUtil.removeSpecialChars(nomeArquivo), jDadosObj))){
+								if(!tipoPlanilha.equals(getTipoPlanilha(line, tipoPlanilha, StringUtil.removeSpecialChars(nomeArquivo), jDadosObj))){
 									inomeOrigem			= -1;		nomeOrigem		= "";
 									idataMovimento		= -1;		dataMovimento	= "";
 									inomePortador		= -1;		nomePortador	= "";
@@ -1034,50 +811,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								}
 								// #DOCUMENTACAO
 								// busca tipoplanilha e indices da planilhas secundarias
-								
-								tipoPlanilha = getTipoPlanilha(cabecalhoPlanilha.toString() + " " + line, tipoPlanilha, StringUtil.removeSpecialChars(nomeArquivo), jDadosObj);
-								// if(codEmpresa.contains("501")){
-									// logger.logInfo("NA == "+nomeArquivo.toUpperCase()+" | L = TP -> "+tipoPlanilha+" | LN = "+line);
-								// }
-								
-								boolean processaPeloNovo = false;
-								//2405-039697
-								if(tipoPlanilha.contains("MOVIMENTO_SICOOB") && roteiroCRMPrincipal.optString("contabilidade").toUpperCase().contains("LAVIE")){
-									processaPeloNovo = true;
-								}
-								
-								if (nomeArquivo.toUpperCase().contains(".PDF") && !nomeArquivo.toUpperCase().contains(".CSV")) {
-									if (TemplateUtils.verificaConversorNovoTipoPlanilha(tipoPlanilha) || processaPeloNovo) {
-										// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
-										String idConversor  = TemplateUtils.getIdLote(nomeArquivo);
-										// logger.logDebug("FOI PRO CONVERSOR1 " + nomeArquivo);
-										boolean deubom = false;
-										deubom = buscaProtocoloConversor(idConversor, apiWeb, tipoLancamento.toLowerCase(), nomeArquivo, logger);
-										
-										if (deubom) {
-											File file2 = new File(dirName);
-									
-											File []  arquivoParaConverter = file2.listFiles();
-											if (FileUtil.dirHasFiles(dirName)) {
-												for (File fl: arquivoParaConverter) {
-													if (fl.getName().toUpperCase().contains(".PDF")) {
-														try {
-															FileUtil.deleteFile(fl);
-														} catch (Exception XX) {}
-														break;
-													}
-												}
-											}
-										}
-										continue;
-									}
-								}
-								
-								//#2306-007459
-								if(tipoPlanilha.contains("CARTAO_SIPAG7") && extensao.contains("CSV")){
-									memFile.setFieldSeparator(";");
-								}
- 
+								tipoPlanilha = getTipoPlanilha(line, tipoPlanilha, StringUtil.removeSpecialChars(nomeArquivo), jDadosObj);
 								if(!tipoPlanilha.equals("MOVIMENTO")){
 									roteiroCRM = buscaRoteiro("getRoteiro"+tipoPlanilha, logger);
 									inomeOrigem     = getIndice("nomeOrigem", inomeOrigem, roteiroCRM);
@@ -1105,34 +839,29 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									icpfCnpj		= getIndice("cpfCnpj", icpfCnpj, roteiroCRM);
 									
 									zerar			= !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
-									
-									
-									// Em casos onde a planilha secund?ria precisa de uma aba espec?fica descomentar essa linha
-									if(!roteiroCRM.optString("Abas_Especificas").equals("") && !roteiroCRM.optString("Abas_Especificas").contains(String.valueOf(abaConvertida))) continue;
+                                    
+                                    // Em casos onde a planilha secund?ria precisa de uma aba espec?fica descomentar essa linha
+                                    // if(!roteiroCRM.optString("Abas_Especificas").contains(String.valueOf(porAba))) continue;
 
 								}
-								
-								if(nomeArquivo.toUpperCase().contains("OTTIMIZZA")){
-									if(!logsTxt.toString().contains("MANTEMARQUIVO"))logsTxt.append("STATUS;DATA;VALOR;DOCUMENTO;CLIENTE/FORNECEDOR;PORTADOR;COMPLEMENTO01;COMPLEMENTO02;COMPLEMENTO03;COMPLEMENTO04;COMPLEMENTO05;COMPLEMENTO06;TIPOPLANILHA;MANTEMARQUIVO;PROCESSAOUD;LINHA;");
-									logs = true;
-								}
+
 
 								// #DOCUMENTACAO
 								// tratamento de "Agrupar Colunas Excel" e "Agrupar a partir da coluna"
-								try {
-									fazerShrinkDelimitandoPosicoes(roteiroCRM, memFile);
-								} catch (IllegalArgumentException e) {
-									//TODO: handle exception
-									erroShrink = true;
-									logger.logError("Deu ruim no shrink \n"+e);
-									break;
-								}
+								 
+                                try {
+                                    fazerShrinkDelimitandoPosicoes(roteiroCRM, memFile);
+                                } catch (IllegalArgumentException e) {
+                                    //TODO: handle exception
+                                    erroShrink = true;
+                                    logger.logError("Deu ruim no shrink \n"+e);
+                                    break;
+                                }
 								/////////////////////////////
 								// VALIDACAO POR CABECALHO //
 								/////////////////////////////
- 
 
- 								inomeOrigem		= getIndiceCabecalho("nomeOrigem", inomeOrigem, memFile, roteiroCRM);
+								inomeOrigem		= getIndiceCabecalho("nomeOrigem", inomeOrigem, memFile, roteiroCRM);
 								idataMovimento	= getIndiceCabecalho("dataMovimento", idataMovimento, memFile, roteiroCRM);
 								inomePortador	= getIndiceCabecalho("nomePortador", inomePortador, memFile, roteiroCRM);
 								idocumento		= getIndiceCabecalho("documento", idocumento, memFile, roteiroCRM);
@@ -1167,11 +896,34 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								// ignorar antes
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO")) {
 
-									histobj.put("nomeOrigem", getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger)).put("documento", getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger)).put("complemento01", getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger)).put("complemento02", getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger)).put("complemento03", getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger)).put("complemento04", getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger)).put("complemento05", getCampoString(complemento05,	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger)).put("complemento06", getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger)).put("nomePortador", getCampoString(nomePortador,	inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger)).put("dataMovimento", "").put("mesAnoAnterior", "").put("mesAno2Anterior", "").put("mesAnoAtual", "").put("contaMovimento", "").put("contaPortador", "").put("contaDebito", "").put("contaCredito", "").put("contaJuros", contaJuros).put("contaDesconto", contaDesconto)
-										   .put("contaMulta", contaMulta).put("valorDocumento", "").put("valorJuros", "")
-										   .put("valorDesconto", "").put("valorMulta","").put("codFilial", "")
-										   .put("numeroAba", String.valueOf(abaConvertida)).put("tipoPlanilha", tipoPlanilha)
-										   .put("nomeArquivo", nomeArquivo.toUpperCase());
+									histobj.put("nomeOrigem", getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger));
+									histobj.put("documento", getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger));
+									histobj.put("complemento01", getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger));
+									histobj.put("complemento02", getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger));
+									histobj.put("complemento03", getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger));
+									histobj.put("complemento04", getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger));
+									histobj.put("complemento05", getCampoString(complemento05,	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger));
+									histobj.put("complemento06", getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger));
+									histobj.put("nomePortador", getCampoString(nomePortador,	inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger));
+									histobj.put("dataMovimento", "");
+									histobj.put("mesAnoAnterior", "");
+									histobj.put("mesAno2Anterior", "");
+									histobj.put("mesAnoAtual", "");
+									histobj.put("contaMovimento", "");
+									histobj.put("contaPortador", "");
+									histobj.put("contaDebito", "");
+									histobj.put("contaCredito", "");
+									histobj.put("contaJuros", contaJuros);
+									histobj.put("contaDesconto", contaDesconto);
+									histobj.put("contaMulta", contaMulta);
+									histobj.put("valorDocumento", "");
+									histobj.put("valorJuros", "");
+									histobj.put("valorDesconto", "");
+									histobj.put("valorMulta","");
+									histobj.put("codFilial", "");
+									histobj.put("numeroAba", String.valueOf(porAba));
+									histobj.put("tipoPlanilha", tipoPlanilha);
+									histobj.put("nomeArquivo", nomeArquivo.toUpperCase());
 
 									ignorarAntes = getTratarLinhaIgnorar(line.replaceAll("\\|","").replaceAll(";","").replaceAll(",","").trim(), tipoLancamento,
 																		 getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger),
@@ -1196,48 +948,32 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 								if (naoLeMais) continue;
 								if (tipoPlanilha.equals("")) continue;
-								
-								//2404-034999 e 2404-036372 - Extratos santander pdf e excel processavam duas vezes, com o tipoPlanilha "EXTRATO" em uma e "MOVIMENTO" em outra
-								if(roteiroCRMPrincipal.optString("contabilidade").toUpperCase().contains("SZXCONSULTORIA") &&
-								codEmpresa.equals("00012") && tipoPlanilha.contains("MOVIMENTO")){
 
-									if(ehExtratoPadrao){
-										continue;
-									}
 
-									if(contadorCabecalho <= 5){ //Para a busca ser feita apenas nas 5 primeiras linhas
-										if(memFile.getLines().toString().toUpperCase().contains("CENTRAL DE ATENDIMENTO SANTANDER") || memFile.getLines().toString().toUpperCase().contains("INTERNET BANKING") ||
-										memFile.getLines().toString().toUpperCase().contains("SANTANDER.COM") || (line.contains("AGENCIA") && line.contains("CONTA")) ||
-										(memFile.getLines().toString().toUpperCase().contains("ISIN/IDENTIFICADOR") && memFile.getLines().toString().toUpperCase().contains("CARTEIRA"))){ //
-											ehExtratoPadrao = true;
-											continue;
-
-										}
-									}
-								}
-
-								
-								
 								// #DOCUMENTACAO
 								// leitura de xlsx e csv
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") || (!roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && !roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA ("))) {
-									TemplateUtils templateUtil = new TemplateUtils();
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
- 									
-									
-									
-									// #Fabrica(2019-05-20)
-									if (tipoPlanilha.contains("OTTCARTAO")) {
-										dataMovimento = templateUtil.getDataOttCartao(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), tipoPlanilha, idataMovimento, line, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-										// logger.logInfo("DT dps -> " + dataMovimento);
-										dataLote	  = getCampoDate(dataMovimento, "", "yyyy-MM");
-									}
-									
-									if (!tipoPlanilha.contains("OTTCARTAO")) {
-										// #Fabrica(2019-05-20)
+
+                                    if (roteiroCRM.optString("dataMovimento").toUpperCase().contains("#") && roteiroCRM.optString("dataMovimento").toUpperCase().contains("CONTEM")){ 
+										String textoBusca	= cutString(roteiroCRM.optString("dataMovimento").toUpperCase(), "(", ")");
+										int colValidacao	= getExcelColumnNumber(cutString(roteiroCRM.optString("dataMovimento").toUpperCase(), 0, "CONTEM"));
+										int colLeitura		= getExcelColumnNumber(cutString(roteiroCRM.optString("dataMovimento").toUpperCase(), ")"));
+										
+										if(cutString(roteiroCRM.optString("dataMovimento").toUpperCase(), ")").equals((roteiroCRM.optString("dataMovimento").toUpperCase()))) {
+											colLeitura = colValidacao; //se nao tem nada depois do ')' usa a coluna anterior.
+										}
+										
+										if(memFile.getStringFieldRemoveEspCharsUpper(colValidacao).contains(textoBusca)){
+											try{
+												dataMovimento     = getDate(dataMovimento, colLeitura, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger); 
+												dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+											}catch(Exception e) {  }
+										}
+									} else {
 										try{
-											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											 
+											// #Fabrica(2019-05-20)
+											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger); 
 											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
 										}catch(Exception e){
 											// dataMovimento   = "";
@@ -1245,40 +981,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										}
 									}
 									
-									 
-									if(templateUtil.validaPlanilhaPadrao(tipoLancamento, memFile)) break;
-									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
-									
-									 
- 								   
-									// leitura de data mantida por seguranca
-									// String dataString = getCampoString(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger).trim();
-									// if (!dataString.equals("")) {
-									// 	String dataMovimentoAux	  = getCampoDate(dataString);
-									// 	if (dataMovimentoAux.contains("/")) {
-									// 		dataMovimento     = getCampoDate(dataString);
-									// 		dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
-									// 	}
-									// }
 
 									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("DATA MOVIMENTO") && !dataMovimento.equals("")) isLinhaPrincipal = true;
-								
-									
-									if (!zerarColAlternativo.equals("")) {
-										if (zerarColAlternativo.contains("documento"))		documento		= "";
-										if (zerarColAlternativo.contains("nomeOrigem"))		nomeOrigem		= "";
-										if (zerarColAlternativo.contains("nomePortador"))   nomePortador	= "";
-										if (zerarColAlternativo.contains("complemento01"))  complemento01	= "";
-										if (zerarColAlternativo.contains("complemento02"))  complemento02	= "";
-										if (zerarColAlternativo.contains("complemento03"))  complemento03   = "";
-										if (zerarColAlternativo.contains("complemento04"))  complemento04   = "";
-										if (zerarColAlternativo.contains("complemento05"))  complemento05   = "";
-										if (zerarColAlternativo.contains("complemento06"))  complemento06   = "";
-										if (zerarColAlternativo.contains("complemento07"))  complemento07   = "";
-										if (zerarColAlternativo.contains("complemento08"))  complemento08   = "";
-										if (zerarColAlternativo.contains("complemento09"))  complemento09   = "";
-										if (zerarColAlternativo.contains("complemento10"))  complemento10   = "";
-									}
 									
 									nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger);
 									nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger);
@@ -1295,11 +999,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento08	= getCampoString(complemento08,	icomplemento08, line, zerar, roteiroCRM.optString("complemento08").toUpperCase(), memFile, logger);
 									complemento09	= getCampoString(complemento09,	icomplemento09, line, zerar, roteiroCRM.optString("complemento09").toUpperCase(), memFile, logger);
 									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, logger);
-									
-									if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR")) {
-										complemento09 = templateUtil.validaComplementoVencimento(roteiroCRM, roteiroCRMPrincipal, line, memFile, logger);
-									}
-									
 									cpfCnpj			= getCampoString(cpfCnpj,		icpfCnpj, 		line, zerar, roteiroCRM.optString("cpfCnpj").toUpperCase(), memFile, logger);
 									codCcOrigem		= getCampoString(codCcOrigem,	icodCcOrigem, line, false, roteiroCRM.optString("centroCusto").toUpperCase(), memFile, logger);
 
@@ -1307,17 +1006,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									parcelaDoc      = 1;
 
 									valorDocumento	= 0;
-									valorDocumentoArray[0] = 0;
-									valorDocumentoArray[1] = 0;
-									valorDocumentoArray[2] = 0;
-									valorDocumentoArray[3] = 0;
-									valorDocumentoArray[4] = 0;
-									valorDocumentoArray[5] = 0;
-									valorDocumentoArray[6] = 0;
-									valorDocumentoArray[7] = 0;
-									valorDocumentoArray[8] = 0;
-									valorDocumentoArray[9] = 0;
-									
 									valorJuros		= 0;
 									valorDesconto	= 0;
 									valorMulta		= 0;
@@ -1326,129 +1014,43 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									debitoCredito 	= "";
 									valorAlternativo = 0;
 									
-									if(ivalorJuros >=0){
-										try{valorJuros = Math.abs(memFile.getDoubleField(ivalorJuros));}
-										catch (Exception vlrj) { valorJuros = 0;}
+									if (!tipoPlanilha.equals("MOVIMENTO")) {
+										if(ivalorJuros >=0){
+											try{valorJuros = Math.abs(memFile.getDoubleField(ivalorJuros));}
+											catch (Exception vlrj) { valorJuros = 0;}
+										}
+										if(ivalorDesconto >=0){
+											try{valorDesconto = Math.abs(memFile.getDoubleField(ivalorDesconto));}
+											catch(Exception vlrd) {valorDesconto = 0;}
+										}
+										if(ivalorMulta >=0){
+											try{valorMulta = Math.abs(memFile.getDoubleField(ivalorMulta));}
+											catch(Exception vlrm) {valorMulta = 0;}
+										}
 									}
-									
-									if(ivalorDesconto >=0){
-										try{valorDesconto = Math.abs(memFile.getDoubleField(ivalorDesconto));}
-										catch(Exception vlrd) {valorDesconto = 0;}
+									if (tipoPlanilha.equals("MOVIMENTO")) {
+										if(ivalorJuros >=0){
+											try{valorJurosExtra = Math.abs(memFile.getDoubleField(ivalorJuros));}
+											catch(Exception vlrd) {valorJurosExtra = 0;}
+										}
+										if(ivalorDesconto >=0){
+											try{valorDescontoExtra = Math.abs(memFile.getDoubleField(ivalorDesconto));}
+											catch(Exception vlrd) {valorDescontoExtra = 0;}
+										}
+										if(icomplemento06 >=0){
+											try{valorDeducoes = Math.abs(memFile.getDoubleField(icomplemento06));}
+											catch(Exception vlrd) {valorDeducoes = 0;}
+										}
+										if(icomplemento05 >=0){
+											try{valorAcrescimos = Math.abs(memFile.getDoubleField(icomplemento05));}
+											catch(Exception vlrd) {valorAcrescimos = 0;}
+										}
 									}
-									
-									// quando no CRM colocarmos que a coluna de juros eh a mesma de valor desconto 
-									// no caso do valor ser negativo, jogaremos zero para juros, ficando o valor absoluto da coluna como desconto
-									// no caso do valor ser positivo, jogamos zero em valor desconto, ficando apenas com o valor dos juros
-									if((ivalorDesconto == ivalorJuros) && valorJuros > 0 && ivalorJuros > 0){
-										try{
-											if(memFile.getDoubleField(ivalorDesconto) < 0) valorJuros = 0;
-											else valorDesconto = 0;
-										} catch(Exception vlrd) {}
-									}
-									
-									if(ivalorMulta >=0){
-										try{valorMulta = Math.abs(memFile.getDoubleField(ivalorMulta));}
-										catch(Exception vlrm) {valorMulta = 0;}
-									}
-									
 									//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
 									if(ivalorDocumento >=0){
 										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
-									
-									 // if(codEmpresa.contains("406")) logger.logInfo("TP = "+tipoPlanilha+" | IV = "+ivalorDocumento+" | V = "+valorDocumento+" | ID = "+idataMovimento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem+" | NP = "+nomePortador);
-									
-									
-									if(logs && cont <= 200){
-										
-										logsTxt.append("\r\n");
-										logsTxt.append("ANALISTA AUX").append(";").append(dataMovimento).append(";").append(valorDocumento).append(";")
-											   .append(documento).append(";").append(nomeOrigem).append(";").append(nomePortador).append(";").append(complemento01)
-											   .append(";").append(complemento02).append(";").append(complemento03).append(";").append(complemento04).append(";")
-											   .append(complemento05).append(";").append(complemento06).append(";").append(tipoPlanilha).append(";")
-											   .append(mantemArquivo.equals("SIM") ? "LENDO PELO TEMPLATE (SIM)" : "LENDO ESPECIFICO (NAO)").append(";")
-											   .append(line).append(";");
-																	
-									}
-
-									// logger.logDebug("ROTEIRO coluna Extra => " + roteiroCRM.optString("Colunas_de_Valores_Extras") + " |TP => " + tipoPlanilha);
-									if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
-										String [] indiceValores = roteiroCRM.optString("Colunas_de_Valores_Extras").split(";");
-										valorSomaArray = 0;
-										for(int iv = 0; iv < indiceValores.length; iv++) {
-											// try{
-												// logger.logDebug("IDValores -> " + indiceValores[iv].toString());
-												// if(!indiceValores[iv].contains("*") && !indiceValores[iv].contains("/") && !indiceValores[iv].contains("+") && !indiceValores[iv].contains("-") && !indiceValores[iv].contains("#")){
-													// logger.logDebug("ENTROU IF");
-													// String rotuloColuna = "";
-													// String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";");
-													// logger.logDebug("ROTULO ARRAY => " +rotuloArray[iv].toString());
-													// indiceValores[iv]	= getIndiceCabecalhoExtra(rotuloArray[iv], memFile);
-													// logger.logDebug("INDICE dps => " +indiceValores[iv].toString());
-												// }
-											// }catch(Exception xx){
-												// logger.logDebug("CAIU CATCH");
-											// }
-												
-											//ssss
-											double denomidador = 0; 
-											int indiceDenominador = -1;
-											String sinal = "";
-											boolean multiplica100 = false;
-											boolean divide100 = false;
-											
-											if (indiceValores[iv].contains("*100")) multiplica100 = true;
-											if (indiceValores[iv].contains("/100")) divide100 = true;
-											indiceValores[iv] = indiceValores[iv].replace("*100","").replace("/100","");
-											
-											if (indiceValores[iv].contains("*")) sinal = "*";
-											if (indiceValores[iv].contains("/")) sinal = "/";
-											if (indiceValores[iv].contains("+")) sinal = "+";
-											if (indiceValores[iv].contains("-")) sinal = "-";										
-
-																					
-											if (!sinal.equals("") && indiceValores[iv].contains(sinal)) {
- 												try {
-													if (!indiceValores[iv].contains("#")) {
-														denomidador = Math.abs(memFile.getDoubleField(Integer.parseInt(cutString(indiceValores[iv], sinal))));
-													}
-													else {
-														denomidador = DecimalUtil.toDecimal(cutString(indiceValores[iv], "#"));
-													}
-												} catch (Exception xx) {denomidador = 0;}
-												indiceValores[iv] = cutString(indiceValores[iv], 0, sinal);
-											} 
-											 	
-											
-											try{
-											
-												valorDocumentoArray[iv] = Math.abs(memFile.getDoubleField(Integer.parseInt(indiceValores[iv])));
-												if (sinal.equals("*") && denomidador > 0) valorDocumentoArray[iv] = valorDocumentoArray[iv] * denomidador;
-												if (sinal.equals("/") && denomidador > 0) valorDocumentoArray[iv] = valorDocumentoArray[iv] / denomidador;
-												if (sinal.equals("+") && denomidador > 0) valorDocumentoArray[iv] = valorDocumentoArray[iv] + denomidador;
-												if (sinal.equals("-") && denomidador > 0) valorDocumentoArray[iv] = valorDocumentoArray[iv] - denomidador;
-												if (multiplica100) valorDocumentoArray[iv] = valorDocumentoArray[iv] * 100;
-												if (divide100)     valorDocumentoArray[iv] = valorDocumentoArray[iv] / 100;
-												
- 
-												
- 											}
-											catch (Exception vlrd) { 
-
- 
- 
-												valorDocumentoArray[iv] = 0; 
-											}
-											
-											if(valorDocumentoArray[iv] < 0){
-												valorDocumentoArray[iv] = 0;
-											} 
-											
-											valorSomaArray += valorDocumentoArray[iv];
-										}
-									}
-									
 									
 									if(ivalorPagamento >=0){
 										try{valorPagamento	= memFile.getDoubleField(ivalorPagamento);}
@@ -1459,64 +1061,20 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										try{valorAlternativo = memFile.getDoubleField(ivalorAlternativo);}
 										catch (Exception vlrd) { valorAlternativo = 0; }
 									}
-									
-									if (tipoLancamento.equals("PAGAR"))
-										debitoCredito = "EXTRATO-DEBITO";
-									
-									if (tipoLancamento.equals("RECEBER"))
-										debitoCredito = "EXTRATO-CREDITO";
-								
-									
-									////////////////////////////////////////////////
-									////	busca Coluna Alternativa 
-									JSONObject obj1 = new JSONObject();
-									String validar	= "dataMovimento;nomeOrigem;documento;complemento01;complemento02;complemento03;complemento04;complemento05;complemento06;complemento07;complemento08;complemento09;complemento10;nomePortador;valorDocumento;valorPagamento;valorJuros;valorDesconto;valorMulta";
-									obj1.put("validar", validar).put("documento", documento).put("nomeOrigem", nomeOrigem).put("nomePortador", nomePortador)
-										.put("dataMovimento", dataMovimento).put("complemento01", complemento01).put("complemento02", complemento02)
-										.put("complemento03", complemento03).put("complemento04", complemento04).put("complemento05", complemento05)
-										.put("complemento06", complemento06).put("complemento07", complemento07).put("complemento08", complemento08)
-										.put("complemento09", complemento09).put("complemento10", complemento10).put("codCentroCusto", codCcOrigem)
-										.put("tipoPlanilha", tipoPlanilha).put("numeroAba",	String.valueOf(abaConvertida)).put("nomeArquivo", nomeArquivo.toUpperCase());
-									
-									JSONObject alternativeObj = getAlternativeDataInt (obj1, memFile);
-									String changed = alternativeObj.optString("changeIt");
-									
-									if(!changed.equals("")) {
-										zerarColAlternativo = changed;
-										if (changed.contains("dataMovimento")) {
-											dataMovimento	= alternativeObj.optString("dataMovimento");
-											dataLote		= alternativeObj.optString("dataLote");
-										}
-										if (changed.contains("documento"))		documento		= alternativeObj.optString("documento");
-										if (changed.contains("nomeOrigem"))		nomeOrigem		= alternativeObj.optString("nomeOrigem");
-										if (changed.contains("nomePortador"))   nomePortador	= alternativeObj.optString("nomePortador");
-										
-										if (changed.contains("complemento01"))  complemento01	= alternativeObj.optString("complemento01");
-										if (changed.contains("complemento02"))  complemento02	= alternativeObj.optString("complemento02");
-										if (changed.contains("complemento03"))  complemento03   = alternativeObj.optString("complemento03");
-										if (changed.contains("complemento04"))  complemento04   = alternativeObj.optString("complemento04");
-										if (changed.contains("complemento05"))  complemento05   = alternativeObj.optString("complemento05");
-										if (changed.contains("complemento06"))  complemento06   = alternativeObj.optString("complemento06");
-										if (changed.contains("complemento07"))  complemento07   = alternativeObj.optString("complemento07");
-										if (changed.contains("complemento08"))  complemento08   = alternativeObj.optString("complemento08");
-										if (changed.contains("complemento09"))  complemento09   = alternativeObj.optString("complemento09");
-										if (changed.contains("complemento10"))  complemento10   = alternativeObj.optString("complemento10");
-										
-										if (changed.contains("valorDocumento"))	valorDocumento	= alternativeObj.optDouble("valorDocumento");
-										
-										if (changed.contains("valorPagamento"))	valorPagamento  = alternativeObj.optDouble("valorPagamento");
-										if (changed.contains("valorDesconto"))	valorDesconto	= alternativeObj.optDouble("valorDesconto");
-										if (changed.contains("valorJuros"))		valorJuros		= alternativeObj.optDouble("valorJuros");
-										if (changed.contains("valorMulta"))		valorMulta		= alternativeObj.optDouble("valorMulta");
-									}
-									
+                                    
+                                    if (tipoLancamento.equals("PAGAR")) 
+                                        if (ivalorAlternativo != -1) 			debitoCredito = "EXTRATO-DEBITO";
+                                    
+                                    if (tipoLancamento.equals("RECEBER")) 
+                                        if (ivalorAlternativo != -1) 			debitoCredito = "EXTRATO-CREDITO";
+                                
 
-									// fazer regra quando tiver valor documento e alternativo na mesma coluna
+                                    // fazer regra quando tiver valor documento e alternativo na mesma coluna
 									String tratarComoValorAlternativo = getTratarValorAlternativo(histobj);
 									if (!tratarComoValorAlternativo.equals("")) {											
 										if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
 										if (tipoLancamento.equals("RECEBER")) 	debitoCredito = "EXTRATO-DEBITO";
-										if(ivalorAlternativo >= 0) valorDocumento = valorAlternativo;
+                                        if(ivalorAlternativo >= 0) valorDocumento = valorAlternativo;
 									}else{// n?o fazer regra quando for valor documento e alternativo em colunas diferentes	
 										if(valorDocumento == 0 && ivalorAlternativo >= 0){		
 											if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
@@ -1524,8 +1082,9 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											valorDocumento = valorAlternativo;
 										}
 									}
-									// ---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
-									if((ivalorDocumento < 0 || tipoPlanilha.contains("PADRAOOTTIMIZZA")) && valorDocumento == 0){
+
+									//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
+									if(ivalorDocumento < 0 && valorDocumento == 0){
 										if		(valorPagamento > 0) valorDocumento = valorPagamento + valorDesconto - valorJuros - valorMulta;
 										else if	(valorPagamento < 0) valorDocumento = valorPagamento - valorDesconto + valorJuros + valorMulta;
 									}
@@ -1536,108 +1095,70 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 									valorDocumento = Math.abs(valorDocumento);
 									
-									// if(codEmpresa.equals("611")) logger.logInfo("TP -> " + tipoPlanilha + "\n" + " DT -> " + dataMovimento + " |VD -> " + valorDocumento  + "\n");
-								
-
-									
 									// ---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
-									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("VALOR DOCUMENTO") && (valorDocumento > 0 || valorSomaArray > 0)) isLinhaPrincipal = true;
+									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("VALOR DOCUMENTO") &&  valorDocumento > 0) isLinhaPrincipal = true;
 									
 									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("VALOR DOCUMENTO") &&
-										lerAposPrincipal.equals("") && (valorDocumento == 0 && valorSomaArray == 0)) {
-											
+										lerAposPrincipal.equals("") && valorDocumento == 0) {
 										continue;
 									}
 								}
-								
- 
 
 								// #DOCUMENTACAO
 								// leitura de TXT
-								if (roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") && roteiroCRM.optString("dataMovimento").replaceAll(" ", "").toUpperCase().startsWith("COLUNA(") && roteiroCRM.optString("dataMovimento").endsWith(")")) {
-  
-									String dataString = getCampoString(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, roteiroCRM, logger).trim();
-  
-   
-									if (!dataString.equals("") && dataString.contains("/")) {
-										String dataMovimentoAux	  = getCampoDate(dataString);
-										if (dataMovimentoAux.contains("/")) {
-											dataMovimento     = getCampoDate(dataString);
-											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
- 										}
-									}
-  									
-  
-									// ajusta data quando vem no formato 01012021  
-									if (!dataString.equals("") && !dataString.contains("/") && dataString.contains("20")) {
-										try {
-											Date dts = DateUtil.stringToDate(dataString, "ddMMyyyy");
-											dataMovimento = DateUtil.dateToString(dts, "dd/MM/yyyy");
-											dataLote = DateUtil.dateToString(dts, "yyyy-MM");
-											if (!dataMovimento.contains("/20")) {   // data bichada sera ignorada
-												dataMovimento = "";
-												continue;
-											}
-										} catch (Exception dt1) {
-											continue;
-										}
-									}
-  
- 
-									nomePortador	= getCampoString(nomePortador, inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, roteiroCRM, logger);
-									nomeOrigem		= getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, roteiroCRM, logger);
-									documento		= getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, roteiroCRM, logger);
+								if (roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") && roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && roteiroCRM.optString("dataMovimento").endsWith(")")) {
 
-									complemento01	= getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento02	= getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento03	= getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento04	= getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento05	= getCampoString(complemento05,	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, roteiroCRM, logger);
+									String dataString = getStringTXT(roteiroCRM.optString("dataMovimento").toUpperCase(), line, objetoParametro).trim();
+									dataMovimento	  = getCampoDate(dataString);
+									dataLote		  = getCampoDate(dataString, "", "yyyy-MM");
 
-									complemento06	= getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento07	= getCampoString(complemento07,	icomplemento07, line, zerar, roteiroCRM.optString("complemento07").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento08	= getCampoString(complemento08,	icomplemento08, line, zerar, roteiroCRM.optString("complemento08").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento09	= getCampoString(complemento09,	icomplemento09, line, zerar, roteiroCRM.optString("complemento09").toUpperCase(), memFile, roteiroCRM, logger);
-									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, roteiroCRM, logger);
-									cpfCnpj			= getCampoString(cpfCnpj,		icpfCnpj, 		line, zerar, roteiroCRM.optString("cpfCnpj").toUpperCase(), memFile, roteiroCRM, logger);
-									codCcOrigem		= getCampoString(codCcOrigem,	icodCcOrigem, 	line, false, roteiroCRM.optString("centroCusto").toUpperCase(), memFile, roteiroCRM, logger);
+									complemento01 = getStringTXT(roteiroCRM.optString("complemento01").toUpperCase(), line, objetoParametro);
+									complemento02 = getStringTXT(roteiroCRM.optString("complemento02").toUpperCase(), line, objetoParametro);
+									complemento03 = getStringTXT(roteiroCRM.optString("complemento03").toUpperCase(), line, objetoParametro);
+									complemento04 = getStringTXT(roteiroCRM.optString("complemento04").toUpperCase(), line, objetoParametro);
+									complemento05 = getStringTXT(roteiroCRM.optString("complemento05").toUpperCase(), line, objetoParametro);
+									complemento06 = getStringTXT(roteiroCRM.optString("complemento06").toUpperCase(), line, objetoParametro);
+									complemento07 = getStringTXT(roteiroCRM.optString("complemento07").toUpperCase(), line, objetoParametro);
+									complemento08 = getStringTXT(roteiroCRM.optString("complemento08").toUpperCase(), line, objetoParametro);
+									complemento09 = getStringTXT(roteiroCRM.optString("complemento09").toUpperCase(), line, objetoParametro);
+									complemento10 = getStringTXT(roteiroCRM.optString("complemento10").toUpperCase(), line, objetoParametro);
+									cpfCnpj		  = getStringTXT(roteiroCRM.optString("cpfCnpj").toUpperCase(), line, objetoParametro);
+
+									nomePortador  = getStringTXT(roteiroCRM.optString("portador").toUpperCase(), line, objetoParametro);
+									documento     = getStringTXT(roteiroCRM.optString("documentoNF").toUpperCase(), line, objetoParametro);
+									codCcOrigem   = getStringTXT(roteiroCRM.optString("centroCusto").toUpperCase(), line, objetoParametro);
+									nomeOrigem    = getStringTXT(roteiroCRM.optString("fornecedor").toUpperCase(), line, objetoParametro);
 
 
-									valorDocumento = getDoubleTXT2020(roteiroCRM.optString("valorDocumento").toUpperCase(), line, objetoParametro);
-									
-									if (tipoPlanilha.contains("OTTCARTAO")) {
-									    String valorStr = getCampoString("", -1, 	line, false, roteiroCRM.optString("valorDocumento").toUpperCase(), memFile, roteiroCRM, logger);
-										if (!valorStr.contains(".") && !valorStr.contains(",")) valorDocumento = valorDocumento / 100;
-									}
+									valorDocumento = getDoubleTXT(roteiroCRM.optString("valorDocumento").toUpperCase(), line, objetoParametro);
+									valorJuros	   = getDoubleTXT(roteiroCRM.optString("valorJuros").toUpperCase(), line, objetoParametro);
+									valorDesconto  = getDoubleTXT(roteiroCRM.optString("valorDesconto").toUpperCase(), line, objetoParametro);
+									valorMulta 	   = getDoubleTXT(roteiroCRM.optString("valorMulta").toUpperCase(), line, objetoParametro);
+									valorPagamento = getDoubleTXT(roteiroCRM.optString("valorPagamento").toUpperCase(), line, objetoParametro);
 
-									valorJuros	   = getDoubleTXT2020(roteiroCRM.optString("valorJuros").toUpperCase(), line, objetoParametro);
-									valorDesconto  = getDoubleTXT2020(roteiroCRM.optString("valorDesconto").toUpperCase(), line, objetoParametro);
-									valorMulta 	   = getDoubleTXT2020(roteiroCRM.optString("valorMulta").toUpperCase(), line, objetoParametro);
-									valorPagamento = getDoubleTXT2020(roteiroCRM.optString("valorPagamento").toUpperCase(), line, objetoParametro);
+                                    if (tipoLancamento.equals("PAGAR")) 
+                                        if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA"))
+                                            debitoCredito = "EXTRATO-DEBITO";
+                                    
+                                    if (tipoLancamento.equals("RECEBER")) 
+                                        if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA"))
+                                            debitoCredito = "EXTRATO-CREDITO";
 
-									if (tipoLancamento.equals("PAGAR")) 
-										if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA"))
-											debitoCredito = "EXTRATO-DEBITO";
-									
-									if (tipoLancamento.equals("RECEBER")) 
-										if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA"))
-											debitoCredito = "EXTRATO-CREDITO";
+                                    // fazer regra quando tiver valor documento e alternativo na mesma coluna
+                                    String tratarComoValorAlternativo = getTratarValorAlternativo(histobj);
+                                    if (!tratarComoValorAlternativo.equals("")) {											
+                                        if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
+                                        if (tipoLancamento.equals("RECEBER")) 	debitoCredito = "EXTRATO-DEBITO";
+                                        if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA")) valorDocumento = valorAlternativo;
+                                    }else{// n?o fazer regra quando for valor documento e alternativo em colunas diferentes	
+                                        if(valorDocumento == 0 && roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA")){		
+                                            if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
+                                            if (tipoLancamento.equals("RECEBER")) 	debitoCredito = "EXTRATO-DEBITO";
+                                            valorDocumento = valorAlternativo;
+                                        }
+                                    }
 
-									// fazer regra quando tiver valor documento e alternativo na mesma coluna
-									String tratarComoValorAlternativo = getTratarValorAlternativo(histobj);
-									if (!tratarComoValorAlternativo.equals("")) {											
-										if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
-										if (tipoLancamento.equals("RECEBER")) 	debitoCredito = "EXTRATO-DEBITO";
-										if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA")) valorDocumento = valorAlternativo;
-									}else{// n?o fazer regra quando for valor documento e alternativo em colunas diferentes	
-										if(valorDocumento == 0 && roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA")){		
-											if (tipoLancamento.equals("PAGAR")) 	debitoCredito = "EXTRATO-CREDITO";
-											if (tipoLancamento.equals("RECEBER")) 	debitoCredito = "EXTRATO-DEBITO";
-											valorDocumento = valorAlternativo;
-										}
-									}
-
-									if(!roteiroCRM.optString("valorDocumento").toUpperCase().contains("COLUNA") && valorDocumento == 0){
+                                    if(!roteiroCRM.optString("valorDocumento").toUpperCase().contains("COLUNA") && valorDocumento == 0){
 										if		(valorPagamento > 0) valorDocumento = valorPagamento + valorDesconto - valorJuros - valorMulta;
 										else if	(valorPagamento < 0) valorDocumento = valorPagamento - valorDesconto + valorJuros + valorMulta;
 									}
@@ -1645,37 +1166,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										if(valorPagamento > valorDocumento) valorJuros = DecimalUtil.toDecimal(String.format("%.2f", valorPagamento - valorDocumento));
 										if(valorPagamento < valorDocumento) valorDesconto = DecimalUtil.toDecimal(String.format("%.2f", valorDocumento - valorPagamento));
 									}
-									
-									//#2305-0004328. Coluna de valor extra para o formato txt
-									if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
-                                        valorSomaArray = TemplateUtils.lerValoresExtrasArquivoTxt(valorDocumentoArray, line, roteiroCRM, null);
-                                    }
+
 									valorDocumento = Math.abs(valorDocumento);
-									
-									// if(logs && cont <= 200){
-										// logsTxt.append("\r\n");
-										
-										// logsTxt.append("ANALISTA AUX");												logsTxt.append(";");
-										// logsTxt.append(dataMovimento); 												logsTxt.append(";");
-										// logsTxt.append(valorDocumento);												logsTxt.append(";");
-										// logsTxt.append(documento);													logsTxt.append(";");
-										// logsTxt.append(nomeOrigem);													logsTxt.append(";");
-										// logsTxt.append(nomePortador);												logsTxt.append(";");
-										// logsTxt.append(complemento01);												logsTxt.append(";");
-										// logsTxt.append(complemento02);												logsTxt.append(";");
-										// logsTxt.append(complemento03);												logsTxt.append(";");
-										// logsTxt.append(complemento04);												logsTxt.append(";");
-										// logsTxt.append(complemento05);												logsTxt.append(";");
-										// logsTxt.append(complemento06);												logsTxt.append(";");
-										// logsTxt.append(tipoPlanilha);												
-										// if(mantemArquivo.equals("SIM"))logsTxt.append("LENDO PELO TEMPLATE");		logsTxt.append(";");
-										// if(mantemArquivo.equals("NAO"))logsTxt.append("LENDO ESPECIFICO");			logsTxt.append(";");
-										// logsTxt.append(line);														logsTxt.append(";");
-																		
-									// }
-									
+
 									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("DATA MOVIMENTO") && !dataMovimento.equals(""))  isLinhaPrincipal = true;
-									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("VALOR DOCUMENTO") && (valorDocumento > 0 || valorSomaArray > 0))		  isLinhaPrincipal = true;
+									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("VALOR DOCUMENTO") && valorDocumento > 0)		  isLinhaPrincipal = true;
 									if (roteiroCRM.optString("campoLinhaPrincipal").toUpperCase().equals("FORNECEDOR-CLIENTE") && !nomeOrigem.equals("")) isLinhaPrincipal = true;
 								}
 
@@ -1700,15 +1195,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									}
 									mesAno2Anterior = StringUtil.leftPad(String.valueOf(mesRef),2,"0") + "/" + String.valueOf(anoRef);
 								}
-								
+								//---~---~---~---~---~---~-
+
+
+								//##########################################################
+
 								// #DOCUMENTACAO
 								// filtro de datas (parametro definido por integracao no CRM, e informado a cada processamento de arquivos)
-								//if (nomeArquivo.toUpperCase().contains("FILTRO_")) filtro = validaFiltro(nomeArquivo, dataMovimento);
-								if (nomeArquivo.toUpperCase().contains("FILTRO_")) {
-									temFiltro = true;
-									filtro = validaFiltro(nomeArquivo, dataMovimento);
-								}
-								
+								if (nomeArquivo.toUpperCase().contains("FILTRO_")) filtro = validaFiltro(nomeArquivo, dataMovimento);
 								if (!filtro) continue;
 
 								valorTotalDoc   += valorDocumento;
@@ -1721,48 +1215,30 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								
 								// #DOCUMENTACAO
 								// cpfCnpj
-								boolean aceitaCpf			= true;
-								boolean cnpjSomenteNumeros	= Boolean.parseBoolean(roteiroCRM.optString("cnpjSomenteNumeros").toLowerCase().trim());
+								boolean aceitaCpf = true;
 
-								if(!cpfCnpj.equals("")) cpfCnpj = trataCpfCnpj(cpfCnpj, cnpjSomenteNumeros, aceitaCpf);
-								
+								if(!cpfCnpj.equals("")){
+									if(Boolean.parseBoolean(roteiroCRM.optString("cnpjSomenteNumeros").toLowerCase().trim())){
+										if(!aceitaCpf)	cpfCnpj = trataCpfCnpj(cpfCnpj, true, false);
+										else			cpfCnpj = trataCpfCnpj(cpfCnpj);
+									}
+									if(!Boolean.parseBoolean(roteiroCRM.optString("cnpjSomenteNumeros").toLowerCase().trim())){
+										if(!aceitaCpf)	cpfCnpj = trataCpfCnpj(cpfCnpj, false, false);
+										else			cpfCnpj = trataCpfCnpj(cpfCnpj, false, true);
+									}
+								}
+
 								// #DOCUMENTACAO
 								// ajustes fornecedor/cliente e portador
 								if (nomeOrigem.equals("") && !roteiroCRM.optString("lerAposPrincipal").toUpperCase().contains("FORNECEDOR")) nomeOrigem = complemento01 + " " + dataMovimento + " R$" + String.valueOf(valorDocumento);
 								nomeOrigem = nomeOrigem.trim();
-								
-								//Removemos o replace de AMP por conta de um efeito colateral #202212-0022861
-								//nomeOrigem = nomeOrigem.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").replaceAll("AMP","").trim();
-								nomeOrigem = nomeOrigem.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								// nomeOrigem = stringNormalizer(nomeOrigem, true);
-								nomeOrigem = StringUtil.removeSpecialCharsToUC(nomeOrigem);
-								
-								// 202301-0023496 JWR Coloquei esse balde com o X para remontar o nomeOrigem
-								// Descomentar caso dê problema com caracteres especiais
-								/*String letrasPermitidas = "ABCDEFGHIJKLMNOPRSTUVWXYZ 0123456789.-/&";
-								String nomeOrigemNovo = "";
-								for (int xx = 0; xx < nomeOrigem.length(); xx++) {
-									if (nomeOrigem.length() > xx) {
-										if (letrasPermitidas.contains(nomeOrigem.substring(xx, xx+1))) {
-											nomeOrigemNovo = nomeOrigemNovo + nomeOrigem.substring(xx, xx+1);
-										}
-									}
-								}
-								nomeOrigem = nomeOrigemNovo;*/
-
+								nomeOrigem = nomeOrigem.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").trim();
+								nomeOrigem = stringNormalizer(nomeOrigem, true);
 								
 								if (roteiroCRM.optString("portador").toUpperCase().contains("NOME") && roteiroCRM.optString("portador").toUpperCase().contains("ARQUIVO")) nomePortador = StringUtil.removeSpecialCharsToUC(nomeArquivo).toUpperCase();
-								nomePortador = nomePortador.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").replaceAll("\\?", "").trim();
+								nomePortador = nomePortador.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").trim();
 								nomePortador = stringNormalizer(nomePortador, true);
-
-								complemento01 = complemento01.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								complemento02 = complemento02.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								complemento03 = complemento03.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								complemento04 = complemento04.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								complemento05 = complemento05.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-								complemento06 = complemento06.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").trim();
-
-								// logger.logDebug("DAMA " + dataMovimento + " | " + valorDocumento + " | " + isLinhaPrincipal);
+								
 								if(dataMovimento.equals("")) continue;
 								// quando for ler linha principal zerar as variaveis que vem depois da principal para nao sobrepor campos.
 								if(isLinhaPrincipal) {
@@ -1770,40 +1246,43 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// cont define que eh um novo lancamento (normalmente uma nova linha)
 									cont++;
 
-									if (lerAposPrincipal.contains("FORNECEDOR"))	nomeOrigem = "";
-									if (lerAposPrincipal.contains("DOCUMENTO"))		documento = "";
-									if (lerAposPrincipal.contains("PORTADOR")) 		nomePortador = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO01")) complemento01 = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO02")) complemento02 = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO03")) complemento03 = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO04")) complemento04 = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO05")) complemento05 = "";
-									if (lerAposPrincipal.contains("COMPLEMENTO06")) complemento06 = "";
+									// if (lerAposPrincipal.contains("FORNECEDOR"))	nomeOrigem = "";
+									// if (lerAposPrincipal.contains("DOCUMENTO"))		documento = "";
+									// if (lerAposPrincipal.contains("PORTADOR")) 		nomePortador = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO01")) complemento01 = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO02")) complemento02 = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO03")) complemento03 = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO04")) complemento04 = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO05")) complemento05 = "";
+									// if (lerAposPrincipal.contains("COMPLEMENTO06")) complemento06 = "";
 
 								}
-								
 								if(cont == 0) continue;
+
+								histobj.put("nomeOrigem", nomeOrigem);					histobj.put("documento", documento);
+								histobj.put("complemento01", complemento01);			histobj.put("complemento02", complemento02);
+								histobj.put("complemento03", complemento03);			histobj.put("complemento04", complemento04);
+								histobj.put("complemento05", complemento05);			histobj.put("complemento06", complemento06);
+								histobj.put("complemento07", complemento07);			histobj.put("complemento08", complemento08);
+								histobj.put("complemento09", complemento09);			histobj.put("complemento10", complemento10);
+								histobj.put("dataMovimento", dataMovimento);			histobj.put("mesAnoAnterior", mesAnoAnterior);
+								histobj.put("mesAno2Anterior", mesAno2Anterior);		histobj.put("mesAnoAtual", mesAnoAtual);
+								histobj.put("nomePortador", nomePortador);				histobj.put("contaMovimento", contaMovimento);
+								histobj.put("contaPortador", contaPortador);	   		histobj.put("contaDebito", "");
+								histobj.put("contaCredito", "");						histobj.put("contaJuros", contaJuros);
+								histobj.put("contaDesconto", contaDesconto);			histobj.put("contaMulta", contaMulta);
+								histobj.put("valorDocumento", valorDocumento);			histobj.put("tipoPlanilha", tipoPlanilha); 
+								histobj.put("valorJuros", valorJuros);   				histobj.put("valorDesconto", valorDesconto);
+								histobj.put("valorMulta", valorMulta); 				    histobj.put("codFilial", codFilial);
+								histobj.put("nomeArquivo", nomeArquivo.toUpperCase()); // foi ajustado 
 								
-								histobj.put("nomeOrigem", nomeOrigem).put("documento", documento).put("complemento01", complemento01).put("complemento02", complemento02)
-									   .put("complemento03", complemento03).put("complemento04", complemento04).put("complemento05", complemento05).put("complemento06", complemento06)
-									   .put("complemento07", complemento07).put("complemento08", complemento08).put("complemento09", complemento09).put("complemento10", complemento10)
-									   .put("dataMovimento", dataMovimento).put("mesAnoAnterior", mesAnoAnterior).put("mesAno2Anterior", mesAno2Anterior).put("mesAnoAtual", mesAnoAtual)
-									   .put("nomePortador", nomePortador).put("contaMovimento", contaMovimento).put("contaPortador", contaPortador).put("contaDebito", "").put("contaCredito", "")
-									   .put("contaJuros", contaJuros).put("contaDesconto", contaDesconto).put("contaMulta", contaMulta).put("valorDocumento", valorDocumento).put("tipoPlanilha", tipoPlanilha)
-									   .put("valorJuros", valorJuros).put("valorDesconto", valorDesconto).put("valorMulta", valorMulta).put("codFilial", codFilial).put("nomeArquivo", nomeArquivo.toUpperCase()); // foi ajustado 
-
-								//feita limpeza de campo para poder pegar melhor os juros e descontos.
-								documento     = getLimpaCamposAvancado("documento", documento, histobj);
-
-
 								// #DOCUMENTACAO
 								// TRATA PLANILHA OU LANCAMENTO EXPECIFICO COMO EXTRATO
 								tratarComoExtrato = getTratarComoExtrato(line.replaceAll("\\|","").replaceAll(";","").replaceAll(",","").trim(), tipoLancamento, documento, nomeOrigem, histobj);
-								nomeOrigem = nomeOrigem.replaceAll("  ", " ").trim();
+                                nomeOrigem = nomeOrigem.replaceAll("  ", " ").trim();
 								if (tratarComoExtrato) {
-									if (nomeOrigem.length() > 199) nomeOrigem = cutString(nomeOrigem, 0, 180); // #Fabrica(2019-10-03) @Becker
-									JSONObject jDados = extrato.jDadosBuilder(nomePortador, codEmpresa, dataMovimento, debitoCredito, nomeArquivo, nomeOrigem, valorDocumento, complemento02, cont);
-									/*JSONObject jDados = new JSONObject();
+                                    if (nomeOrigem.length() > 199) nomeOrigem = cutString(nomeOrigem, 0, 180); // #Fabrica(2019-10-03) @Becker
+									JSONObject jDados = new JSONObject();
 									jDados.put("PORTADOR",    		nomePortador);
 									jDados.put("EMPRESA",     		codEmpresa);
 									jDados.put("DATAMOVIMENTO",	 	dataMovimento);
@@ -1812,8 +1291,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									jDados.put("VALORDOCUMENTO",    valorDocumento);
 									jDados.put("COMPLEMENTO01",     complemento02);
 									jDados.put("DEBITO-CREDITO",    debitoCredito);
-									jDados.put("CONT",  			String.valueOf(cont));*/
-									// logger.logDebug("nomePortador -> " + nomePortador);
+									jDados.put("CONT",  			String.valueOf(cont));
 									boolean primExtrato = insertIOExtrato(jDados, dbIOCont, logger );
 									jStatus = new JSONObject();
 									putStatus(dirName, "", jStatus, logger);
@@ -1861,69 +1339,43 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 								int restoLinha = 0;
 								restoLinha = (cont % 100);
-								
-								// logger.logDebug("PUTSTATUS 1591");
 								if (restoLinha == 0) putStatus(dirName, "02--Etapa 2 de 4 - " + String.valueOf(cont) + "--" + tipoLancamento + ".status", jStatus, logger);
 
 
 								String contLinhaTexto = String.valueOf(cont);
 								contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 05, "0");
-								String consolidaClass = StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
+								String consolidaClass = StringUtil.leftPad(String.valueOf(porAba), 02, "0") + contLinhaTexto;
 
 								classificacao         = dataMovimento.replace("/","").trim() + consolidaClass;
 								
-								
-								// quando usa o getColunaAlternativa tem que refatorar o datalote
-								dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");								
-								
 								//alterado para evitar problemas de lote (maiusculo)
 								lote = (nomeEmpresa + "_" + codEmpresa + "__" + nomeArquivo  + "__" + dataLote + "_" + tipoLancamento).replaceAll("\\." , "");
-								chave = lote + "-" + String.valueOf(abaConvertida) + String.valueOf(contadorArquivo) + "-" + contLinhaTexto;
-								
-									
-								// if(codEmpresa.equals("987789")) logger.logDebug("DATA == "+dataMovimento+" | LOTEEE == "+lote.replace("_rodaconversor", "")+" | TP === "+tipoPlanilha+" | COD ROT == "+roteiroCRMPrincipal.optString("codigo"));
-								
+								chave = lote + "-" + String.valueOf(porAba) + "-" + contLinhaTexto;
+                                // lote = nomeEmpresa + "_" + codEmpresa + "_" + nomeArquivo  + "_" + dataLote + "_" + tipoLancamento;
+
 								if(chave.length() > 200)  chave = chave.substring(0, 199);
 								
 								// #DOCUMENTACAO
 								////////////////////////////////////////////////////////////// ACUMULA ANTES
-								histobj.put("nomeOrigem", nomeOrigem).put("documento", documento).put("complemento01", complemento01)
-									   .put("complemento02", complemento02).put("complemento03", complemento03).put("complemento04", complemento04)
-									   .put("complemento05", complemento05).put("complemento06", complemento06).put("nomePortador", nomePortador)
-									   .put("dataMovimento", dataMovimento).put("mesAnoAnterior", mesAnoAnterior)
-									   .put("mesAno2Anterior", mesAno2Anterior).put("mesAnoAtual", mesAnoAtual)
-									   .put("valorDocumento", valorDocumento).put("valorJuros", valorJuros).put("valorDesconto", valorDesconto)
-									   .put("valorMulta",valorMulta).put("tipoPlanilha", tipoPlanilha).put("nomeArquivo", nomeArquivo.toUpperCase())
-									   .put("line", line.toUpperCase()).put("cabecalhoRegra", cabecalhoRegra.toString());
-  								
-								String modificaData = getModificaData(histobj);
-								
-								if (modificaData.startsWith("01"))  dataMovimento = getNextDay(dataMovimento, 1, true);
-								if (modificaData.startsWith("02"))  dataMovimento = getNextDay(dataMovimento, 2, true);
-								if (modificaData.startsWith("03"))  dataMovimento = getNextDay(dataMovimento, 1, false);
-								if (modificaData.startsWith("04"))  dataMovimento = getNextDay(dataMovimento, 2, false);
-								if (modificaData.startsWith("05"))  dataMovimento = "01/" + cutString(dataMovimento, "/");
-								if (modificaData.startsWith("06"))  dataMovimento = getLastDayOfMonth(dataMovimento, true);
-								
-								
-								// METODO QUE REFATORA OS CAMPOS COM BASE NO CABECALHO DO CRM
-								// EXEMPLO QUANDO ENCONTRAR #LINE NO CAMPO COMPLEMENTO03, VAMOS JOGAR O LINE NESTE COMPLEMENTO
-								// UM COMPLEMENTO02 POR EXEMPLO PODE RECEBER DADOS DE TIPOPLANILHA
-								nomeOrigem       = getRefatoraCampo(nomeOrigem, roteiroCRM.optString("fornecedor"), histobj);
-								nomePortador     = getRefatoraCampo(nomePortador, roteiroCRM.optString("portador"), histobj);
-								documento        = getRefatoraCampo(documento, roteiroCRM.optString("documentoNF"), histobj);
-								complemento01    = getRefatoraCampo(complemento01, roteiroCRM.optString("complemento01"), histobj);
-								complemento02    = getRefatoraCampo(complemento02, roteiroCRM.optString("complemento02"), histobj);
-								complemento03    = getRefatoraCampo(complemento03, roteiroCRM.optString("complemento03"), histobj);
-								complemento04    = getRefatoraCampo(complemento04, roteiroCRM.optString("complemento04"), histobj);
-								complemento05    = getRefatoraCampo(complemento05, roteiroCRM.optString("complemento05"), histobj);
-								complemento06    = getRefatoraCampo(complemento06, roteiroCRM.optString("complemento06"), histobj);
-								complemento07    = getRefatoraCampo(complemento07, roteiroCRM.optString("complemento07"), histobj);
-								complemento08    = getRefatoraCampo(complemento08, roteiroCRM.optString("complemento08"), histobj);
-								complemento09    = getRefatoraCampo(complemento09, roteiroCRM.optString("complemento09"), histobj);
-								complemento10    = getRefatoraCampo(complemento10, roteiroCRM.optString("complemento10"), histobj);
-								 
-
+								histobj.put("nomeOrigem", nomeOrigem);
+								histobj.put("documento", documento);
+								histobj.put("complemento01", complemento01);
+								histobj.put("complemento02", complemento02);
+								histobj.put("complemento03", complemento03);
+								histobj.put("complemento04", complemento04);
+								histobj.put("complemento05", complemento05);
+								histobj.put("complemento06", complemento06);
+								histobj.put("nomePortador", nomePortador);
+								histobj.put("dataMovimento", dataMovimento);
+								histobj.put("mesAnoAnterior", mesAnoAnterior);
+								histobj.put("mesAno2Anterior", mesAno2Anterior);
+								histobj.put("mesAnoAtual", mesAnoAtual);
+								histobj.put("valorDocumento", valorDocumento);
+								histobj.put("valorJuros", valorJuros);
+								histobj.put("valorDesconto", valorDesconto);
+								histobj.put("valorMulta",valorMulta);
+								histobj.put("tipoPlanilha", tipoPlanilha);
+								histobj.put("nomeArquivo", nomeArquivo.toUpperCase());
 								
 								String testeChave = getRegrasParaAcumular(lote, chave, tipoLancamento, documento, nomeOrigem, histobj).replaceAll("[^0-9a-zA-Z]*", "");
 								if(testeChave.toUpperCase().contains("ACUMULAANTES") || testeChave.toUpperCase().contains("ACUMULARANTES")) {
@@ -1935,82 +1387,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								String key = chave  + "-CTB";
 								nomeOrigem = nomeOrigem.replaceAll("  "," ").trim();
 
-								partidaDobradaJuros		= 0;
-								partidaDobradaDesconto	= 0;
-								partidaDobradaMulta		= 0;
-
-								if (forcarPartidaDobrada) {
-									partidaDobradaJuros		= valorJuros;
-									partidaDobradaDesconto	= valorDesconto;
-									partidaDobradaMulta		= valorMulta;
-									valorJuros				= 0;
-									valorDesconto			= 0;
-									valorMulta				= 0;
-								}
 								
-								if (tipoPlanilha.contains("OTTCARTAO")) {
-									
-									if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") && memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).equals("")) continue;
-									if (roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") && dataMovimento.equals("")) continue;
-									complemento01 = tipoPlanilha;
-									complemento02 = "VENDA";
-									
-									nomePortador = tipoPlanilha;
-									
-									// salva arquivo no hasmap para posterior eliminacao 
-									ttArq    = (ttArquivo)mapaArquivo.get(nomeArquivo);
-									if (ttArq          == null) {
-										ttArq          = new ttArquivo();
-										ttArq.arquivo  = nomeArquivo;
-										
-									}
-									mapaArquivo.put(nomeArquivo,ttArq);
- 									
-								} else {
-								
-									// quando se mantem o arquivo, somente devem ser processados arquivos padroes
-									// planilhas do rotiero movimento (principal), OFX e demais devem ficar para a rota normal
-									// Trocado para validar se a planilha comeca como movimento - importante por causa da iguacu, Onnegestao, confialtiva que tinham movimento no roteiro secundario e estavam sendo bloqueados
-									if (mantemArquivo.equals("SIM") && !tipoPlanilha.contains("PADRAOOTTIMIZZA") && 
-									   !roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES") && 
-									   (tipoPlanilha.contains("SECUNDARIO") || tipoPlanilha.startsWith("MOVIMENTO"))) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
-									   // Colocado este IF para dar mais performance, ou seja, se ja tiver lido mais de 15 linhas
-									   // e planilha for para ser rodada na personalizada
-									   // break agiliza a saida da leitura da planilha. Xavier em 19.08
-									   if (contadorCabecalho < 15) continue;
-									   logs = false;
-									   // logger.logDebug("FB");
-									   break;
-									}
-									
-									// definido que as planilhas simples que rodam pelo template leem apenas a aba 0
-									if (tipoPlanilha.equals("MOVIMENTO") && mantemArquivo.equals("SIM") && 
-										porAba > 0 && roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES")) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
-									   
-									   logs = false;
-									   // logger.logDebug("SB");
-									   break;
-									}
-									
-								}
-								//#FABRICA 31/08/2022 - @sergio - 202208-0017778
-								//Estavamos processando as planilhas padroes sem apaga-las no processo
-								//O if abaixo faz com que paguemos a planilha, após processar pelo padrao
-								
-								// logger.logDebug("TPAQ " + tipoPlanilha);
-								
-								if(tipoPlanilha.contains("PADRAOOTTIMIZZA")){
-									ttArq    = (ttArquivo)mapaArquivo.get(nomeArquivo);
-									if (ttArq          == null) {
-										ttArq          = new ttArquivo();
-										ttArq.arquivo  = nomeArquivo;
-										
-									}
-									mapaArquivo.put(nomeArquivo,ttArq);
-									
-								}
-					
-								// logger.logDebug("ANTES ttMov2");
 								// #DOCUMENTACAO
 								// insere numa tabela temporaria
 								ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
@@ -2039,7 +1416,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									ttMov2.tipoPlanilha      = tipoPlanilha;
 									ttMov2.chaveExtrato      = chaveExtrato;
 									ttMov2.debitoCredito     = debitoCredito;
-									ttMov2.contLinha         = contLinhaTexto;
+                                    ttMov2.contLinha         = contLinhaTexto;
 									ttMov2.historicoMulta    = "";
 									ttMov2.historicoJuros    = "";
 									ttMov2.historicoDesconto = "";
@@ -2048,7 +1425,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									ttMov2.naturezaContabil  = "";
 									ttMov2.contador 		 = 0;
 									ttMov2.parcelaDoc        = parcelaDoc;
-									ttMov2.abaPlanilha       = String.valueOf(abaConvertida);
+									ttMov2.abaPlanilha       = String.valueOf(porAba);
 
 									if(!lerAposPrincipal.contains("FORNECEDOR"))	ttMov2.nomeOrigem    = nomeOrigem;
 									if(!lerAposPrincipal.contains("DOCUMENTO")) 	ttMov2.documento 	 = documento;
@@ -2059,8 +1436,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									if(!lerAposPrincipal.contains("COMPLEMENTO04")) ttMov2.complemento04 = complemento04;
 									if(!lerAposPrincipal.contains("COMPLEMENTO05")) ttMov2.complemento05 = complemento05;
 									if(!lerAposPrincipal.contains("COMPLEMENTO06")) ttMov2.complemento06 = complemento06;
-									
-									// logger.logDebug("TTMOVTP -> "+tipoPlanilha);
 
 
 								}
@@ -2073,216 +1448,108 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 								// #DOCUMENTACAO
 								// acumula linhas secundarias ou apenas l? as secundarias
-								if (!nomeOrigem.equals("")    && lerAposPrincipal.contains("FORNECEDOR"))	 ttMov2.nomeOrigem    = (ttMov2.nomeOrigem    + " " + nomeOrigem).trim();
-								if (!documento.equals("") 	  && lerAposPrincipal.contains("DOCUMENTO")) 	 ttMov2.documento	  = (ttMov2.documento + " " + documento).trim();
-								if (!nomePortador.equals("")  && lerAposPrincipal.contains("PORTADOR"))      ttMov2.nomePortador  = (ttMov2.nomePortador  + " " + nomePortador).trim();
-								if (!complemento01.equals("") && lerAposPrincipal.contains("COMPLEMENTO01")) ttMov2.complemento01 = (ttMov2.complemento01 + " " + complemento01).trim();
-								if (!complemento02.equals("") && lerAposPrincipal.contains("COMPLEMENTO02")) ttMov2.complemento02 = (ttMov2.complemento02 + " " + complemento02).trim();
-								if (!complemento03.equals("") && lerAposPrincipal.contains("COMPLEMENTO03")) ttMov2.complemento03 = (ttMov2.complemento03 + " " + complemento03).trim();
-								if (!complemento04.equals("") && lerAposPrincipal.contains("COMPLEMENTO04")) ttMov2.complemento04 = (ttMov2.complemento04 + " " + complemento04).trim();
-								if (!complemento05.equals("") && lerAposPrincipal.contains("COMPLEMENTO05")) ttMov2.complemento05 = (ttMov2.complemento05 + " " + complemento05).trim();
-								if (!complemento06.equals("") && lerAposPrincipal.contains("COMPLEMENTO06")) ttMov2.complemento06 = (ttMov2.complemento06 + " " + complemento06).trim();
+								boolean acumulaSegundaLinha = true;
+								
+								if(acumulaSegundaLinha){
+									if (!nomeOrigem.equals("")    && lerAposPrincipal.contains("FORNECEDOR"))	 ttMov2.nomeOrigem    = (ttMov2.nomeOrigem    + " " + nomeOrigem).trim();
+									if (!documento.equals("") 	  && lerAposPrincipal.contains("DOCUMENTO")) 	 ttMov2.documento	  = (ttMov2.documento + " " + documento).trim();
+									if (!nomePortador.equals("")  && lerAposPrincipal.contains("PORTADOR"))      ttMov2.nomePortador  = (ttMov2.nomePortador  + " " + nomePortador).trim();
+									if (!complemento01.equals("") && lerAposPrincipal.contains("COMPLEMENTO01")) ttMov2.complemento01 = (ttMov2.complemento01 + " " + complemento01).trim();
+									if (!complemento02.equals("") && lerAposPrincipal.contains("COMPLEMENTO02")) ttMov2.complemento02 = (ttMov2.complemento02 + " " + complemento02).trim();
+									if (!complemento03.equals("") && lerAposPrincipal.contains("COMPLEMENTO03")) ttMov2.complemento03 = (ttMov2.complemento03 + " " + complemento03).trim();
+									if (!complemento04.equals("") && lerAposPrincipal.contains("COMPLEMENTO04")) ttMov2.complemento04 = (ttMov2.complemento04 + " " + complemento04).trim();
+									if (!complemento05.equals("") && lerAposPrincipal.contains("COMPLEMENTO05")) ttMov2.complemento05 = (ttMov2.complemento05 + " " + complemento05).trim();
+									if (!complemento06.equals("") && lerAposPrincipal.contains("COMPLEMENTO06")) ttMov2.complemento06 = (ttMov2.complemento06 + " " + complemento06).trim();
+								}
+								if(!acumulaSegundaLinha){
+									if (!nomeOrigem.equals("")    && lerAposPrincipal.contains("FORNECEDOR"))	 ttMov2.nomeOrigem    = nomeOrigem.trim();
+									if (!documento.equals("") 	  && lerAposPrincipal.contains("DOCUMENTO")) 	 ttMov2.documento	  = documento.trim();
+									if (!nomePortador.equals("")  && lerAposPrincipal.contains("PORTADOR"))      ttMov2.nomePortador  = nomePortador.trim();
+									if (!complemento01.equals("") && lerAposPrincipal.contains("COMPLEMENTO01")) ttMov2.complemento01 = complemento01.trim();
+									if (!complemento02.equals("") && lerAposPrincipal.contains("COMPLEMENTO02")) ttMov2.complemento02 = complemento02.trim();
+									if (!complemento03.equals("") && lerAposPrincipal.contains("COMPLEMENTO03")) ttMov2.complemento03 = complemento03.trim();
+									if (!complemento04.equals("") && lerAposPrincipal.contains("COMPLEMENTO04")) ttMov2.complemento04 = complemento04.trim();
+									if (!complemento05.equals("") && lerAposPrincipal.contains("COMPLEMENTO05")) ttMov2.complemento05 = complemento05.trim();
+									if (!complemento06.equals("") && lerAposPrincipal.contains("COMPLEMENTO06")) ttMov2.complemento06 = complemento06.trim();
+								}
 								
 								ttMov2.valorDocumento   = ttMov2.valorDocumento  + valorDocumento;
 								ttMov2.valorDesconto    = ttMov2.valorDesconto   + valorDesconto;
 								ttMov2.valorMulta       = ttMov2.valorMulta      + valorMulta;
 								ttMov2.valorJuros       = ttMov2.valorJuros      + valorJuros;
 
-								leuFinanceiro = true;
-								mapaVariavel.put(key,ttMov2);
+								if (ttMov2.valorDocumento > 0) {
+									leuFinanceiro = true;
+									mapaVariavel.put(key,ttMov2);
 								
-								// logger.logDebug("TEPE " + tipoPlanilha + " | " + roteiroCRM.optString("Colunas_de_Valores_Extras") + " | " + ttMov2.valorDocumento + " | " + ttMov2.dataMovimento);
-								
-								if (!roteiroCRM.optString("Colunas_de_Valores_Extras").equals("")) {
-
-									for (int iv =0; iv < 10; iv++) { 
-										
-										if (valorDocumentoArray[iv] == 0) continue;
-										
-										String rotuloColuna = "";
-										String [] rotuloArray  = roteiroCRM.optString("Rotulos_Para_Valores_Extras").split(";"); 
-										
-										try {
-											rotuloColuna = rotuloArray[iv];
-										} 
-										catch (Exception xx) {
-											continue;
-										}
-										
-										if (rotuloColuna.equals("")) continue;
-										
-									
-										cont++; 
+									if (valorJurosExtra > 0) {
+										cont++;
 										contLinhaTexto = String.valueOf(cont);
 										contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 05, "0");
-										consolidaClass = StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
+										consolidaClass = StringUtil.leftPad(String.valueOf(porAba), 02, "0") + contLinhaTexto;
 
 										classificacao         = dataMovimento.replace("/","").trim() + consolidaClass;
 
-										chave = lote + "-" + String.valueOf(abaConvertida) + rotuloColuna + contLinhaTexto;
+										chave = lote + "-" + String.valueOf(porAba) + "-EXTRA-JUROS-" + contLinhaTexto;
 										key = chave  + "-CTB";
 										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
-										ttTemp.dataMovimento = dataMovimento;
-										histobj.put("dataMovimento", dataMovimento);
-										
-										ttTemp.complemento05 = rotuloColuna;
-										histobj.put("complemento05", rotuloColuna);
-										
-										String modificaData2 = getModificaData(histobj);											
-										
-										if (modificaData2.startsWith("01"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 1, true);
-										if (modificaData2.startsWith("02"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 2, true);
-										if (modificaData2.startsWith("03"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 1, false);
-										if (modificaData2.startsWith("04"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 2, false);
-										if (modificaData2.startsWith("05"))  ttTemp.dataMovimento = "01/" + cutString(dataMovimento, "/");
-										if (modificaData2.startsWith("06"))  ttTemp.dataMovimento = getLastDayOfMonth(dataMovimento, true);
-										
-										ttTemp.valorDocumento   = valorDocumentoArray[iv] ;
-										ttTemp.valorDesconto    = 0;
-										ttTemp.valorMulta       = 0;
-										ttTemp.valorJuros       = 0;
-										
-										JSONObject obj1 = new JSONObject();
-										String validar	= "dataMovimento;nomeOrigem;documento;complemento01;complemento02;complemento03;complemento04;complemento05;complemento06;complemento07;complemento08;complemento09;complemento10;nomePortador;valorDocumento;valorPagamento;valorJuros;valorDesconto;valorMulta";
-										
-										obj1.put("validar", validar).put("documento", documento).put("nomeOrigem", nomeOrigem).put("nomePortador", nomePortador)
-											.put("dataMovimento", ttTemp.dataMovimento).put("complemento01", complemento01).put("complemento02", complemento02)
-											.put("complemento03", complemento03).put("complemento04", complemento04).put("complemento05", ttTemp.complemento05)
-											.put("complemento06", complemento06).put("complemento07", complemento07).put("complemento08", complemento08)
-											.put("complemento09", complemento09).put("complemento10", complemento10).put("codCentroCusto", codCcOrigem)
-											.put("tipoPlanilha", tipoPlanilha).put("numeroAba",	String.valueOf(abaConvertida)).put("nomeArquivo", nomeArquivo.toUpperCase());
-										
-										JSONObject alternativeObj = getAlternativeDataInt (obj1, memFile);
-										String changed = alternativeObj.optString("changeIt");
-										
-										if(!changed.equals("")) {
-											zerarColAlternativo = changed;
-											if (changed.contains("dataMovimento")) {
-												ttTemp.dataMovimento	= alternativeObj.optString("dataMovimento");
-											}
-											if (changed.contains("documento"))		ttTemp.documento = alternativeObj.optString("documento");
-											if (changed.contains("nomeOrigem"))		ttTemp.nomeOrigem = alternativeObj.optString("nomeOrigem");
-											if (changed.contains("nomePortador"))   ttTemp.nomePortador	= alternativeObj.optString("nomePortador");
-											
-											if (changed.contains("complemento01"))  ttTemp.complemento01 = alternativeObj.optString("complemento01");
-											if (changed.contains("complemento02"))  ttTemp.complemento02 = alternativeObj.optString("complemento02");
-											if (changed.contains("complemento03"))  ttTemp.complemento03 = alternativeObj.optString("complemento03");
-											if (changed.contains("complemento04"))  ttTemp.complemento04 = alternativeObj.optString("complemento04");
-											if (changed.contains("complemento05"))  ttTemp.complemento05 = alternativeObj.optString("complemento05");
-											if (changed.contains("complemento06"))  ttTemp.complemento06 = alternativeObj.optString("complemento06");
-											if (changed.contains("complemento07"))  ttTemp.complemento07 = alternativeObj.optString("complemento07");
-											if (changed.contains("complemento08"))  ttTemp.complemento08 = alternativeObj.optString("complemento08");
-											if (changed.contains("complemento09"))  ttTemp.complemento09 = alternativeObj.optString("complemento09");
-											if (changed.contains("complemento10"))  ttTemp.complemento10 = alternativeObj.optString("complemento10");
-											
-											
-											if (changed.contains("valorJuros"))		ttTemp.valorJuros = alternativeObj.optDouble("valorJuros");
-											if (changed.contains("valorMulta"))		ttTemp.valorMulta = alternativeObj.optDouble("valorMulta");
-											if (changed.contains("valorDesconto"))	ttTemp.valorDesconto = alternativeObj.optDouble("valorDesconto");
-											if (changed.contains("valorDocumento"))	ttTemp.valorDocumento = alternativeObj.optDouble("valorDocumento");
-										}
+										ttTemp.valorDocumento = valorJurosExtra;
 
-										if (tipoPlanilha.contains("OTTCARTAO")) {
-											ttTemp.complemento01 = tipoPlanilha;
-											ttTemp.complemento02 = rotuloColuna;
-										}
-										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, rotuloColuna, classificacao);
+										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 6, "EXTRA-JUROS", classificacao);
 									}
-								}
-								
-								// Para cartoes, criamos o modelo de gerar tafifa por regra
-								if (tipoPlanilha.contains("OTTCARTAO")) {
-
-									histobj.put("complemento02", "TARIFA").put("complemento03", complemento03).put("dataMovimento", dataMovimento).put("complemento05", "TARIFA");									
- 									
-									double taxaTarifa = getTaxaTarifa("", tipoLancamento, documento, nomeOrigem, histobj);
-  									 
 									
-									if (taxaTarifa > 0) {
-										cont++; 
+									if (valorDescontoExtra > 0) {
+										cont++;
 										contLinhaTexto = String.valueOf(cont);
 										contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 05, "0");
-										consolidaClass = StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
+										consolidaClass = StringUtil.leftPad(String.valueOf(porAba), 02, "0") + contLinhaTexto;
 
 										classificacao         = dataMovimento.replace("/","").trim() + consolidaClass;
 
-										chave = lote + "-" + String.valueOf(abaConvertida) + "TARIFA" + contLinhaTexto;
+										chave = lote + "-" + String.valueOf(porAba) + "-EXTRA-DESCONTOS-" + contLinhaTexto;
 										key = chave  + "-CTB";
 										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
-										ttTemp.dataMovimento = dataMovimento;
-										
-										
-										ttTemp.complemento05 = "TARIFA";
-										String modificaData2 = getModificaData(histobj);											
-										
-										if (modificaData2.startsWith("01"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 1, true);
-										if (modificaData2.startsWith("02"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 2, true);
-										if (modificaData2.startsWith("03"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 1, false);
-										if (modificaData2.startsWith("04"))  ttTemp.dataMovimento = getNextDay(dataMovimento, 2, false);
-										if (modificaData2.startsWith("05"))  ttTemp.dataMovimento = "01/" + cutString(dataMovimento, "/");
-										if (modificaData2.startsWith("06"))  ttTemp.dataMovimento = getLastDayOfMonth(dataMovimento, true);
-										ttTemp.valorDocumento   = ttTemp.valorDocumento * taxaTarifa;
-										ttTemp.valorDesconto    = 0;
-										ttTemp.valorMulta       = 0;
-										ttTemp.valorJuros       = 0;
+										ttTemp.valorDocumento = valorDescontoExtra;
 
- 										ttTemp.complemento01 = tipoPlanilha;
-										ttTemp.complemento02 = "TARIFA";
-										
- 										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, "TARIFA", classificacao);
+										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 6, "EXTRA-DESCONTOS", classificacao);
 									}
+									
+									if (valorDeducoes > 0) {
+										cont++;
+										contLinhaTexto = String.valueOf(cont);
+										contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 05, "0");
+										consolidaClass = StringUtil.leftPad(String.valueOf(porAba), 02, "0") + contLinhaTexto;
+
+										classificacao         = dataMovimento.replace("/","").trim() + consolidaClass;
+
+										chave = lote + "-" + String.valueOf(porAba) + "-EXTRA-DEDUCOES-" + contLinhaTexto;
+										key = chave  + "-CTB";
+										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
+										ttTemp.valorDocumento = valorDeducoes;
+
+										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 6, "EXTRA-DEDUCOES", classificacao);
+									}
+									
+									if (valorAcrescimos > 0) {
+										cont++;
+										contLinhaTexto = String.valueOf(cont);
+										contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 05, "0");
+										consolidaClass = StringUtil.leftPad(String.valueOf(porAba), 02, "0") + contLinhaTexto;
+
+										classificacao         = dataMovimento.replace("/","").trim() + consolidaClass;
+
+										chave = lote + "-" + String.valueOf(porAba) + "-EXTRA-ACRESCIMOS-" + contLinhaTexto;
+										key = chave  + "-CTB";
+										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
+										ttTemp.valorDocumento = valorAcrescimos;
+
+										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 6, "EXTRA-ACRESCIMOS", classificacao);
+									}
+									
 								}
-								
-								
 
-									
-								if (forcarPartidaDobrada) {
-									if (partidaDobradaJuros		> 0) {
-										cont++;
-										contLinhaTexto	= StringUtil.leftPad(String.valueOf(cont), 05, "0");
-										consolidaClass	= StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
-										classificacao	= dataMovimento.replace("/","").trim() + consolidaClass;
-
-										chave = lote + "-" + String.valueOf(abaConvertida) + "-DOBRADA_JUR-" + contLinhaTexto;
-										key = chave  + "-CTB";
-										ttMovimentoPadrao ttTemp = new ttMovimentoPadrao(ttMov2);
-										ttTemp.valorDocumento = partidaDobradaJuros;
-										ttTemp.cpfCnpj = "";
-										
-										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, "JUROS", classificacao);
-									}
-									
-									if (partidaDobradaDesconto	> 0) {
-										cont++;
-										contLinhaTexto	= StringUtil.leftPad(String.valueOf(cont), 05, "0");
-										consolidaClass	= StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
-										classificacao	= dataMovimento.replace("/","").trim() + consolidaClass;
-
-										chave	= lote + "-" + String.valueOf(abaConvertida) + "-DOBRADA_DES-" + contLinhaTexto;
-										key		= chave  + "-CTB";
-										ttMovimentoPadrao ttTemp	= new ttMovimentoPadrao(ttMov2);
-										ttTemp.valorDocumento		= partidaDobradaDesconto;
-										ttTemp.cpfCnpj = "";
-										
-										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, "DESCONTO", classificacao);
-									}
-									
-									if (partidaDobradaMulta		> 0) {
-										cont++;
-										contLinhaTexto	= StringUtil.leftPad(String.valueOf(cont), 05, "0");
-										consolidaClass	= StringUtil.leftPad(String.valueOf(abaConvertida), 02, "0") + contLinhaTexto;
-										classificacao	= dataMovimento.replace("/","").trim() + consolidaClass;
-
-										chave	= lote + "-" + String.valueOf(abaConvertida) + "-DOBRADA_MUL-" + contLinhaTexto;
-										key		= chave  + "-CTB";
-										ttMovimentoPadrao ttTemp	= new ttMovimentoPadrao(ttMov2);
-										ttTemp.valorDocumento		= partidaDobradaMulta;
-										ttTemp.cpfCnpj = "";
-										
-										mapaVariavel = geralancamentoExtraInterno(mapaVariavel, ttTemp, key, true, 5, "MULTA", classificacao);
-									}
-								}								
 							} catch (Exception e) {
+								logger.logError("EndpointA:", e);
 							}
 						} // while
 					}finally {
