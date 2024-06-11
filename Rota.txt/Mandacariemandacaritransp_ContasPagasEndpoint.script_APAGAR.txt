@@ -372,7 +372,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				try { forcarPartidaDobrada	= Boolean.parseBoolean(roteiroCRMPrincipal.optString("Forcar_Partida_Dobrada").toLowerCase().trim()); } 
 				catch (Exception bl) {forcarPartidaDobrada = false;}
 				
-				//2304-003551. Quando utiliza esse ERP ? obrigado a sem em partida dobrada.
+				//2304-003551. Quando utiliza esse ERP é obrigado a sem em partida dobrada.
 				if (roteiroCRMPrincipal.optString("erpContabilidade").equals("DOMINIO2") || roteiroCRMPrincipal.optString("erpContabilidade").equals("ALTERDATA") || roteiroCRMPrincipal.optString("erpContabilidade").equals("CORDILHEIRA") || roteiroCRMPrincipal.optString("erpContabilidade").equals("LEDWARE")) {
                     forcarPartidaDobrada = true;
                 }
@@ -1739,7 +1739,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								nomeOrigem = StringUtil.removeSpecialCharsToUC(nomeOrigem);
 								
 								// 202301-0023496 JWR Coloquei esse balde com o X para remontar o nomeOrigem
-								// Descomentar caso d? problema com caracteres especiais
+								// Descomentar caso dê problema com caracteres especiais
 								/*String letrasPermitidas = "ABCDEFGHIJKLMNOPRSTUVWXYZ 0123456789.-/&";
 								String nomeOrigemNovo = "";
 								for (int xx = 0; xx < nomeOrigem.length(); xx++) {
@@ -1974,7 +1974,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// Trocado para validar se a planilha comeca como movimento - importante por causa da iguacu, Onnegestao, confialtiva que tinham movimento no roteiro secundario e estavam sendo bloqueados
 									if (mantemArquivo.equals("SIM") && !tipoPlanilha.contains("PADRAOOTTIMIZZA") && 
 									   !roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES") && 
-									   (tipoPlanilha.contains("SECUNDARIO") || tipoPlanilha.startsWith("MOVIMENTO"))) { //#Soares esteve aqui -> chamado referente a mudan?a: 202210-0019668
+									   (tipoPlanilha.contains("SECUNDARIO") || tipoPlanilha.startsWith("MOVIMENTO"))) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
 									   // Colocado este IF para dar mais performance, ou seja, se ja tiver lido mais de 15 linhas
 									   // e planilha for para ser rodada na personalizada
 									   // break agiliza a saida da leitura da planilha. Xavier em 19.08
@@ -1986,7 +1986,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									// definido que as planilhas simples que rodam pelo template leem apenas a aba 0
 									if (tipoPlanilha.equals("MOVIMENTO") && mantemArquivo.equals("SIM") && 
-										porAba > 0 && roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES")) { //#Soares esteve aqui -> chamado referente a mudan?a: 202210-0019668
+										porAba > 0 && roteiroCRM.optString("nomeRelatorioRef").equals("PLANILHA_SIMPLES")) { //#Soares esteve aqui -> chamado referente a mudança: 202210-0019668
 									   
 									   logs = false;
 									   // logger.logDebug("SB");
@@ -1996,7 +1996,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								}
 								//#FABRICA 31/08/2022 - @sergio - 202208-0017778
 								//Estavamos processando as planilhas padroes sem apaga-las no processo
-								//O if abaixo faz com que paguemos a planilha, ap?s processar pelo padrao
+								//O if abaixo faz com que paguemos a planilha, após processar pelo padrao
 								
 								// logger.logDebug("TPAQ " + tipoPlanilha);
 								
@@ -2942,7 +2942,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			contaMovimento    = getConta09(contaMovimento, ttMov.nomeOrigem,  ttMov.documento, "", ttMov.complemento01,  ttMov.complemento02,  ttMov.complemento03, "",  ttMov.centroCusto);
 			contaPortador     = getConta09(contaPortador, "", "", ttMov.nomePortador, "", "", "", ttMov.nomeArquivo, "");
 			//ttMov.centroCusto = getCentroCusto("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador, ttMov.complemento01, ttMov.complemento02, ttMov.complemento03, "", ttMov.centroCusto);
-			//2310-017917 - As regras de centro custo tem validacao com o nome do arquivo e n?o funcionava porque nomeArquivo nao estava sendo passado no getCentroCusto
+			//2310-017917 - As regras de centro custo tem validacao com o nome do arquivo e não funcionava porque nomeArquivo nao estava sendo passado no getCentroCusto
 			ttMov.centroCusto = getCentroCusto("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador, ttMov.complemento01, ttMov.complemento02, ttMov.complemento03, nomeArquivo, ttMov.centroCusto); 
 			ttMov.codFilial   = getFilial("", ttMov.nomeOrigem, ttMov.documento, ttMov.nomePortador,
 										  ttMov.complemento01, ttMov.complemento02, ttMov.complemento03,
@@ -3072,7 +3072,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			contaMovimento = getContaMovimento3(contaMovimento, ttMov.tipoLancamento, ttMov.documento, ttMov.nomeOrigem, histobj);
 			contaPortador  = getContaPortador(contaPortador, ttMov.tipoLancamento, ttMov.documento, ttMov.nomeOrigem, histobj);
 			
-			//#2305-004914. Carrega a chamadas das rotinas getContaMovimento e getContaPortador caso n?o tenha ainda.
+			//#2305-004914. Carrega a chamadas das rotinas getContaMovimento e getContaPortador caso não tenha ainda.
 			// Classe Principal SC
 			Class<?> sc = this.getClass();
 			// Instancia da Classe Principal
@@ -3147,7 +3147,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			if (!contaMovimento.contains("IGNORA")) { // colocado para ignorar os lancamentos de partida dobrada quando o lancamento principal eh ignorado 20122022 JWR
 				if (ttMov.chave.contains("DOBRADA_JUR") && !ttMov.contaJuros.equals("")) contaMovimento = ttMov.contaJuros;//#2304-002846
 				if (ttMov.chave.contains("DOBRADA_DES")) {
-					// invers?o de contas em desconto.
+					// inversão de contas em desconto.
 					contaMovimento = contaPortador;
 					if (!ttMov.contaDesconto.equals("")) contaPortador = ttMov.contaDesconto;
 				}
@@ -4287,7 +4287,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					 else  { 
 						if(!chaveDuplicata.equals("")){
 							try {
-								// INSERIDO O WHERE CODEMPRESA = ? PARA CORRE????O DO CHAMADO 202301-0023064.
+								// INSERIDO O WHERE CODEMPRESA = ? PARA CORRE�?�?O DO CHAMADO 202301-0023064.
 								String sql = "SELECT SERIE, SITUACAO, CHAVEDUPLICATA, VALORPARCELA, CHAVE, CPFCNPJ FROM IO_DUPLICATA WHERE CODEMPRESA = ? AND IO_DUPLICATA.CHAVE LIKE ? "; 
 								recordsDup = dbIOCont.sql(sql)
 								  .setFields("SERIE, SITUACAO, CHAVEDUPLICATA, VALORPARCELA, CHAVE, CPFCNPJ")
@@ -4570,7 +4570,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 							}
 							String valorLiquido = String.format("%.2f", ttMov.valorDocumento + ttMov.valorJuros - ttMov.valorDesconto + ttMov.valorMulta);
 							jDescricaoDupl.put("VALORLIQUIDO",  valorLiquido);
-							//#2402-029218 - Quando h? Filial mandamos o codFilial e n?o o codEmpresa
+							//#2402-029218 - Quando há Filial mandamos o codFilial e não o codEmpresa
 							txtFornecedor.append(ttMov.codFilial.equals("") ? jDescricaoDupl.optString("CODEMPRESA") : ttMov.codFilial).append(";").append(razaoSocialDuplicata).append(";").append(ttMov.documento).append(";")
 										 .append(ttMov.dataMovimento).append(";").append(String.format("%.2f", ttMov.valorDocumento)).append(";")
 										 .append(jDescricaoDupl.optString("VALORLIQUIDO").replaceAll("\\.",",")).append(";").append(ttMov.nomePortador).append(";")
@@ -4982,7 +4982,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			if (roteiroCRMPrincipal.optString("erpContabilidade").contains("JBSOFTWARE") || 
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("TRON") || 
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("CONSISANET") || 
-				roteiroCRMPrincipal.optString("erpContabilidade").contains("DYAD") ||//removido o erp FORTES dessa valida??o - 202301-0023113
+				roteiroCRMPrincipal.optString("erpContabilidade").contains("DYAD") ||//removido o erp FORTES dessa validação - 202301-0023113
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("MICROSYSTEM") ||
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("PROSYST") ||
 				roteiroCRMPrincipal.optString("erpContabilidade").contains("WARELINE")) ttMov3.contador = 3;
@@ -6021,7 +6021,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			ResumoNotasCorretagem.append("\r\n");
 			ResumoNotasCorretagem.append("TOTAL DE VENDAS COM PERDA ").append(";;").append(String.format("%.2f",somaPerdas));
 			ResumoNotasCorretagem.append("\r\n");
-			ResumoNotasCorretagem.append("DIFEREN??A A  TRIBUTAR (GANHO - PERDAS)").append(";;").append(String.format("%.2f",diferencaGanhosPerdas));
+			ResumoNotasCorretagem.append("DIFEREN�?A A  TRIBUTAR (GANHO - PERDAS)").append(";;").append(String.format("%.2f",diferencaGanhosPerdas));
 			String filenameNotasCorretagem = RouteEngine.INOUT_HOME + "/contabil/" + roteiroCRMPrincipal.optString("contabilidade") + "/Arquivos/RESUMO_NOTAS_CORRETAGEM_" + tipoLancamento + "_" + nomeEmpresa + "_"+codEmpresa +idLoteResumo+".csv";
 			FileWriter writerNotas = new FileWriter(filenameNotasCorretagem);
 			// writerRazao.writeNewFile(ResumoTxt.toString());
@@ -6725,23 +6725,22 @@ public String sendToConvertAPI(String uri, JSONObject bodyObj, File fl, String d
 
 
 
-
-
 //## CODIGO GERADO A PARTIR DAS REGRAS NO SALESFORCE ##
 //## NAO ALTERAR DAQUI ATE O FINAL DO SCRIPT!!!!     ##
 public JSONObject getRoteiro() {
     JSONObject js = new JSONObject();
-    js.put("codigo", "ROT-2020-099813");
-    js.put("idRoteiro", "a0A1C000011YzGh");
+    js.put("codigo", "ROT-2020-099812");
+    js.put("idRoteiro", "a0A1C000011YzGX");
     js.put("idEmpresa", "a0q1C000008XThzQAG");
     js.put("idContabilidade", "a091C00001RRLBW");
     js.put("CnpjContabilidade", "10.559.095/0001-31");
     js.put("CnpjEmpresa", "73.704.389/0001-20");
+    js.put("ignoraExel", "FALSE");
     js.put("fornecedor", "4");
     js.put("dataMovimento", "8");
     js.put("portador", "1");
     js.put("documentoNF", "4");
-    js.put("valorDocumento", "5");
+    js.put("valorDocumento", "6");
     js.put("valorJuros", "");
     js.put("valorDesconto", "");
     js.put("valorMulta", "");
@@ -6773,7 +6772,7 @@ public JSONObject getRoteiro() {
     js.put("Cruza_Extrato_com_Extrato", "FALSE");
     js.put("cruzaExtrato", "FALSE");
     js.put("empresa", "Mandacariemandacaritransp");
-    js.put("empresaDir", "");
+    js.put("empresaDir", "Mandacariemandacaritransp_#119");
     js.put("erpContabilidade", "QUESTOR");
     js.put("Forcar_Partida_Dobrada", "FALSE");
     js.put("Forcar_Partida_Simples", "FALSE");
@@ -6786,13 +6785,13 @@ public JSONObject getRoteiro() {
     js.put("Ler_Planilha_Pelo_Cabecalho", "FALSE");
     js.put("movimentoPortador", "PARTIDA DOBRADA");
     js.put("naoZerarValores", "FALSE");
-    js.put("lerAposPrincipal", "FORNECEDOR-CLIENTE;DOCUMENTO;COMPLEMENTO01;COMPLEMENTO02");
+    js.put("lerAposPrincipal", "");
     js.put("campoLinhaPrincipal", "VALOR DOCUMENTO");
     js.put("nomeRelatorioRef", "BRADESCO 10103 012020 ATE 072020");
-    js.put("Planilhas_Padroes", "Extratos OFX");
+    js.put("Planilhas_Padroes", "");
     js.put("statusRoteiro", "EM DESENVOLVIMENTO");
     js.put("tipoArquivo", ".XLSX - EXCEL");
-    js.put("tipoIntegracao", "CONTAS RECEBIDAS");
+    js.put("tipoIntegracao", "CONTAS PAGAS");
     js.put("fazerShrink", "FALSE");
     js.put("colunaShrink", "0");
     js.put("dupliNaoEncontContabil", "FALSE");
@@ -6853,8 +6852,96 @@ public JSONObject getRoteiro() {
     return js;
 }
 
+public JSONObject getRoteiroZZPADRAOOTTIMIZZAPAG1() {
+    JSONObject js = new JSONObject();
+    js.put("codigo", "ROT-2021-1016997");
+    js.put("idRoteiro", "a0A1C000011YzGX");
+    js.put("idEmpresa", "a0q6R000007KGdjQAG");
+    js.put("idContabilidade", "a091500001BVcOf");
+    js.put("CnpjContabilidade", "10.000.000/0000-0");
+    js.put("CnpjEmpresa", "1");
+    js.put("usarComplementoVencimento", "NAO USAR");
+    js.put("usarComplementoParcela", "NAO USAR");
+    js.put("fornecedor", "2");
+    js.put("dataMovimento", "0");
+    js.put("portador", "6");
+    js.put("documentoNF", "1");
+    js.put("valorDocumento", "4");
+    js.put("valorJuros", "");
+    js.put("valorDesconto", "");
+    js.put("valorMulta", "");
+    js.put("valorPagamento", "5");
+    js.put("complemento01", "3");
+    js.put("complemento02", "7");
+    js.put("complemento03", "");
+    js.put("complemento04", "");
+    js.put("complemento05", "");
+    js.put("complemento06", "");
+    js.put("centroCusto", "");
+    js.put("dataFake", "");
+
+    js.put("cpfCnpj", "");
+    js.put("gravaCnpjMovimento", "FALSE");
+    js.put("cnpjSomenteNumeros", "FALSE");
+    js.put("valorAlternativo", "");
+    js.put("Abas_Especificas", "0");
+    js.put("classificaFornec", "");
+    js.put("classificaPlano", "");
+    js.put("contaFixaCredito", "");
+    js.put("contaFixaDebito", "");
+    js.put("contaFixaDesconto", "");
+    js.put("contaFixaJuros", "");
+    js.put("contaFixaMulta", "");
+    js.put("contabilidade", "Fococontabilidade");
+    js.put("Contabilizacao_Atraves_Fornecedor", "FALSE");
+    js.put("Conta_Fixa_Cruzamento_Extrato", "");
+    js.put("Cruza_Extrato_com_Extrato", "false");
+    js.put("cruzaExtrato", "false");
+    js.put("empresa", "Mandacariemandacaritransp");
+    js.put("empresaDir", "Mandacariemandacaritransp_#119");
+    js.put("erpContabilidade", "QUESTOR");
+    js.put("Forcar_Partida_Dobrada", "FALSE");
+    js.put("Forcar_Partida_Simples", "FALSE");
+    js.put("Realizar_Busca_Plano", "FALSE");
+    js.put("geraGerencial", "FALSE");
+    js.put("Integracao_fiscal", "false");
+    js.put("Integracao_contratos", "false");
+    js.put("Ler_Planilha_Pelo_Cabecalho", "FALSE");
+    js.put("movimentoPortador", "PARTIDA DOBRADA");
+    js.put("naoZerarValores", "FALSE");
+    js.put("lerAposPrincipal", "");
+    js.put("campoLinhaPrincipal", "VALOR DOCUMENTO");
+    js.put("nomeRelatorioRef", "OFICIAL PLANILHA PADRAO OTTIMIZZA");
+    js.put("Planilhas_Padroes", "");
+    js.put("statusRoteiro", "EM DESENVOLVIMENTO");
+    js.put("tipoArquivo", ".XLSX - EXCEL");
+    js.put("tipoIntegracao", "CONTAS PAGAS");
+    js.put("fazerShrink", "FALSE");
+    js.put("colunaShrink", "0");
+    js.put("dupliNaoEncontContabil", "FALSE");
+    js.put("Conta_Dupl_Contabil", "");
+    js.put("Aloca_Checknum", "FALSE");
+    js.put("Rotulo_Complemento_01", "");
+    js.put("Rotulo_Complemento_02", "");
+    js.put("Rotulo_Complemento_03", "");
+    js.put("Rotulo_Complemento_04", "");
+    js.put("Rotulo_Complemento_05", "");
+    js.put("Colunas_de_Valores_Extras", "");
+    js.put("Rotulos_Para_Valores_Extras", "");
+    js.put("Colunas_de_Portadores_Extras", "");
+
+    return js;
+}
+
 public String getTipoPlanilha(String line, String tipoPlanilha, String nomeArquivo, JSONObject jDadosObj) {
     boolean achouTipo = true;
+    String [] campos1 = "DATA PAGAMENTO|DOCUMENTO;FORNECEDOR;DETALHES DO PAGAMENTO".split(";");
+    for (int x=0;x<campos1.length;x++) {
+        if (!line.contains(campos1[x])) { 
+            achouTipo = false; break; }
+    }
+    if (achouTipo) return "ZZPADRAOOTTIMIZZAPAG1";
+    achouTipo = true;
     return tipoPlanilha;
 }
 public String getConta(String nomeOrigem, String documento, String nomePortador,
@@ -6911,786 +6998,251 @@ public String getContaMovimento(String contaMovimento, String tipoLancamento, St
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) { //ROT-2023-1093746
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX ENVIADO")) { //ROT-2023-1093746
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGARME2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGA")) { //ROT-2023-1093778
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PUNTO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGO")) { //ROT-2023-1097268
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VALOR") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LIQUIDADO")) { //ROT-2023-11102111
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) { //ROT-2023-11102111
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AME1") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).equals("")) { //ROT-2023-0140950
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("PAGAMENTO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ASSINATURA") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("SAQUE") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) { //ROT-2021-0612707
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("APROVAD") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) { //ROT-2021-0612707
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("EXTORNO")) {
-        conta = "8";
-        contaMovimento = "8";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("CH.DEV: PAGTO DONIZETE ANTONIO REZENDE BOCO")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("CH.DEV: PAGTO CICERO FLORIANO PEIXOTO")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && complemento02.contains("CONTA") && complemento02.contains("AUX:") && complemento02.contains("4091")) {
-        conta = "5101";
-        contaMovimento = "5101";
-    }
-    if (complemento02.contains("CONTA") && complemento02.contains("AUX:") && complemento02.contains("1010") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "5102";
-        contaMovimento = "5102";
-    }
-    if (nomeOrigem.contains("APARECIDO") && nomeOrigem.contains("SANTOS") && documento.contains("CH") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (complemento02.contains("CONTA") && complemento02.contains("AUX:") && complemento02.contains("7305") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "5101";
-        contaMovimento = "5101";
-    }
-    if (complemento02.contains("CONTA") && complemento02.contains("039071") && complemento02.contains("AUX:") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "5101";
-        contaMovimento = "5101";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && complemento02.contains("CONTA") && complemento02.contains("AUX:") && complemento02.contains("6869")) {
-        conta = "5102";
-        contaMovimento = "5102";
-    }
-    if (complemento02.contains("AUX:") && complemento02.contains("CONTA") && tipoPlanilha.contains("MOVIMENTO") && complemento02.contains("2954")) {
-        conta = "5100";
-        contaMovimento = "5100";
-    }
-    if (complemento02.contains("28") && complemento02.contains("AUX:") && complemento02.contains("CONTA") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "5100";
-        contaMovimento = "5100";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("THIAGO MOREIRA DOS SANTOS")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (nomeOrigem.contains("CH.DEV: PAGTO CARLOS EDUARDO TINTI") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("CREDITO INTIMACAO RECLAMATORIA JOSE ERINALDO")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (nomeOrigem.contains("IND E COM DE PROD ALIM CEPERA") && tipoPlanilha.contains("MOVIMENTO")) {
-        conta = "866";
-        contaMovimento = "866";
-    }
-    if (complemento01.contains("CHEQUE") && tipoPlanilha.contains("MOVIMENTO") && nomeOrigem.contains("ALEXANDRE")) {
-        conta = "48";
-        contaMovimento = "48";
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("CONFIRMED")) { //ROT-2020-058689
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVAD")) { //ROT-2021-0311455
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("COMPLETO")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSFERENCIA")) { //ROT-2021-0411996
-        conta = "IGNORARINVERTE";
-        contaMovimento = "IGNORARINVERTE";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REEMBOLSO")) { //ROT-2021-0411996
-        conta = "IGNORARINVERTE";
-        contaMovimento = "IGNORARINVERTE";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("DINHEIRO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("VIA LOJA") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (!StringUtil.removeSpecialCharsToUC(complemento04).equals("") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento05).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("PRATO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("PRATO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CART")) { //ROT-2021-0512280
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_POLICARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("TRANSFERENCIA")) { //ROT-2021-0612672
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("2")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("3")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("4")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("5")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("6")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("7")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("8")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("9")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AIQFOME1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CANCELADO")) { //ROT-2020-079383
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_STONE2") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("CANCELAD")) { //ROT-2021-0612733
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("10")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("11")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("12")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("13")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("14")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("15")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("16")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("17")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("18")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_BMGCARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVADA")) { //ROT-2022-0421802
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_REDECARD3") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("APROVADA")) { //ROT-2022-1033321
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_DOM1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ENTRADA")) { //ROT-2024-03128218
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) { //ROT-2023-1093746
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX ENVIADO")) { //ROT-2023-1093746
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGARME2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGA")) { //ROT-2023-1093778
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PUNTO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGO")) { //ROT-2023-1097268
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VALOR") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LIQUIDADO")) { //ROT-2023-11102111
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) { //ROT-2023-11102111
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AME1") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).equals("")) { //ROT-2023-0140950
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("PAGAMENTO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ASSINATURA") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("SAQUE") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) { //ROT-2021-0612707
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("APROVAD") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) { //ROT-2021-0612707
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (Integer.parseInt(dataMovimento.substring(6)) <= 2018) { //ROT-2020-099813
+    if (Integer.parseInt(dataMovimento.substring(6)) <= 2018) {
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
     if (Integer.parseInt(dataMovimento.substring(6)) <= 2019 &&
-        Integer.parseInt(dataMovimento.substring(3,5)) <= 6) { //ROT-2020-099813
+        Integer.parseInt(dataMovimento.substring(3,5)) <= 6) {
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("CONFIRMED")) { //ROT-2020-058689
+    if (StringUtil.removeSpecialCharsToUC(complemento03).equals("")) {
         conta = "IGNORAR";
         contaMovimento = "IGNORAR";
         return conta;
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVAD")) { //ROT-2021-0311455
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRADESCO")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_DETODOS") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("APROVAD")) { //ROT-2021-0311491
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRADESCO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("AUT")) {
+        conta = "48";
+        contaMovimento = "48";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("COMPLETO")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FGTS")) {
+        conta = "219";
+        contaMovimento = "219";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ALCIDES") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FELIZARDO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MELO")) {
+        conta = "48";
+        contaMovimento = "48";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MONGERAL")) {
+        conta = "924";
+        contaMovimento = "924";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VITALLIS")) {
+        conta = "899";
+        contaMovimento = "899";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) { //ROT-2021-0211301
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VIVO")) {
+        conta = "663";
+        contaMovimento = "663";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSFERENCIA")) { //ROT-2021-0411996
-        conta = "IGNORARINVERTE";
-        contaMovimento = "IGNORARINVERTE";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CAIXA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ECONOMICA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEDERAL")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REEMBOLSO")) { //ROT-2021-0411996
-        conta = "IGNORARINVERTE";
-        contaMovimento = "IGNORARINVERTE";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONSORC")) {
+        conta = "950";
+        contaMovimento = "950";
     }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("DINHEIRO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SECRETARIA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FAZENDA")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("VIA LOJA") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RECEITA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEDERAL")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (!StringUtil.removeSpecialCharsToUC(complemento04).equals("") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SERTRA")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(complemento05).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) { //ROT-2021-0512225
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEMBOM")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("PRATO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("PRATO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CART")) { //ROT-2021-0512280
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JUCEG")) {
+        conta = "5103";
+        contaMovimento = "5103";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_POLICARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("TRANSFERENCIA")) { //ROT-2021-0612672
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PREFEITURA")) {
+        conta = "707";
+        contaMovimento = "707";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("2")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ITAUCARD")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("3")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CARTOES") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CAIXA")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("4")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RODOBENS") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERC")) {
+        conta = "950";
+        contaMovimento = "950";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("5")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("HDI") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SEGUROS")) {
+        conta = "924";
+        contaMovimento = "924";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("6")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SINDICATO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SETCESG")) {
+        conta = "222";
+        contaMovimento = "222";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("7")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("OI") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("S") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("A")) {
+        conta = "663";
+        contaMovimento = "663";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("8")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("MINISTERIO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("DA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("PREVIDENCIA")) {
+        conta = "8";
+        contaMovimento = "8";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("9")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("INSTITUTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("NACIONAL") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("DO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("SEGURO")) {
+        conta = "218";
+        contaMovimento = "218";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AIQFOME1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CANCELADO")) { //ROT-2020-079383
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("15856")) {
+        conta = "11";
+        contaMovimento = "11";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_STONE2") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("CANCELAD")) { //ROT-2021-0612733
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4130")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("10")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("03907")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("11")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("731392")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("12")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("604434")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("13")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("28-0")) {
+        conta = "5190";
+        contaMovimento = "5190";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("14")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("SICOOB") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("RURAL")) {
+        conta = "896";
+        contaMovimento = "896";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("15")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("6869")) {
+        conta = "5229";
+        contaMovimento = "5229";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("16")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("1010")) {
+        conta = "847";
+        contaMovimento = "847";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("17")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4091")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("18")) { //ROT-2021-0612669
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4204")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("2954")) {
+        conta = "5190";
+        contaMovimento = "5190";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("7305")) {
+        conta = "5202";
+        contaMovimento = "5202";
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0220368
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_BMGCARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVADA")) { //ROT-2022-0421802
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-0421940
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_REDECARD3") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("APROVADA")) { //ROT-2022-1033321
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) { //ROT-2022-1239716
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_DOM1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ENTRADA")) { //ROT-2024-03128218
-        conta = "IGNORAR";
-        contaMovimento = "IGNORAR";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("30-1")) {
+        conta = "10";
+        contaMovimento = "10";
     }
     return conta;
 }
@@ -7726,6 +7278,22 @@ public String getContaMovimento2(String contaMovimento, String tipoLancamento, S
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
+    if (Integer.parseInt(dataMovimento.substring(6)) <= 2018) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
+    if (Integer.parseInt(dataMovimento.substring(6)) <= 2019 &&
+        Integer.parseInt(dataMovimento.substring(3,5)) <= 6) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
+    if (StringUtil.removeSpecialCharsToUC(complemento03).equals("")) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
     return conta;
 }
 public String getContaMovimento3(String contaMovimento, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
@@ -7760,6 +7328,22 @@ public String getContaMovimento3(String contaMovimento, String tipoLancamento, S
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
+    if (Integer.parseInt(dataMovimento.substring(6)) <= 2018) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
+    if (Integer.parseInt(dataMovimento.substring(6)) <= 2019 &&
+        Integer.parseInt(dataMovimento.substring(3,5)) <= 6) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
+    if (StringUtil.removeSpecialCharsToUC(complemento03).equals("")) {
+        conta = "IGNORAR";
+        contaMovimento = "IGNORAR";
+        return conta;
+    }
     return conta;
 }
 public String getContaMovimento4(String contaMovimento, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
@@ -7896,56 +7480,6 @@ public String getRegraContaMovimento(String contaMovimento, String tipoLancament
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_TRUDATA1', Fornecedor/Cliente contem 'SALDO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_TRUDATA1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX ENVIADO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_TRUDATA1', Fornecedor/Cliente contem 'PIX ENVIADO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGARME2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_PAGARME2', Complemento (06) nao contem 'PAGA', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PUNTO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("PAGO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_PUNTO2', Complemento (06) nao contem 'PAGO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VALOR") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LIQUIDADO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_GETNET5', Fornecedor/Cliente contem 'VALOR', Fornecedor/Cliente contem 'LIQUIDADO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_GETNET5") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SALDO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_GETNET5', Fornecedor/Cliente contem 'SALDO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AME1") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).equals("")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_AME1', Complemento (04) contem 'EM BRANCO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("PAGAMENTO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ASSINATURA") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("SAQUE") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_PAGSEGURO1', Complemento (04) nao contem 'PAGAMENTO', Complemento (04) nao contem 'ASSINATURA', Complemento (04) nao contem 'SAQUE', Complemento (01) contem 'CARTAO_PAGSEGURO1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_PAGSEGURO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("APROVAD") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_PAGSEGURO1")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_PAGSEGURO1', Complemento (03) nao contem 'APROVAD', Complemento (01) contem 'CARTAO_PAGSEGURO1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
     if (Integer.parseInt(dataMovimento.substring(6)) <= 2018) {
         conta = "Quando Ano Movimento menor ou igual a '2018', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
@@ -7955,291 +7489,202 @@ public String getRegraContaMovimento(String contaMovimento, String tipoLancament
         conta = "Quando Ano Movimento menor ou igual a '2019', Mes Movimento menor ou igual a '6', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
     }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("CONFIRMED")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_ALELO1', Complemento (04) nao contem 'CONFIRMED', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_ALELO2") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVAD")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_ALELO2', Complemento (04) nao contem 'APROVAD', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_DETODOS") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("APROVAD")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_DETODOS', Complemento (03) nao contem 'APROVAD', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("COMPLETO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_HOTMART1', Complemento (04) nao contem 'COMPLETO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_HOTMART1', Complemento (02) igual a 'VENDA', Complemento (03) contem 'USD', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("USD")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_HOTMART1', Complemento (02) igual a 'TARIFA', Complemento (03) contem 'USD', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("VENDAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_HOTMART1', Complemento (02) igual a 'VENDAINTERNACIONAL', Complemento (03) contem 'BRL', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_HOTMART1") &&
-        StringUtil.removeSpecialCharsToUC(complemento02).equals("TARIFAINTERNACIONAL") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("BRL")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_HOTMART1', Complemento (02) igual a 'TARIFAINTERNACIONAL', Complemento (03) contem 'BRL', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSFERENCIA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_MOIP1', Fornecedor/Cliente contem 'TRANSFERENCIA', CONTA MOVIMENTO SERA = 'IGNORAR'INVERTE";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento01).contains("CARTAO_MOIP1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REEMBOLSO")) {
-        conta = "Quando Complemento (01) contem 'CARTAO_MOIP1', Fornecedor/Cliente contem 'REEMBOLSO', CONTA MOVIMENTO SERA = 'IGNORAR'INVERTE";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("DINHEIRO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) {
-        conta = "Quando Complemento (03) contem 'DINHEIRO', Tipo Planilha contem 'CARTAO_IFOOD_EXCEL1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento03).contains("VIA LOJA") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) {
-        conta = "Quando Complemento (03) contem 'VIA LOJA', Tipo Planilha contem 'CARTAO_IFOOD_EXCEL1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (!StringUtil.removeSpecialCharsToUC(complemento04).equals("") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) {
-        conta = "Quando Complemento (04) nao contem 'EM BRANCO', Tipo Planilha contem 'CARTAO_IFOOD_EXCEL1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(complemento05).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_IFOOD_EXCEL1")) {
-        conta = "Quando Complemento (05) contem 'NAO', Tipo Planilha contem 'CARTAO_IFOOD_EXCEL1', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("PRATO") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("PRATO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CART")) {
-        conta = "Quando Tipo Planilha contem 'PRATO', Complemento (01) contem 'PRATO', Complemento (03) nao contem 'CART', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_POLICARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("TRANSFERENCIA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_POLICARD', Complemento (03) contem 'TRANSFERENCIA', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("2")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '2', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("3")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '3', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("4")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '4', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("5")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '5', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("6")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '6', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("7")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '7', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("8")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '8', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("9")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '9', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_AIQFOME1") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CANCELADO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_AIQFOME1', Fornecedor/Cliente contem 'CANCELADO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_STONE2") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("CANCELAD")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_STONE2', Complemento (04) contem 'CANCELAD', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("10")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '10', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("11")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '11', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("12")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '12', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("13")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '13', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("14")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '14', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("15")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '15', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("16")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '16', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("17")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '17', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SIPAG2") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("18")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_SIPAG2', Complemento (03) contem '18', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO6', Complemento (05) contem 'EM BRANCO', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO6', Complemento (05) contem 'TARIFA', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO6") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO6', Complemento (05) contem 'DEBITOCESSAO', Complemento (03) nao contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_BMGCARD") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("NAO") &&
-        StringUtil.removeSpecialCharsToUC(complemento04).contains("APROVADA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_BMGCARD', Complemento (04) contem 'NAO', Complemento (04) contem 'APROVADA', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO8', Complemento (05) contem 'EM BRANCO', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO8', Complemento (05) contem 'TARIFA', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO8") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO8', Complemento (05) contem 'DEBITOCESSAO', Complemento (03) nao contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_REDECARD3") &&
-        !StringUtil.removeSpecialCharsToUC(complemento06).contains("APROVADA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_REDECARD3', Complemento (06) nao contem 'APROVADA', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).equals("") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO9', Complemento (05) contem 'EM BRANCO', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO9', Complemento (05) contem 'TARIFA', Complemento (03) contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_CIELO9") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("DEBITOCESSAO") &&
-        !StringUtil.removeSpecialCharsToUC(complemento03).contains("CESSAO")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_CIELO9', Complemento (05) contem 'DEBITOCESSAO', Complemento (03) nao contem 'CESSAO', CONTA MOVIMENTO SERA = 'IGNORAR'";
-        return conta;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_DOM1") &&
-        !StringUtil.removeSpecialCharsToUC(complemento04).contains("ENTRADA")) {
-        conta = "Quando Tipo Planilha contem 'CARTAO_DOM1', Complemento (04) nao contem 'ENTRADA', CONTA MOVIMENTO SERA = 'IGNORAR'";
+    if (StringUtil.removeSpecialCharsToUC(complemento03).equals("")) {
+        conta = "Quando Complemento (03) contem 'EM BRANCO', CONTA MOVIMENTO SERA = 'IGNORAR'";
         return conta;
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("EXTORNO")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'EXTORNO', CONTA MOVIMENTO SERA = '8'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRADESCO")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'BRADESCO', CONTA MOVIMENTO SERA = '8'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CH") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DEV")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'CH', Fornecedor/Cliente contem 'DEV', CONTA MOVIMENTO SERA = '48'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRADESCO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("AUT")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'BRADESCO', Complemento (01) contem 'AUT', CONTA MOVIMENTO SERA = '48'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("THIAGO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MOREIRA") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SANTOS")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'THIAGO', Fornecedor/Cliente contem 'MOREIRA', Fornecedor/Cliente contem 'SANTOS', CONTA MOVIMENTO SERA = '48'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FGTS")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'FGTS', CONTA MOVIMENTO SERA = '219'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PROD") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ALIM")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'PROD', Fornecedor/Cliente contem 'ALIM', CONTA MOVIMENTO SERA = '866'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ALCIDES") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FELIZARDO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MELO")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'ALCIDES', Fornecedor/Cliente contem 'FELIZARDO', Fornecedor/Cliente contem 'MELO', CONTA MOVIMENTO SERA = '48'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CREDITO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("INTIMAC")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'CREDITO', Fornecedor/Cliente contem 'INTIMAC', CONTA MOVIMENTO SERA = '48'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MONGERAL")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'MONGERAL', CONTA MOVIMENTO SERA = '924'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ALEXANDRE") &&
-        StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'ALEXANDRE', Complemento (01) contem 'CHEQUE', CONTA MOVIMENTO SERA = '48'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VITALLIS")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'VITALLIS', CONTA MOVIMENTO SERA = '899'";
     }
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("APARECIDO") &&
-        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SANTOS") &&
-        StringUtil.removeSpecialCharsToUC(documento).contains("CH")) {
-        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'APARECIDO', Fornecedor/Cliente contem 'SANTOS', Documento/NF contem 'CH', CONTA MOVIMENTO SERA = '48'";
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VIVO")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'VIVO', CONTA MOVIMENTO SERA = '663'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CAIXA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ECONOMICA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEDERAL")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'CAIXA', Fornecedor/Cliente contem 'ECONOMICA', Fornecedor/Cliente contem 'FEDERAL', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONSORC")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'CONSORC', CONTA MOVIMENTO SERA = '950'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SECRETARIA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FAZENDA")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'SECRETARIA', Fornecedor/Cliente contem 'FAZENDA', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RECEITA") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEDERAL")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'RECEITA', Fornecedor/Cliente contem 'FEDERAL', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SERTRA")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'SERTRA', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FEMBOM")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'FEMBOM', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JUCEG")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'JUCEG', CONTA MOVIMENTO SERA = '5103'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PREFEITURA")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'PREFEITURA', CONTA MOVIMENTO SERA = '707'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ITAUCARD")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'ITAUCARD', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CARTOES") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CAIXA")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'CARTOES', Fornecedor/Cliente contem 'CAIXA', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RODOBENS") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERC")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'RODOBENS', Fornecedor/Cliente contem 'COMERC', CONTA MOVIMENTO SERA = '950'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("HDI") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SEGUROS")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'HDI', Fornecedor/Cliente contem 'SEGUROS', CONTA MOVIMENTO SERA = '924'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SINDICATO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SETCESG")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'SINDICATO', Fornecedor/Cliente contem 'SETCESG', CONTA MOVIMENTO SERA = '222'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("OI") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("S") &&
+        StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("A")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Fornecedor/Cliente contem 'OI', Fornecedor/Cliente contem 'S', Fornecedor/Cliente contem 'A', CONTA MOVIMENTO SERA = '663'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("MINISTERIO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("DA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("PREVIDENCIA")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'MINISTERIO', Complemento (01) contem 'DA', Complemento (01) contem 'PREVIDENCIA', CONTA MOVIMENTO SERA = '8'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("INSTITUTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("NACIONAL") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("DO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("SEGURO")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'INSTITUTO', Complemento (01) contem 'NACIONAL', Complemento (01) contem 'DO', Complemento (01) contem 'SEGURO', CONTA MOVIMENTO SERA = '218'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("15856")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '15856', CONTA MOVIMENTO SERA = '11'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4130")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '4130', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("03907")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '03907', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("731392")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '731392', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("604434")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '604434', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("28-0")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '28-0', CONTA MOVIMENTO SERA = '5190'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("SICOOB") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("RURAL")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'SICOOB', Complemento (01) contem 'RURAL', CONTA MOVIMENTO SERA = '896'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("6869")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '6869', CONTA MOVIMENTO SERA = '5229'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("1010")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '1010', CONTA MOVIMENTO SERA = '847'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4091")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '4091', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("4204")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '4204', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("2954")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '2954', CONTA MOVIMENTO SERA = '5190'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("7305")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '7305', CONTA MOVIMENTO SERA = '5202'";
+    }
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") &&
+        StringUtil.removeSpecialCharsToUC(complemento01).contains("CONTA") &&
+        StringUtil.removeSpecialCharsToUC(complemento02).contains("30-1")) {
+        conta = "Quando Tipo Planilha contem 'MOVIMENTO', Complemento (01) contem 'TRANSFERENCIA', Complemento (01) contem 'CONTA', Complemento (02) contem '30-1', CONTA MOVIMENTO SERA = '10'";
     }
     return conta;
 }
@@ -8281,12 +7726,38 @@ public String getContaPortador(String contaMovimento, String tipoLancamento, Str
     if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("1010")) {
         conta = "847";
     }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("4130")) {
+        conta = "5202";
+    }
     if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("15856")) {
         conta = "11";
     }
-    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("266524290")) {
-        conta = "5399";
-        return conta;
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("4091")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("7305")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("2954")) {
+        conta = "5190";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("6869")) {
+        conta = "5229";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("03907")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("4204")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("731392")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("604434")) {
+        conta = "5202";
+    }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("28-0")) {
+        conta = "5190";
     }
     if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("266524290")) {
         conta = "5399";
@@ -8326,6 +7797,10 @@ public String getContaPortador2(String contaMovimento, String tipoLancamento, St
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
+    if (StringUtil.removeSpecialCharsToUC(nomePortador).contains("266524290")) {
+        conta = "5399";
+        return conta;
+    }
     return conta;
 }
 public String getContaPortador3(String contaMovimento, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
@@ -8430,211 +7905,7 @@ public String getContaPortador5(String contaMovimento, String tipoLancamento, St
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
     return conta;
 }
-public String getContaPortador6(String contaMovimento, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaMovimento;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
 public String getContaJuros(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaJuros;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
-public String getContaJuros2(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaJuros;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
-public String getContaJuros3(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaJuros;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
-public String getContaJuros4(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaJuros;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
-public String getContaJuros5(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaDebito     = objHistorico.optString("contaDebito");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaCredito    = objHistorico.optString("contaCredito");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    String conta = contaJuros;
-    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
-    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
-    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    return conta;
-}
-public String getContaJuros6(String contaJuros, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
     String complemento01   = objHistorico.optString("complemento01");
     String complemento02   = objHistorico.optString("complemento02");
     String complemento03   = objHistorico.optString("complemento03");
@@ -8944,6 +8215,39 @@ public String getTratarComoDiv(String documento, String nomeOrigem, JSONObject o
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
     return retornoDiv;
 }
+public String getCodigoSCP(String documento, String nomeOrigem, String contaMovimento, JSONObject objHistorico){
+    String complemento01   = objHistorico.optString("complemento01");
+    String complemento02   = objHistorico.optString("complemento02");
+    String complemento03   = objHistorico.optString("complemento03");
+    String complemento04   = objHistorico.optString("complemento04");
+    String complemento05   = objHistorico.optString("complemento05");
+    String complemento06   = objHistorico.optString("complemento06");
+    String complemento07   = objHistorico.optString("complemento07");
+    String complemento08   = objHistorico.optString("complemento08");
+    String complemento09   = objHistorico.optString("complemento09");
+    String complemento10   = objHistorico.optString("complemento10");
+    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
+    String dataMovimento   = objHistorico.optString("dataMovimento");
+    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
+    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
+    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
+    String nomePortador    = objHistorico.optString("nomePortador");
+    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
+    String tipoLancamento  = objHistorico.optString("tipoLancamento");
+    String codCentroCusto  = objHistorico.optString("centroCusto");
+    String classificacao  = objHistorico.optString("classificacao");
+    int    numeroAba       = objHistorico.optInt("numeroAba");
+    double valorDocumento  = objHistorico.optDouble("valorDocumento");
+    double valorDesconto   = objHistorico.optDouble("valorDesconto");
+    double valorJuros      = objHistorico.optDouble("valorJuros");
+
+    String retornoSCP  = "";
+
+    if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
+    if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
+    if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
+    return retornoSCP;
+}
 public String getCodigoClassificacao(String nomeOrigem, JSONObject objHistorico){
     String complemento01   = objHistorico.optString("complemento01");
     String complemento02   = objHistorico.optString("complemento02");
@@ -8977,7 +8281,7 @@ public String getCodigoClassificacao(String nomeOrigem, JSONObject objHistorico)
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
     if (!StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REGRA CLASSIFICACAO FORNEC")) {
-        retornoClassificacao = "110201";
+        retornoClassificacao = "210102";
     }
     return retornoClassificacao;
 }
@@ -9095,6 +8399,222 @@ public String getHistorico(String conta, String histParam, String tipoLancamento
 
     return historico.replaceAll("  "," ").trim();
 }
+public String getHistoricoRegra(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
+    String historico = "";
+    String complemento01   = objHistorico.optString("complemento01");
+    String complemento02   = objHistorico.optString("complemento02");
+    String complemento03   = objHistorico.optString("complemento03");
+    String complemento04   = objHistorico.optString("complemento04");
+    String complemento05   = objHistorico.optString("complemento05");
+    String complemento06   = objHistorico.optString("complemento06");
+    String complemento07   = objHistorico.optString("complemento07");
+    String complemento08   = objHistorico.optString("complemento08");
+    String complemento09   = objHistorico.optString("complemento09");
+    String complemento10   = objHistorico.optString("complemento10");
+    String dataMovimento   = objHistorico.optString("dataMovimento");
+    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
+    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
+    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
+    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
+    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
+    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
+    String contaJuros      = objHistorico.optString("contaJuros");
+    String contaDesconto   = objHistorico.optString("contaDesconto");
+    String contaMulta      = objHistorico.optString("contaMulta");
+    String nomePortador    = objHistorico.optString("nomePortador");
+    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
+    int    numeroAba       = objHistorico.optInt("numeroAba");
+    String parcelaAtual    = objHistorico.optString("parcelaAtual");
+    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
+    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
+    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
+    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
+    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
+    String codCentroCusto  = objHistorico.optString("centroCusto");
+    double valorDocumento  = objHistorico.optDouble("valorDocumento");
+    double valorDesconto   = objHistorico.optDouble("valorDesconto");
+    double valorJuros      = objHistorico.optDouble("valorJuros");
+    if(!histParam.equals("")) historico = histParam;
+
+    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
+    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
+
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("219"))  historico = "PAGAMENTO" + " " + nomeOrigem + " " + "COMP." + " " + mesAnoAtual + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("48"))  historico = "ADTO VIAGEM" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("8"))  historico = "PAGAMENTO" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("924"))  historico = "PAGAMENTO SEGURO -" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("663"))  historico = "PAGAMENTO" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("222"))  historico = "PAGAMENTO" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5101"))  historico = "TRANSFERENCIA TRANSP. MANDACARI EIRELI"  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5102"))  historico = "TRASNFERENCIA TRANSPORTADORA MANDACARI E MANDACARI"  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5100"))  historico = "TRANSFERENCIA TRANSPORTADORA MAVI"  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("899"))  historico = "PAGAMENTO" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("218"))  historico = "PAGAMENTO INSS" + " " + mesAnoAtual + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("950"))  historico = "CONSORCIO" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5103"))  historico = "TAXA" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("707"))  historico = "IMPOSTO MUNICIPAL" + " " + nomeOrigem + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("986"))  historico = "ADIANTAMENTO APARECIDO"  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "  CodigoHistorico:434";
+    
+
+    return historico.replaceAll("  "," ").trim();
+}
+public String getHistoricoRegra2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
+    String historico = "";
+    String complemento01   = objHistorico.optString("complemento01");
+    String complemento02   = objHistorico.optString("complemento02");
+    String complemento03   = objHistorico.optString("complemento03");
+    String complemento04   = objHistorico.optString("complemento04");
+    String complemento05   = objHistorico.optString("complemento05");
+    String complemento06   = objHistorico.optString("complemento06");
+    String complemento07   = objHistorico.optString("complemento07");
+    String complemento08   = objHistorico.optString("complemento08");
+    String complemento09   = objHistorico.optString("complemento09");
+    String complemento10   = objHistorico.optString("complemento10");
+    String dataMovimento   = objHistorico.optString("dataMovimento");
+    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
+    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
+    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
+    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
+    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
+    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
+    String contaJuros      = objHistorico.optString("contaJuros");
+    String contaDesconto   = objHistorico.optString("contaDesconto");
+    String contaMulta      = objHistorico.optString("contaMulta");
+    String nomePortador    = objHistorico.optString("nomePortador");
+    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
+    int    numeroAba       = objHistorico.optInt("numeroAba");
+    String parcelaAtual    = objHistorico.optString("parcelaAtual");
+    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
+    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
+    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
+    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
+    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
+    String codCentroCusto  = objHistorico.optString("centroCusto");
+    double valorDocumento  = objHistorico.optDouble("valorDocumento");
+    double valorDesconto   = objHistorico.optDouble("valorDesconto");
+    double valorJuros      = objHistorico.optDouble("valorJuros");
+    if(!histParam.equals("")) historico = histParam;
+
+    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
+    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
+
+
+    return historico.replaceAll("  "," ").trim();
+}
+public String getHistoricoRegra3(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
+    String historico = "";
+    String complemento01   = objHistorico.optString("complemento01");
+    String complemento02   = objHistorico.optString("complemento02");
+    String complemento03   = objHistorico.optString("complemento03");
+    String complemento04   = objHistorico.optString("complemento04");
+    String complemento05   = objHistorico.optString("complemento05");
+    String complemento06   = objHistorico.optString("complemento06");
+    String complemento07   = objHistorico.optString("complemento07");
+    String complemento08   = objHistorico.optString("complemento08");
+    String complemento09   = objHistorico.optString("complemento09");
+    String complemento10   = objHistorico.optString("complemento10");
+    String dataMovimento   = objHistorico.optString("dataMovimento");
+    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
+    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
+    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
+    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
+    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
+    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
+    String contaJuros      = objHistorico.optString("contaJuros");
+    String contaDesconto   = objHistorico.optString("contaDesconto");
+    String contaMulta      = objHistorico.optString("contaMulta");
+    String nomePortador    = objHistorico.optString("nomePortador");
+    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
+    int    numeroAba       = objHistorico.optInt("numeroAba");
+    String parcelaAtual    = objHistorico.optString("parcelaAtual");
+    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
+    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
+    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
+    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
+    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
+    String codCentroCusto  = objHistorico.optString("centroCusto");
+    double valorDocumento  = objHistorico.optDouble("valorDocumento");
+    double valorDesconto   = objHistorico.optDouble("valorDesconto");
+    double valorJuros      = objHistorico.optDouble("valorJuros");
+    if(!histParam.equals("")) historico = histParam;
+
+    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
+    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
+
+
+    return historico.replaceAll("  "," ").trim();
+}
+public String getHistoricoRegra4(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
+    String historico = "";
+    String complemento01   = objHistorico.optString("complemento01");
+    String complemento02   = objHistorico.optString("complemento02");
+    String complemento03   = objHistorico.optString("complemento03");
+    String complemento04   = objHistorico.optString("complemento04");
+    String complemento05   = objHistorico.optString("complemento05");
+    String complemento06   = objHistorico.optString("complemento06");
+    String complemento07   = objHistorico.optString("complemento07");
+    String complemento08   = objHistorico.optString("complemento08");
+    String complemento09   = objHistorico.optString("complemento09");
+    String complemento10   = objHistorico.optString("complemento10");
+    String dataMovimento   = objHistorico.optString("dataMovimento");
+    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
+    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
+    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
+    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
+    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
+    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
+    String contaJuros      = objHistorico.optString("contaJuros");
+    String contaDesconto   = objHistorico.optString("contaDesconto");
+    String contaMulta      = objHistorico.optString("contaMulta");
+    String nomePortador    = objHistorico.optString("nomePortador");
+    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
+    int    numeroAba       = objHistorico.optInt("numeroAba");
+    String parcelaAtual    = objHistorico.optString("parcelaAtual");
+    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
+    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
+    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
+    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
+    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
+    String codCentroCusto  = objHistorico.optString("centroCusto");
+    double valorDocumento  = objHistorico.optDouble("valorDocumento");
+    double valorDesconto   = objHistorico.optDouble("valorDesconto");
+    double valorJuros      = objHistorico.optDouble("valorJuros");
+    if(!histParam.equals("")) historico = histParam;
+
+    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
+    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
+
+
+    return historico.replaceAll("  "," ").trim();
+}
 public String getRegraHistoricoRegra(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
     String historico = "";
     String complemento01   = objHistorico.optString("complemento01");
@@ -9130,17 +8650,43 @@ public String getRegraHistoricoRegra(String conta, String histParam, String tipo
     
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem USO FUTURO, HISTORICO =";
     
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("434"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem 434, HISTORICO = Complemento (01)";
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem USO FUTURO, HISTORICO =";
     
-    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("8"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 8, HISTORICO = ESTORNO LANCAMENTO INDEVIDO";
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem USO FUTURO, HISTORICO =";
     
-    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("48"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 48, HISTORICO = Fornecedor/Cliente";
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem USO FUTURO, HISTORICO =";
+    
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = "HISTORICO POR REGRA = Quando Tipo Planilha contem USO FUTURO, HISTORICO =";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("219"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 219, HISTORICO = PAGAMENTO Fornecedor/Cliente COMP. Mes-Ano Atual";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("48"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 48, HISTORICO = ADTO VIAGEM Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("8"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 8, HISTORICO = PAGAMENTO Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("924"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 924, HISTORICO = PAGAMENTO SEGURO - Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("663"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 663, HISTORICO = PAGAMENTO Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("222"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 222, HISTORICO = PAGAMENTO Fornecedor/Cliente";
     
     if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5101"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5101, HISTORICO = TRANSFERENCIA TRANSP. MANDACARI EIRELI";
     
-    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5102"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5102, HISTORICO = TRANSFERENCIA TRANS. MANDACARI E MANDACARI";
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5102"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5102, HISTORICO = TRASNFERENCIA TRANSPORTADORA MANDACARI E MANDACARI";
     
-    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5100"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5100, HISTORICO = TRANSFERENCIA TRANSP. MAVI";
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5100"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5100, HISTORICO = TRANSFERENCIA TRANSPORTADORA MAVI";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("899"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 899, HISTORICO = PAGAMENTO Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("218"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 218, HISTORICO = PAGAMENTO INSS Mes-Ano Atual";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("950"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 950, HISTORICO = CONSORCIO Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("5103"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 5103, HISTORICO = TAXA Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("707"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 707, HISTORICO = IMPOSTO MUNICIPAL Fornecedor/Cliente";
+    
+    if (StringUtil.removeSpecialCharsToUC(contaMovimento).equals("986"))  historico = "HISTORICO POR REGRA = Quando Conta Normal - Movimento - igual a 986, HISTORICO = ADIANTAMENTO APARECIDO";
     
 
     return historico.replaceAll("  "," ").trim();
@@ -9283,336 +8829,9 @@ public double getTaxaTarifa(String contaMovimento, String tipoLancamento, String
     if (complemento03.contains("C6#")) { complemento06 = complemento03.substring(complemento03.indexOf("C6#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C6#")).trim(); }
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_STELO") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CREDITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("VISTA")) {
-        valorTaxaTarifa = 0.0319;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_STELO") &&
-        StringUtil.removeSpecialCharsToUC(complemento05).contains("TARIFA") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("CREDITO") &&
-        StringUtil.removeSpecialCharsToUC(complemento03).contains("PARC")) {
-        valorTaxaTarifa = 0.0379;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_VRALIMENTACAO1")) {
-        valorTaxaTarifa = 0.063;
-    }
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("CARTAO_SENFF")) {
-        valorTaxaTarifa = 0.04;
-    }
     return valorTaxaTarifa;
 }
-public String getHistoricoRegra(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
-    
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
-    
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
-    
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("434"))  historico = "" + " " + complemento01 + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
-    
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoRegra2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoRegra3(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoRegra4(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoRegra5(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoRegra6(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento").replaceAll("INVERTE","");
-    String contaPortador   = objHistorico.optString("contaPortador").replaceAll("INVERTE","");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha    = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
 public String getHistoricoPortador(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha     = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoPortador2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
     String historico = "";
     String complemento01   = objHistorico.optString("complemento01");
     String complemento02   = objHistorico.optString("complemento02");
@@ -9698,49 +8917,6 @@ public String getHistoricoJuros(String conta, String histParam, String tipoLanca
 
     return historico.replaceAll("  "," ").trim();
 }
-public String getHistoricoJuros2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha     = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
 public String getHistoricoDesconto(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
     String historico = "";
     String complemento01   = objHistorico.optString("complemento01");
@@ -9784,93 +8960,7 @@ public String getHistoricoDesconto(String conta, String histParam, String tipoLa
 
     return historico.replaceAll("  "," ").trim();
 }
-public String getHistoricoDesconto2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha     = objHistorico.optString("tipoPlanilha");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
 public String getHistoricoMulta(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
-    String historico = "";
-    String complemento01   = objHistorico.optString("complemento01");
-    String complemento02   = objHistorico.optString("complemento02");
-    String complemento03   = objHistorico.optString("complemento03");
-    String complemento04   = objHistorico.optString("complemento04");
-    String complemento05   = objHistorico.optString("complemento05");
-    String complemento06   = objHistorico.optString("complemento06");
-    String complemento07   = objHistorico.optString("complemento07");
-    String complemento08   = objHistorico.optString("complemento08");
-    String complemento09   = objHistorico.optString("complemento09");
-    String complemento10   = objHistorico.optString("complemento10");
-    String dataMovimento   = objHistorico.optString("dataMovimento");
-    String mesAnoAnterior  = objHistorico.optString("mesAnoAnterior");
-    String mesAno2Anterior = objHistorico.optString("mesAno2Anterior");
-    String mesAnoAtual     = objHistorico.optString("mesAnoAtual");
-    String nomeArquivo     = objHistorico.optString("nomeArquivo").toUpperCase();
-    String contaMovimento  = objHistorico.optString("contaMovimento");
-    String contaPortador   = objHistorico.optString("contaPortador");
-    String contaJuros      = objHistorico.optString("contaJuros");
-    String contaDesconto   = objHistorico.optString("contaDesconto");
-    String contaMulta      = objHistorico.optString("contaMulta");
-    String nomePortador    = objHistorico.optString("nomePortador");
-    String tipoPlanilha     = objHistorico.optString("tipoPlanilha");
-    String codCentroCusto  = objHistorico.optString("centroCusto");
-    int    numeroAba       = objHistorico.optInt("numeroAba");
-    String parcelaAtual    = objHistorico.optString("parcelaAtual");
-    String parcelaAtualeFinal  = objHistorico.optString("parcelaAtualeFinal");
-    String trimestreMesAnoAnterior = objHistorico.optString("trimestreMesAnoAnterior");
-    String trimestreMesAnoAtual = objHistorico.optString("trimestreMesAnoAtual");
-    String descricaoPlanoMovimento  = objHistorico.optString("descricaoPlanoMovimento");
-    String descricaoPlanoPortador  = objHistorico.optString("descricaoPlanoPortador");
-    double valorDocumento  = objHistorico.optDouble("valorDocumento");
-    double valorDesconto   = objHistorico.optDouble("valorDesconto");
-    double valorJuros      = objHistorico.optDouble("valorJuros");
-    if(!histParam.equals("")) historico = histParam;
-
-    if(histParam.equals("") && tipoLancamento.contains("PAGAR"))    historico = "PAGAMENTO " + documento + " " + nomeOrigem;
-    if(histParam.equals("") && tipoLancamento.contains("RECEBER"))  historico = "RECEBIMENTO " + documento + " " + nomeOrigem;
-
-
-    return historico.replaceAll("  "," ").trim();
-}
-public String getHistoricoMulta2(String conta, String histParam, String tipoLancamento, String documento, String nomeOrigem, JSONObject objHistorico) {
     String historico = "";
     String complemento01   = objHistorico.optString("complemento01");
     String complemento02   = objHistorico.optString("complemento02");
@@ -10133,21 +9223,21 @@ public String  getLimpaCamposAvancado(String parametro, String parametro2, JSONO
     double valorDocumento  = objHistorico.optDouble("valorDocumento");
     double valorDesconto   = objHistorico.optDouble("valorDesconto");
     double valorJuros      = objHistorico.optDouble("valorJuros");
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTOXXXX") && parametro.equals("nomeOrigem")) lote = cutString(lote,"-"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("RECEB.") && parametro.equals("nomeOrigem")) lote = cutString(lote,"RECEB."); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" FAT") && parametro.equals("nomeOrigem")) lote = cutString(lote,0," FAT"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" FAT") && parametro.equals("documento")) lote = cutString(lote," FAT"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" FAT=") && parametro.equals("documento")) lote = cutString(lote,"="); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("REF PARCELA") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"REF PARCELA"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF") && parametro.equals("nomeOrigem")) lote = cutString(lote,0," NF"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF") && parametro.equals("documento")) lote = cutString(lote," NF"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF=") && parametro.equals("documento")) lote = cutString(lote,"="); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && !StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF") && !StringUtil.removeSpecialCharsToUC(complemento01).contains(" FAT") && !StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && parametro.equals("documento")) lote = ""; //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("->") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"->"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("->") && parametro.equals("documento")) lote = cutString(lote,"->"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("- >") && parametro.equals("documento")) lote = cutString(lote,"- >"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("- >") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"- >"); //ROT-2020-099813
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE N.") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"CHEQUE N."); //ROT-2020-099813
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" CTE") && parametro.equals("nomeOrigem")) lote = cutString(lote,0," CTE"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("PAGTO") && parametro.equals("nomeOrigem")) lote = cutString(lote,"PAGTO"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF") && parametro.equals("nomeOrigem")) lote = cutString(lote,0," NF"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("->") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"->"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("- >") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"- >"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("- >") && parametro.equals("documento")) lote = cutString(lote,"- >"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("->") && parametro.equals("documento")) lote = cutString(lote,"->"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && !StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF") && !StringUtil.removeSpecialCharsToUC(complemento01).contains("CHEQUE") && !StringUtil.removeSpecialCharsToUC(complemento01).contains(" CH ") && parametro.equals("documento")) lote = ""; //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" NF=") && parametro.equals("documento")) lote = cutString(lote," NF="," "); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("COD.CC:") && parametro.equals("nomeOrigem")) lote = cutString(lote,0,"COD.CC:"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("CC.FUNC:") && parametro.equals("nomeOrigem")) lote = cutString(lote,"CC.FUNC:"); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" CH ") && parametro.equals("nomeOrigem")) lote = cutString(lote,0," CH "); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" CH ") && parametro.equals("documento")) lote = cutString(lote," CH "); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains(" CTE=") && parametro.equals("documento")) lote = cutString(lote," CTE="," "); //ROT-2020-099812
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("TRANSFERENCIA") && parametro.equals("complemento02")) lote = cutString(lote,"DESTINO:","TRAN"); //ROT-2020-099812
 
     return lote.trim();
 }
@@ -10247,7 +9337,10 @@ public String getColunaAlternativa(String parametro, JSONObject objHistorico) {
 
     return retornaColunas.replace(",",";").trim();
 }
-//FINALPARAMETRIZACAOREGRAS
+
+/*#############################################@ EXTRATO-BOTICARIO-EXCEL @##############################################*/
+
+/*#############################################@ EXTRATO-BOTICARIO-EXCEL @##############################################*/
 
 /*#############################################@ EXTRATO-BOTICARIO-EXCEL @##############################################*/
 public HashMap readBoticario(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {

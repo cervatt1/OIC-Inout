@@ -264,8 +264,22 @@ public class TemplateUtils {
 		}
 		return false;
 	}
+	public static String verificaSegundoConversorNovo(String arquivoCompleto) {
+		if (arquivoCompleto.contains("BANCO ITAU S.A.") && arquivoCompleto.contains("MOVIMENTACAO DE TITULOS") &&
+			arquivoCompleto.contains("POSICAO ATE O MOMENTO") && arquivoCompleto.contains("RESUMO DAS DEDUCOES")) {
+			return "readExtratoItauPdfFrancesinha5";
+		}
+		
+		return "";
+	}
 	
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
+		//2405-040179
+        if(arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("EXTRATO POR PERIODO") &&
+            arquivoCompleto.contains("DATA MOV.") && arquivoCompleto.contains("NR.") && arquivoCompleto.contains("DOC.") &&
+            arquivoCompleto.contains("GERAR EM ARQUIVO") && arquivoCompleto.contains("SIGLAS E ABREVIACOES")){
+			return true; //CEF MODELO 07
+		}
 		if (((arquivoCompleto.contains("NU PAGAMENTOS S.A.") && arquivoCompleto.contains("NU FINANCEIRA S.A.")) &&
 			arquivoCompleto.contains("0800 887 0463")) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
 			return true; //NUBANK
@@ -501,10 +515,10 @@ public class TemplateUtils {
 			return true; //PINK PAY
 		}
 		//2311-022659
-		if(arquivoCompleto.contains("BANCO ITAU S.A.") && arquivoCompleto.contains("TITULOS") && arquivoCompleto.contains("MOVIMENTACAO") && 
+		/*if(arquivoCompleto.contains("BANCO ITAU S.A.") && arquivoCompleto.contains("TITULOS") && arquivoCompleto.contains("MOVIMENTACAO") && 
 			arquivoCompleto.contains("PAGADOR")  && arquivoCompleto.contains("OUTROS VALORES")){
 			return true; //ITAUFRANCESINHA03
-		}
+		}*/
 		//2311-023654
 		if(arquivoCompleto.contains("OUVIDORIA BB") && arquivoCompleto.contains("DEFICIENTES") && arquivoCompleto.contains("AUDITIVOS") &&
 			arquivoCompleto.contains("CONSULTAR") && arquivoCompleto.contains("BOLETOS") && arquivoCompleto.contains("INSTRUCOES")){
@@ -577,6 +591,12 @@ public class TemplateUtils {
 			arquivoCompleto.contains("RAZAO SOCIAL DO BENEFICIARIO")){
 			return true; //COMPROVANTE SICREDI
 		}*/
+		
+		//2405-039500
+		if (arquivoCompleto.contains("CONTAMAX") && arquivoCompleto.contains("EMPRESARIAL") && arquivoCompleto.contains("EXTRATO") &&
+			arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("SANTANDER") && arquivoCompleto.contains("RENDIMENTO")) {
+			return true; //Santander Contamax Empresarial
+		}
 
 		if (arquivoCompleto.contains("%$&") || arquivoCompleto.contains("!%") || arquivoCompleto.contains("$!%&") || arquivoCompleto.contains("# $%") 
 			|| arquivoCompleto.contains("$*&-") || arquivoCompleto.contains("%$$&$$") || arquivoCompleto.contains("#$#%") || arquivoCompleto.contains("%&*") 

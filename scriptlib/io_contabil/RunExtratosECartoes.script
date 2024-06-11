@@ -464,11 +464,34 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 
 
 public String validacaoPDF(String anoData, String complemento01, String complemento02, String line, DataBase dbIOCont, JSONObject variaveis, JSONObject roteiroCRM, String arquivoCompleto, String cabecalhoPlanilha, String tipoLancamento, String nomeEmpresa, String codEmpresa, String nomeArquivo, String nomeArquivoAuxiliar, MemoryFile memFile, HashMap mapaVariavel, String nomePortador, String nomePortador2, String tipoPlanilha, InoutLogger logger) throws Exception {
+
+	////// COMPROVANTE DE PAGTO BRADESCO PDF //////////////////////////////////////////////////////////////////
+	if(roteiroCRM.optString("Planilhas_Padroes").contains("Bradesco_Comprovantes_PDF")){
+		if(cabecalhoPlanilha.contains("COMPROVANTE DE TRANSACAO BANCARIA") && arquivoCompleto.contains("ALO BRADESCO") &&
+			arquivoCompleto.contains("0800 704 8383")){
+
+			String dataStringAux = cutString(cabecalhoPlanilha, "OPERACAO: ", cabecalhoPlanilha.lastIndexOf("/20")+5).trim();
+			String dataMovimento = getCampoDate(dataStringAux);
+
+			tipoPlanilha = "BRADESCO COMPROVANTES";
+			JSONObject jDados = new JSONObject();
+			jDados.put("TIPOPLANILHA", tipoPlanilha);
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			jDados.put("NOMEEMPRESA",    nomeEmpresa);
+			jDados.put("DATAMOVIMENTO", dataMovimento);
+
+			mapaVariavel = readExtratoECartao("readBradescoComprovantesPDF", memFile, jDados, mapaVariavel, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
 	
 	////// COMPROVANTE SICREDI PDF //////////////////////////////////////////////////////////////////
 	if(roteiroCRM.optString("Planilhas_Padroes").contains("Sicredi_Comprovantes_PDF")){
-		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("ASSOCIADO") &&
-			arquivoCompleto.contains("COOPERATIVA")){
+		if(arquivoCompleto.contains("SAC 0800 724 7220") && arquivoCompleto.contains("VALOR DO TITULO") &&
+			arquivoCompleto.contains("RAZAO SOCIAL DO BENEFICIARIO") && arquivoCompleto.contains("SOLICITANTE:")){
 
 			if(memFile.getStringFieldRemoveEspCharsUpper(1).contains("CONTA CORRENTE")){
 				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(1);
@@ -548,47 +571,12 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 	}
 	
-	// EXTRATO - PDF - Pin Bank
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinBank_PDF")) {
-		if (arquivoCompleto.contains("REFERENCIA") &&
-			arquivoCompleto.contains("ACESSOACONTA.COM.BR") &&
-			arquivoCompleto.contains("EXTRATO CONTA DE PAGAMENTO/LANCAMENTOS") /*&&
-			arquivoCompleto.contains("DATA|DESCRICAO|VALOR (R$)|TIPO|REFERENCIA")*/){
-				
-			JSONObject jDados = new JSONObject();
-			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOPLANILHA", "EXTRATO-FIRST-CAPITAL");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
-			readExtratoECartao("readExtratoPinBankPDF", memFile, jDados, dbIOCont, logger);
-			variaveis.put("tipoRetorno",   "break");
-			return variaveis.toString();
-		}
-	}
-
-	// EXTRATO - PDF - Star Bank
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_STARBANK_PDF")) {
-		if (arquivoCompleto.contains("STARK BANK S.A.") &&
-			arquivoCompleto.contains("VALOR / TARIFA (R$)") &&
-			arquivoCompleto.contains("SALDO (R$)")){
-				
-			JSONObject jDados = new JSONObject();
-			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOPLANILHA", "EXTRATO-STARBANK");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
-			readExtratoECartao("readExtratoStarBankPDF", memFile, jDados, dbIOCont, logger);
-			variaveis.put("tipoRetorno",   "break");
-			return variaveis.toString();
-		}
-	}
-
 	// EXTRATO - PDF - BS CASH
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BSCASH_PDF")) {
 		if (arquivoCompleto.contains("DATA|DCTO.|OPERACAO|HISTORICO|MOVIMENTACAO (R$)|SALDO (R$), SALDO ANTERIOR") &&
 			arquivoCompleto.contains("DATA DA GERACAO DO DOCUMENTO:") &&
 			arquivoCompleto.contains("RECEBIMENTO DE TRANSFERENCIA ENTRE CONTAS")){
-				
+
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -599,7 +587,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
-
+	
 	////// EXTRATO - BANESE PDF//////////////////////////////////////////////////////////////////
 	// //logger.logInfoDebug("EXTEN == "+extensao+" | CABECALHOPLANILHA == "+cabecalhoPlanilha+" | NOME ARQ == "+nomeArquivo);
 	// //logger.logInfoInfo("LIN - "+line);
@@ -1289,7 +1277,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOLANCAMENTO", tipoLancamento);
-				jDados.put("TIPOPLANILHA", "CDB / RDB e BB Reaplic");
+				jDados.put("TIPOPLANILHA", "BB RENDE FACIL");
 				jDados.put("TIPOPDFBB", "001");
 
 				mapaVariavel = readExtratoECartao("readExtrato_ApliBB_PDF", memFile, jDados, mapaVariavel, logger);
@@ -2210,6 +2198,27 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		return variaveis.toString();
 	}
 	
+	////// Santander Contamax Empresarial //////////////////////////////////////////////////////////////////
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ApliSantander_PDF")) {
+		if (cabecalhoPlanilha.contains("CONTAMAX") && cabecalhoPlanilha.contains("EMPRESARIAL") && cabecalhoPlanilha.contains("EXTRATO") && 
+		cabecalhoPlanilha.contains("CORRENTE") && arquivoCompleto.contains("SANTANDER")){
+
+			nomePortador = "SANTANDER CONTAMAX " + cutString(cabecalhoPlanilha, "CORRENTE").replaceAll(":", "").replaceAll(";", "").trim();
+
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEPORTADOR", nomePortador);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "SANTANDER CONTAMAX EMPRESARIAL");
+			jDados.put("NOMEEMPRESA", nomeEmpresa);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+
+			mapaVariavel = readExtratoECartao("readExtrato_ApliSantander_PDF", memFile, jDados, mapaVariavel, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+	
 	//2312-024563
 	////// EXTRATO - UBP PDF //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_UBP_PDF")) {
@@ -2288,6 +2297,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		String tipoPadrao = "";
 		// //logger.logInfoDebug("Line -> "+line);
 
+
+
 		if ((nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA")) && (nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {
 		// if ((nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {
 			//logger.logInfoDebug("NP CEF PDF capturado");
@@ -2298,6 +2309,15 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno",   "continue");
 			return variaveis.toString();
 		}
+
+		//2405-040179
+		if(cabecalhoPlanilha.contains("CONTA:") && cabecalhoPlanilha.contains("EXTRATO POR PERIODO") &&
+			cabecalhoPlanilha.contains("DATA MOV.") && cabecalhoPlanilha.contains("NR.") && cabecalhoPlanilha.contains("DOC.") &&
+			arquivoCompleto.contains("GERAR EM ARQUIVO") && arquivoCompleto.contains("SIGLAS E ABREVIACOES")){
+			nomePortador2 = "CAIXA MODELO07";
+		}
+
+
 		// if(nomePortador2.contains("CEF") && nomeArquivo.toUpperCase().contains("PDF")){
 		if(nomePortador2.contains("CEF")){
 			// //logger.logInfoDebug("NP CEF");
@@ -2403,21 +2423,20 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			}
 
 			//logger.logInfoDebug("TIPOPAdrao -> " + tipoPadrao + " | L = "+line);
-			
+
 			if(cabecalhoPlanilha.contains("CGC:") &&
 			cabecalhoPlanilha.contains("LIMITE FLUTUANTE GIM:") &&
 			cabecalhoPlanilha.contains("LIMITE  CHEQUE  AZUL:") &&
 			cabecalhoPlanilha.contains("VLR.TOTAL") && tipoPadrao.equals("")){
 				tipoPadrao = "010";
 			}
-			
+
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-CEF");
 			jDados.put("TIPOPADRAO", tipoPadrao);
 			jDados.put("LINHA", line);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			// //logger.logInfoDebug("NP FINAL -> "+nomePortador2);
 			if(tipoPadrao.equals("")){
@@ -2430,7 +2449,24 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
+
+		//2405-040179
+		if(nomePortador2.contains("MODELO07")){
+			JSONObject jDados = new JSONObject();
+
+			nomePortador =  cutString(cabecalhoPlanilha, "CONTA:", "EXTRATO").trim();
+
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+
+			readExtratoECartao("readExtratoCefPDF7", memFile, nomePortador, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
+			return variaveis.toString();
+		}
+
 	}
+
 	
 	////// EXTRATO - VALECARD //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Cartao_ValeCard_PDF")) {
@@ -3616,6 +3652,26 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			mapaVariavel = readExtratoECartao("readExtratoItauPdfFrancesinha4", memFile, jDados, mapaVariavel, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
+		}
+		logger.logInfo("Antees readFranc");
+		if(variaveis.has("read") && variaveis.optString("read").equals("readExtratoItauPdfFrancesinha5")){
+			logger.logInfo("entrouread");
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(4).contains("AGENCIA/CONTA")){
+				nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(4), "CONTA");
+				logger.logInfo("port: " + nomePortador);
+			}
+
+			JSONObject jDados = new JSONObject();
+
+			jDados.put("PORTADOR", nomePortador);
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "ITAU-FRANCESINHA05");
+			jDados.put("NOMEEMPRESA", nomeEmpresa);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+
+			mapaVariavel = readExtratoECartao("readExtratoItauPdfFrancesinha5", memFile, jDados, mapaVariavel, logger);
 		}
 	}
 	

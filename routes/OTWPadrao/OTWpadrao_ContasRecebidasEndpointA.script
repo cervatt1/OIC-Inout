@@ -21635,7 +21635,7 @@ public boolean readExtratoItauDefault(MemoryFile memFile, String anoData, String
 						dataLote			= getCampoDate(dataMovimento, "", "yyyy-MM");
 					}
 				}
-
+				
 				if(dataString.length() == 5){
 					try {
 						Date dt = DateUtil.stringToDate("01/01/1900", "dd/MM/yyyy");
