@@ -865,6 +865,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								// leitura de xlsx e csv
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") || (!roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && !roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA ("))) {
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
+                                    logger.logInfo("####################--> TIPOPLANILHA: " + tipoPlanilha);
+                                    logger.logInfo("####################--> line: " + line);
+                                    if( tipoPlanilha.equals("MOVIMENTO") && line.toUpperCase().contains("TOTAL DE LAN") && 
+                                        line.toUpperCase().contains("AMENTEOS") && line.toUpperCase().contains("TOTAL DE LAN") && 
+                                        (line.toUpperCase().contains("NACIONAIS") || line.toUpperCase().contains("INTERNACIONAIS"))) continue; 
 
                                     //Colocar aqui
                                    if (tipoPlanilha.equals("MOVIMENTO")){
@@ -9521,7 +9526,7 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CASAN"))    historico = "PAGAMENTO DE TITULO CASAN";  //id -> 1716758.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA CELESC 0000002493608"))    historico = "PAGAMENTO TITULO DA CELESC 0000002493608";  //id -> 1716732.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("IOF") && StringUtil.removeSpecialCharsToUC(complemento04).contains("IOF"))    historico = "PAGAMENTO IOF";  //id -> 1716782.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DEBITO DEVOLUCAO PIX"))    historico = "DEVOLUÇÃO DEPOSITO BANCO SICOOB - CONFORME EXTRATO BANCARIO";  //id -> 1398421.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DEBITO DEVOLUCAO PIX"))    historico = "DEVOLUï¿½ï¿½O DEPOSITO BANCO SICOOB - CONFORME EXTRATO BANCARIO";  //id -> 1398421.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FLU") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ARML12"))    historico = "APLICACAO COMPROMISSADA DEB FLU U ARML12";  //id -> 1618484.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA CELESC 0000026528810"))    historico = "PAGAMENTO TITULO DA CELESC 0000026528810";  //id -> 1716747.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(complemento04).contains("APLICACAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("APLICACAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMPROMISSADA"))    historico = "PAGAMENTO DE TITULO APLICACAO COMPROMISSADA";  //id -> 1714736.00
@@ -9548,7 +9553,7 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("*CPETCURSOS04"))    historico = "PAGAMENTO DE TITULO CURSO";  //id -> 1279736.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("*CPETCURSOS01"))    historico = "" + nomeOrigem + "";  //id -> 1280174.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("EMITIDO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MESMA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TIT"))    historico = "CodigoHistorico:29";  //id -> 1398436.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TARIFA"))    historico = "TARIFA BANCÁRIA SANTANDER";  //id -> 1201866.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TARIFA"))    historico = "TARIFA BANCï¿½RIA SANTANDER";  //id -> 1201866.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("*CPETCURSOS03"))    historico = "" + nomeOrigem + "";  //id -> 1280183.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA CELESC 0000004098536"))    historico = "PAGAMENTO TITULO DA CELESC 0000004098536";  //id -> 1716736.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("*CPETCURSOS02"))    historico = "" + nomeOrigem + "";  //id -> 1280179.00
@@ -9577,7 +9582,7 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA VIVO FIXO 9796469720"))    historico = "PAGAMENTO DE TITULO DA VIVO FIXO 9796469720";  //id -> 1716773.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSF") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAGADOR"))    historico = "CodigoHistorico:13";  //id -> 1673155.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("APLICACAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FLU") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VSCF14"))    historico = "APLICACAO COMPROMISSADA DEB FLU U VSCF14";  //id -> 1618499.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FLU") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("HVSP11"))    historico = "APLICAÇÃO COMPROMISSADA DEB FLU U HVSP11";  //id -> 1618491.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FLU") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("HVSP11"))    historico = "APLICAï¿½ï¿½O COMPROMISSADA DEB FLU U HVSP11";  //id -> 1618491.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CASAS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGUA"))    historico = "CodigoHistorico:150";  //id -> 1084453.00
     if (StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGUA") && StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("SICREDI_PAG"))    historico = "PAGAMENTO AGUA " + nomeOrigem + "";  //id -> 259373.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FLU") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ECOV14"))    historico = "APLICACAO COMPROMISSADA DEB FLU U ECOV14";  //id -> 1618488.00
@@ -9597,7 +9602,7 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGUA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("02770733"))    historico = "PAGAMENTO DE TITULO DA AGUA JOINV 02770733";  //id -> 1716720.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGUA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("08658684"))    historico = "PAGAMENTO DE TITULO DA AGUA JOINV 08658684";  //id -> 1716722.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DA BRT SC 7107093526"))    historico = "PAGAMENTO DE TITULO DA BRT SC 7175238526";  //id -> 1716725.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("APLICACAO CONTAMAX"))    historico = "APLICAÇÃO CONTAMAX";  //id -> 1201846.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("APLICACAO CONTAMAX"))    historico = "APLICAï¿½ï¿½O CONTAMAX";  //id -> 1201846.00
     if (StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MANUTENCAO") && StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("SICREDI_PAG"))    historico = "JUROS E TAXAS BANCARIAS - BANCO SICREDI " + mesAnoAtual + "";  //id -> 259537.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("ZZPADRAOOTTIMIZZAPAG") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("*CPETCURSOS05"))    historico = "" + nomeOrigem + "";  //id -> 1280186.00
     if (StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("USO FUTURO"))  historico = ""  + " " + ""  + " " + ""  + " " + ""  + " " + "" + "";
@@ -13882,7 +13887,7 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 			if(tipo.equals("003") || tipo.equals("002") || tipo.equals("001")){
 				if(memFile.getFieldsSize()-1 < ivalorDocumento ) ivalorDocumento -= 1;
 					
-				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO HÃ? UMA LETRA NA COLUNA DO NOME ORIGEM;
+				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO Hï¿½? UMA LETRA NA COLUNA DO NOME ORIGEM;
                 if(memFile.getStringFieldRemoveEspCharsUpper(1).trim().length() == 1){
                     ivalorDocumento += 1;
 				}
