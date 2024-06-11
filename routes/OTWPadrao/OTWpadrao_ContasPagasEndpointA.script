@@ -16174,6 +16174,9 @@ public HashMap readFaturaCartaoCredito_Itau_Excel(MemoryFile memFile, JSONObject
 		memFile.setFieldSeparator("\\|");
 		cont++;
 
+		if(	line.toUpperCase().contains("TOTAL DE LAN") && line.toUpperCase().contains("AMENTOS") &&  
+			(line.toUpperCase().contains("NACIONAIS") || line.toUpperCase().contains("INTERNACIONAIS"))) continue;
+
 		try {
 
 			if(dataMovimento.equals("")) continue;
