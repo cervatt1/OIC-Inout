@@ -1100,7 +1100,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										// #Fabrica(2019-05-20)
 										try{
 											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
-											 
+											logger.logInfo("########--> DATAMOV: " + dataMovimento + " | CONTENT: " + memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
 											dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
 										}catch(Exception e){
 											// dataMovimento   = "";
@@ -1244,8 +1244,9 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									//---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---
 									if(ivalorDocumento >=0){
-										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
-										catch (Exception vlrd) { valorDocumento = 0; }
+										try{valorDocumento = memFile.getDoubleField(ivalorDocumento);
+										logger.logInfo("##############--> VALORDOCUMENTO: " + valorDocumento + " | CONTEN: " + memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento));
+										}catch (Exception vlrd) { valorDocumento = 0; }
 									}
 									
 								    if (codEmpresa.contains("669")) logger.logDebug("TP  1110 -> " + memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento) + " | " +tipoPlanilha+" - DM "+idataMovimento+" -> "+dataMovimento+" - VD "+ivalorDocumento+" -> "+valorDocumento);
@@ -3146,7 +3147,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 			
  			
-			if(roteiroCRMPrincipal.optString("erpContabilidade").contains("DEXION")){
+			/*if(roteiroCRMPrincipal.optString("erpContabilidade").contains("DEXION")){
 				if (contaMovimento.equals("")) {
 						JSONObject descricaoPlano = dbIOCont.sql("SELECT CONTACONTABIL FROM IO_PLANOCONTA WHERE CODEMPRESA = ? AND DESCRICAOPLANO LIKE ?")
 						.fields("CONTACONTABIL")
@@ -3155,7 +3156,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 						.queryUnique();
 						contaMovimento = descricaoPlano.optString("CONTACONTABIL").trim();
 				}
-			}
+			}*/
 
 			if (contaPortador.equals("")) {
 				try {
@@ -3500,7 +3501,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 				}	
 					
 				 
-				if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("QUESTOR")) {
+				/*if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("QUESTOR")) {
 
 					JSONObject jDadosAux = new JSONObject();
 					jDadosAux.put("CODEMPRESA",                 codEmpresa);
@@ -3603,7 +3604,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 							}
 						}
 					}
-				}
+				}/*
 
 				/*if (roteiroCRMPrincipal.optString("erpContabilidade").toUpperCase().contains("MAKROWEB")) {
 					JSONObject jDados = new JSONObject();
@@ -10844,21 +10845,21 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LEANDRO PORTELLA"))    historico = "PAGO NF. " + nomeOrigem + "";  //id -> 2446447.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RJ") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AUTOMACAO"))    historico = "PAGO NF. " + nomeOrigem + "";  //id -> 2446804.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SUPRI") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("POSTOS"))    historico = "PAGO NF. " + nomeOrigem + "";  //id -> 2446851.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447232.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOSENALDA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447337.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOSE"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447340.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAULO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ROBERTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453492.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PESSOTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453497.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VENDA AO CONSUMIDOR"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453529.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PEDROLINA") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453493.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LOGISTICA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453501.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RAMOS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453503.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RODOELIAS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453507.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSGIACOMOSSI"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453513.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTADORA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453515.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453521.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VANESSA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2453525.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DE") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SOUZA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447334.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447232.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOSENALDA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447337.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOSE"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447340.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAULO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ROBERTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453492.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PESSOTO") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453497.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VENDA AO CONSUMIDOR"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453529.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PEDROLINA") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453493.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LOGISTICA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453501.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RAMOS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453503.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RODOELIAS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453507.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSGIACOMOSSI"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453513.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTADORA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453515.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453521.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VANESSA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2453525.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JOAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DE") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SOUZA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447334.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(complemento04).contains("ORIGINAL") && StringUtil.removeSpecialCharsToUC(complemento04).contains("LUBRIF"))    historico = "" + nomeOrigem + "";  //id -> 1721850.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FOLHA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAGTO"))    historico = "" + nomeOrigem + "";  //id -> 1722127.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(complemento04).contains("DEBITO") && StringUtil.removeSpecialCharsToUC(complemento04).contains("ARRECADACAO"))    historico = "" + nomeOrigem + "";  //id -> 1722142.00
@@ -10892,7 +10893,7 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TARIFAS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PGTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FOLHA"))    historico = "" + nomeOrigem + "";  //id -> 2021615.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LIQUIDACAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BOLETO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("5813075000296"))    historico = "" + nomeOrigem + "";  //id -> 1905160.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAGAMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("15213115870"))    historico = "" + nomeOrigem + "";  //id -> 1907535.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ABS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTES"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447102.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ABS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTES"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447102.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RESAN"))    historico = "PAGO " + nomeOrigem + "";  //id -> 2446770.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TIJOLOS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BARRO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRANCO"))    historico = "PAGO NF. " + nomeOrigem + "";  //id -> 2446888.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SANTOS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("E") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BRITO"))    historico = "PAGO NF. " + nomeOrigem + "";  //id -> 2446889.00
@@ -10903,31 +10904,31 @@ public String getHistoricoRegra(String conta, String histParam, String tipoLanca
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAGAMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("03372816960"))    historico = "" + nomeOrigem + "";  //id -> 1905328.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PAGAMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("PIX") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("06555029986"))    historico = "" + nomeOrigem + "";  //id -> 1905346.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LIQUIDACAO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BOLETO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("GILCILENE"))    historico = "" + nomeOrigem + "";  //id -> 2261377.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ANTONIO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VITOR"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447173.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ADS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTES"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447109.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGROCOMERCIAL"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447135.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AMERICA TRANSPORTES"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447157.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CTS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447244.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447275.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AILTON") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LOPES"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447146.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIO DE COMBUSTIVEIS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447214.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ANTONIO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MORAES"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447167.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIAL SAO MIGUEL LTDA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447207.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("IRMAOS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRAVASSOS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447315.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MARIANO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447353.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JEREMIAS"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447321.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COOPERATIVA"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447236.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DECIO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447247.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447263.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("GESSEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447287.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MORETTO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447279.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MARCIO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447328.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MAURO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447359.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MELCHIORETTO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447294.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("GUILHERME"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447298.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JEFERSON") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447310.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LASAROLI"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447344.00
-    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MAICON"))    historico = "CHEQUE TROCO N° " + documento + " " + nomeOrigem + "";  //id -> 2447351.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ANTONIO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("VITOR"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447173.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ADS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTES"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447109.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AGROCOMERCIAL"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447135.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AMERICA TRANSPORTES"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447157.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("CTS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447244.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRANSPORTE") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447275.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("AILTON") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LOPES"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447146.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIO DE COMBUSTIVEIS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447214.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ANTONIO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MORAES"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447167.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COMERCIAL SAO MIGUEL LTDA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447207.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("IRMAOS") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("TRAVASSOS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447315.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MARIANO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447353.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JEREMIAS"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447321.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("COOPERATIVA"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447236.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DECIO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447247.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447263.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("GESSEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447287.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MORETTO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447279.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MARCIO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447328.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MAURO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447359.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MELCHIORETTO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447294.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("GUILHERME"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447298.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("JEFERSON") && StringUtil.removeSpecialCharsToUC(complemento01).contains("DINHEIRO"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447310.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LASAROLI"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447344.00
+    if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("MOVIMENTO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("MAICON"))    historico = "CHEQUE TROCO Nï¿½ " + documento + " " + nomeOrigem + "";  //id -> 2447351.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("DEBITO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("LUCIMARA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("SOUZA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("FRAN"))    historico = "" + nomeOrigem + "";  //id -> 1722181.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("ERIKA") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("RIBEIRO") && StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("BARBOSA"))    historico = "" + nomeOrigem + "";  //id -> 1722207.00
     if (StringUtil.removeSpecialCharsToUC(tipoPlanilha).contains("EXTRATO") && StringUtil.removeSpecialCharsToUC(complemento04).contains("GARBELL") && StringUtil.removeSpecialCharsToUC(complemento04).contains("GELO"))    historico = "" + nomeOrigem + "";  //id -> 1721860.00
