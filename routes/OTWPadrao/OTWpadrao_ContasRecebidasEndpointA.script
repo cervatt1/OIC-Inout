@@ -10328,8 +10328,15 @@ public boolean readExtratoAsaasPDF(MemoryFile memFile, String nomePortador, JSON
 			
 			try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
 			catch (Exception vlrd) { valorDocumento = 0; }
-			
-			
+			if(valorDocumento == 0) {
+				try{
+					valorDocumento = Double.parseDouble(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).trim()
+													.replaceAll("R$", "").replaceAll("\\.", "").replaceAll(",", ""))/100;
+				}catch(Exception e){
+					valorDocumento = 0;
+					logger.logInfo("ERRO AO PEGAR VDOC: " + e.getMessage());
+				}
+			}
 			if (valorDocumento == 0) continue;
 			
 			contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
