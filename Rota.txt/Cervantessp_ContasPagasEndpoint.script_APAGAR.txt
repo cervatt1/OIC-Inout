@@ -1177,9 +1177,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
                                     if(!changed.equals("")) {
                                         zerarColAlternativo = changed;
+                                        logger.logInfo("ENTRO IFEM VEM ASSIM: " + dataMovimento);
                                         if (changed.contains("dataMovimento")) {
                                             dataMovimento	= alternativeObj.optString("dataMovimento");
                                             dataLote		= alternativeObj.optString("dataLote");
+                                            logger.logInfo("ENTRO IFEM SAI ASSIM: " + dataMovimento);
                                         }
                                         if (changed.contains("documento"))		documento		= alternativeObj.optString("documento");
                                         if (changed.contains("nomeOrigem"))		nomeOrigem		= alternativeObj.optString("nomeOrigem");
@@ -1555,6 +1557,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
                                 histobj.put("cabecalhoRegra", cabecalhoRegra.toString());
 
                                 String modificaData = getModificaData(histobj);
+                                logger.logInfo("ANTES DO modificaData.startsWith: " + dataMovimento);
 
                                 if (modificaData.startsWith("01"))  dataMovimento = getNextDay(dataMovimento, 1, true);
                                 if (modificaData.startsWith("02"))  dataMovimento = getNextDay(dataMovimento, 2, true);
@@ -1563,6 +1566,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
                                 if (modificaData.startsWith("05"))  dataMovimento = "01/" + cutString(dataMovimento, "/");
                                 if (modificaData.startsWith("06"))  dataMovimento = getLastDayOfMonth(dataMovimento, true);
 
+                                logger.logInfo("DEPOIS DO modificaData.startsWith: " + dataMovimento);
 
                                 // METODO QUE REFATORA OS CAMPOS COM BASE NO CABECALHO DO CRM
                                 // EXEMPLO QUANDO ENCONTRAR #LINE NO CAMPO COMPLEMENTO03, VAMOS JOGAR O LINE NESTE COMPLEMENTO
@@ -1633,7 +1637,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
                                 }
 
-                                // logger.logDebug("ANTES ttMov2");
+                                logger.logInfo("ANTES ttMov2 DT dataMovimento: " + dataMovimento);
                                 // #DOCUMENTACAO
                                 // insere numa tabela temporaria
                                 ttMovimentoPadrao ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
@@ -1685,6 +1689,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 
                                 }
+                                logger.logInfo("DEPOIS ttMov2 DT ttMov2.dataMovimento: " + ttMov2.dataMovimento + " | NO: " + ttMov2.nomeOrigem);
 
                                 ///  -------------------------------------------------------------------------------------------------------
                                 ///	 QUANDO FOR PLANILHA COM MAIS DE UMA LINHA, JOGAR OS VALORES PARA CIMA (dentro da parte de inclusao)
@@ -11095,7 +11100,7 @@ public String getCodigoClassificacao(String nomeOrigem, JSONObject objHistorico)
     if (complemento03.contains("C5#")) { complemento05 = complemento03.substring(complemento03.indexOf("C5#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C5#")).trim(); }
     if (complemento03.contains("C4#")) { complemento04 = complemento03.substring(complemento03.indexOf("C4#")+3).trim(); complemento03 = complemento03.substring(0,complemento03.indexOf("C4#")).trim(); }
     if (!StringUtil.removeSpecialCharsToUC(nomeOrigem).contains("REGRA CLASSIFICACAO")) {
-        retornoClassificacao = "2.1.1.01 ";
+        retornoClassificacao = "2.1.1.01ï¿½";
     }
     return retornoClassificacao;
 }

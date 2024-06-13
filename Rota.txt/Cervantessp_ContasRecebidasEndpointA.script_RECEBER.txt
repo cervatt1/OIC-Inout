@@ -1120,9 +1120,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									
 									if(!changed.equals("")) {
 										zerarColAlternativo = changed;
+                                        logger.logInfo("ENTRO IFEM VEM ASSIM: " + dataMovimento);
 										if (changed.contains("dataMovimento")) {
 											dataMovimento	= alternativeObj.optString("dataMovimento");
 											dataLote		= alternativeObj.optString("dataLote");
+                                            logger.logInfo("ENTRO IFEM SAI ASSIM: " + dataMovimento);
 										}
 										if (changed.contains("documento"))		documento		= alternativeObj.optString("documento");
 										if (changed.contains("nomeOrigem"))		nomeOrigem		= alternativeObj.optString("nomeOrigem");
@@ -2045,6 +2047,13 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 			// ajuste 11/2020 @DiMaz
 			if (ttMov.valorDocumento == 0) continue;
+			logger.logInfo("-----------------------------------------------------------------------------------------------------");
+            logger.logInfo("1.ttMov.dataMovimento: "+ ttMov.dataMovimento + " | 1.ttMov.nomeOrigem: "+ ttMov.nomeOrigem);
+            logger.logInfo("1.ttMov.complemento07: "+ ttMov.complemento07);
+            ttMov.dataMovimento = ttMov.dataMovimento.trim().replaceAll(" ","");
+            logger.logInfo("2.ttMov.dataMovimento: "+ ttMov.dataMovimento);
+            //if(ttMov.dataMovimento.length() < 10) ttMov.dataMovimento = "0"+ttMov.dataMovimento;  
+            logger.logInfo("2.ttMov.dataMovimento: "+ ttMov.dataMovimento);
  
 
 			// #DOCUMENTACAO

@@ -3336,7 +3336,11 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				(cabecalhoPlanilha.contains("SISTEMA DE COOPERATIVAS DE CREDITO DO BRASIL") || cabecalhoPlanilha.contains("SISTEMA DE COOPERATIVAS DE CRADITO DO BRASIL") || cabecalhoPlanilha.contains("SERVICOS FINANCEIROS DO SICOOB") ||
 				cabecalhoPlanilha.contains("SISTEMA|DE|COOPERATIVAS|DE|CREDITO|DO|BRASIL") || cabecalhoPlanilha.contains("SERVICOS|FINANCEIROS|DO|SICOOB")))
 				//Padrao 4 - 2311-021100
-				|| (cabecalhoPlanilha.contains("BANCO:") && cabecalhoPlanilha.contains("PERIODO DE") && cabecalhoPlanilha.contains("SALDO") && cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS") )) {
+				|| (cabecalhoPlanilha.contains("BANCO:") && cabecalhoPlanilha.contains("PERIODO DE") && cabecalhoPlanilha.contains("SALDO") && cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS") )
+				
+				|| (arquivoCompleto.contains("SALDO EM CONTA CORRENTE(+):") && 
+					arquivoCompleto.contains("SALDO EM CONTA INVESTIMENTO(+):") &&
+					arquivoCompleto.contains("08007250996"))) {
 			
 			// //logger.logInfoInfo("Entra na validacao do Sicoob Pdf");
 			JSONObject jDados = new JSONObject();
