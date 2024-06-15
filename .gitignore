@@ -23,3 +23,4 @@ scriptlib/io_contabil/*
 !scriptlib/io_contabil/GeraArquivo.script
 !scriptlib/io_contabil/TemplateUtils.script
 !scriptlib/io_contabil/Util.script
+!scriptlib/io_contabil/__Worker.script

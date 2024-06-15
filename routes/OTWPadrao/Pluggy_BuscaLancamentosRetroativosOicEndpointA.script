@@ -101,6 +101,9 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
     propsOtt.load("contabil/Ottimizza/contabil.properties");
 
+    // criaa hash mapp dos id lode de erro
+    StringBuilder deu_erro = new StringBuilder();
+    StringBuilder deu_ok = new StringBuilder();
 
 	postStatus("S11", "Ottimizza", "Pluggy_Retroativo", "Nada Pendente", "Sem Arquivo Para Processar", "Roda do S1", logger);
 
@@ -331,11 +334,20 @@ public JSONArray run(InoutLogger logger) throws Exception {
                     }
                 }
 				
-				// 
+				// TRATA ERRO PROCESSAMENTO 
 				if (errorAccount != 2) {
-					LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
-					atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId("ott_oud_id"+lote), apiWeb, logger);
-				}
+                    /**
+                     *  Tratativa que gera mensagem para todos os arquivos processados descontinuada 15/06/2024
+                     * 
+                     *  LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+				     *  atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId("ott_oud_id"+lote), apiWeb, logger);
+                     * 
+                     */
+                    deu_erro.append("ott_oud_id"+lote).append(";");
+				}else{
+                    deu_ok.append("ott_oud_id"+lote).append(";");
+                }
+
             }
             catch(Exception ex) {
                 logger.logInfo("ERROR GET TRANSACTIONS -> "+ex.getMessage());
@@ -377,6 +389,18 @@ public JSONArray run(InoutLogger logger) throws Exception {
 	}
     if (dbPartner	 != null) dbPartner.closeConnection();
     // if (dbFila != null) dbFila.closeConnection();
+
+    if(!deu_erro.toString().equals("")){ 
+        for(String process : deu_erro.toString().split(";")){
+            logger.logInfo("LOGDEAVALIACAO: " + process);
+            // se nao conter em deu_ok 
+            if(!deu_ok.toString().contains(process)){
+                logger.logInfo("DENTRO_IF: " + process);
+                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId(process), apiWeb, logger);
+            }
+        }
+    }
 
     return new JSONArray();
 }
