@@ -4335,6 +4335,23 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
+				
+		if ((arquivoCompleto.contains("0800 761 6196") || arquivoCompleto.contains("08007616196") || 
+			 arquivoCompleto.contains("0800761 6196") || arquivoCompleto.contains("0800 7616196")) &&
+			arquivoCompleto.contains("SALDO TOTAL EM") &&
+			arquivoCompleto.contains("LANCAMENTOS FUTUROS (-)") &&
+			arquivoCompleto.contains("SALDO DISPONIVEL (=)")){
+
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("PADRAO", "002");
+			jDados.put("TIPOPLANILHA", "EXTRATO-SULCREDI");
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			readExtratoECartao("readExtratoSulcrediPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
 	}
 	
 	////// FATURA CARTAO CREDITO SICOOB PDF //////////////////////////////////////////////////////////////////

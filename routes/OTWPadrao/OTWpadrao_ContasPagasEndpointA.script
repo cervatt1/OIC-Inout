@@ -1140,7 +1140,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									}
 									
 									//if(templateUtil.validaPlanilhaPadrao(tipoLancamento, memFile)) break;
-									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
+									 logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
 									
  								   
@@ -6258,14 +6258,14 @@ public JSONObject getRoteiro() {
     js.put("CnpjContabilidade", "35.471.669/0001-46");
     js.put("CnpjEmpresa", "12.024.938/0001-20");
     js.put("fornecedor", "1");
-    js.put("dataMovimento", "-1");
-    js.put("portador", "9");
+    js.put("dataMovimento", "0");
+    js.put("portador", "3");
     js.put("documentoNF", "3");
-    js.put("valorDocumento", "-1");
-    js.put("valorJuros", "6");
-    js.put("valorDesconto", "7");
-    js.put("valorMulta", "");
-    js.put("valorPagamento", "8");
+    js.put("valorDocumento", "2");
+    js.put("valorJuros", "-1");
+    js.put("valorDesconto", "-1");
+    js.put("valorMulta", "-1");
+    js.put("valorPagamento", "-1");
     js.put("complemento01", "3");
     js.put("complemento02", "3");
     js.put("complemento03", "");
@@ -6385,15 +6385,15 @@ public JSONObject getRoteiroZZPADRAOOTTIMIZZAPAG1() {
     js.put("usarComplementoParcela", "NAO USAR");
     js.put("fornecedor", "2");
     js.put("dataMovimento", "0");
-    js.put("portador", "6");
-    js.put("documentoNF", "1");
-    js.put("valorDocumento", "4");
-    js.put("valorJuros", "");
-    js.put("valorDesconto", "");
-    js.put("valorMulta", "");
-    js.put("valorPagamento", "5");
+    js.put("portador", "3");
+    js.put("documentoNF", "3");
+    js.put("valorDocumento", "2");
+    js.put("valorJuros", "-1");
+    js.put("valorDesconto", "-1");
+    js.put("valorMulta", "-1");
+    js.put("valorPagamento", "-1");
     js.put("complemento01", "3");
-    js.put("complemento02", "7");
+    js.put("complemento02", "-1");
     js.put("complemento03", "");
     js.put("complemento04", "");
     js.put("complemento05", "");
@@ -14678,7 +14678,7 @@ public boolean readExtratoBancoDoBrasilFinanciamentos(MemoryFile memFile, String
 
 public boolean readExtratoBancoDoBrasilPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
 	
-	logger.logDebug("BB PDF 0 ---------------------------");
+	logger.logDebug("BBPDF");
 	
 	JSONObject extratoEmpresa = new JSONObject();
 
@@ -14735,7 +14735,7 @@ public boolean readExtratoBancoDoBrasilPDF(MemoryFile memFile, String nomePortad
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
-		//logger.logInfo("NA = "+nomeArquivo.toUpperCase());
+		logger.logInfo("NA = "+nomeArquivo.toUpperCase());
 		// naoLeMais = false; //Nao era dado false antes da condicao para true do naoLeMais, fazendo o codigo nao ler o resto que era necessario
         // if (line.replaceAll(" ", "").contains("999") && line.replaceAll(" ", "").contains("SALDO") && !line.contains("ANTERIOR")) naoLeMais = true;
         if (line.replaceAll(" ", "").contains("999") && line.replaceAll(" ", "").contains("SALDO") && !line.contains("ANTERIOR")) continue;
@@ -22893,6 +22893,9 @@ public boolean readExtratoSulcrediPDF(MemoryFile memFile, String nomePortador, J
     String strValorDocumento = "";
     String contLinhaExtrato  = "";
 	String anoData			 = "";
+	String tipoPadrao		 = "";
+	String tipoLancamento	 = "";
+	String tipoPlanilha		 = "";
 
 	boolean naoLeMais = false;
 
@@ -22903,61 +22906,108 @@ public boolean readExtratoSulcrediPDF(MemoryFile memFile, String nomePortador, J
 	int inomeOrigem		= 0;
 	int ivalorDocumento	= 1;
 	int icomplemento02  = 4;
+	int idebitoCredito  = -1;
+	int inomePortador   = -1;
 
     nomePortador = nomePortador.replaceAll("\\?","");
     complemento01 = nomePortador.replaceAll("\\?","");
 
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA");
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO");
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
+    if(jDados.has("TIPOPLANILHA")) tipoPlanilha 	= jDados.optString("TIPOPLANILHA");
+    if(jDados.has("PADRAO")) tipoPadrao 	= jDados.optString("PADRAO");
 
     while (memFile.hasNextLine()) {
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		if(nomeArquivo.contains(".csv") && line.contains(";") && !line.contains("\\|")) memFile.setFieldSeparator(";");	
-
-		if(memFile.getFieldsSize() < 5) continue;
-		if(line.startsWith("SALDO")) continue;
-
 		try {
+			if(tipoPadrao.equals("")){	
+				if(nomeArquivo.contains(".csv") && line.contains(";") && !line.contains("\\|")) memFile.setFieldSeparator(";");	
 
-			try {
-				Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
-				dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
-				dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-			} catch (Exception dt1) {
+				if(memFile.getFieldsSize() < 5) continue;
+				if(line.startsWith("SALDO")) continue;
+
 				try {
-					Date dt = memFile.getDateField(idataMovimento);
+					Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
 					dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
 					dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-				} catch (Exception dt2) {
+				} catch (Exception dt1) {
 					try {
-					    String dataString = "";
-						dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
-						Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+						Date dt = memFile.getDateField(idataMovimento);
 						dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
 						dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-					} catch (Exception dt2) { dataMovimento = ""; }
+					} catch (Exception dt2) {
+						try {
+							String dataString = "";
+							dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
+							Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
+							dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
+							dataLote = DateUtil.dateToString(dt, "yyyy-MM");
+						} catch (Exception dt2) { dataMovimento = ""; }
+					}
 				}
+
+				if (dataMovimento.equals("")) continue;
+
+				try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
+				catch (Exception vlrd) { valorDocumento = 0; }
+
+				debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento);
+				if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
+				if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
+
+				valorDocumento = Math.abs(valorDocumento);
+
+				if (valorDocumento == 0) continue;
+
+				nomeOrigem = "";
+				nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+
+				complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
 			}
 
-			if (dataMovimento.equals("")) continue;
+			if(tipoPadrao.equals("002")){
+				idataMovimento	= 0;
+				inomePortador	= 0;
+				inomeOrigem		= 1;
+				ivalorDocumento	= 3;
+				idebitoCredito	= 3;
+				/**
+				 * captura nomePortador
+				 */
+				if( memFile.getStringFieldRemoveEspCharsUpper(inomePortador).contains("CONTA:") && nomePortador.equals("") ){
+					nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "CONTA:").trim();
+					complemento01 = nomePortador;
+				}
+			
+				try{
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));			
+				}catch(Exception e){
+					logger.logInfo("ERRO DATA: "+ e.getMessage());
+				}
+				if(dataMovimento.equals("")) continue;
 
-            try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
-            catch (Exception vlrd) { valorDocumento = 0; }
+				try {
+					valorDocumento = memFile.getDoubleField(ivalorDocumento);
+				} catch (Exception vlrj) {
+					valorDocumento = 0;
+				}
 
-			debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento);
-            if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
-            if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
+				debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(idebitoCredito);
+				if (debitoCreditoAux.contains("-")) {
+					debitoCredito = "EXTRATO-DEBITO";
+				}else{
+					debitoCredito = "EXTRATO-CREDITO";
+				}
 
-			valorDocumento = Math.abs(valorDocumento);
+				valorDocumento = Math.abs(valorDocumento);
+				if(valorDocumento == 0) continue;
 
-            if (valorDocumento == 0) continue;
-
-            nomeOrigem = "";
-            nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
-
-			complemento02 = memFile.getStringFieldRemoveEspCharsUpper(icomplemento02);
+				nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).trim();
+				complemento03 = nomeOrigem;
+			}
 
 			contLinhaExtrato = StringUtil.leftPad(String.valueOf(memFile.getCurrentIndex()), 05, "0");
 
