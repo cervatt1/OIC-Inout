@@ -1,0 +1,63 @@
+import javax.xml.namespace.QName;
+{import: io_contabil.Util};
+{import: io_contabil.Database};
+{import: io_contabil.Regras};
+{import: io_contabil.Cloud};
+{import: io_contabil.DatabasePostgreSQL};
+
+public JSONArray run(InoutLogger logger) throws Exception {
+
+    JSONArray records = new JSONArray();
+
+    try {
+        
+        
+
+        ////////////////////////////////////////////////////////////////////
+        // Obtem conexao no Salesforce /////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+
+        ConnectorConfig config = new ConnectorConfig();
+        config.setUsername("adm@ottimizza.com.br");
+        config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
+        config.setTraceMessage(true);
+        PartnerConnection connection = Connector.newConnection(config);
+
+        ////////////////////////////////////////////////////////////////////
+        // Obtem Contabilidades ////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+
+        Date hoje  = new Date();
+        Date ontem = subDaysToDate(hoje, 1);
+        QueryResult qres1 = null;
+
+        //Query statements
+        String sql1= "SELECT Chave_OIC_Integracao__c, ID_Externo__c FROM Roteiros__c WHERE Perdeu_Ontem__c = TRUE";
+        
+        //Query execution
+        try {
+          qres1 = connection.query(sql1);
+        }catch(Exception ex) {
+          logger.logInfo("ERROR TRYING TO SELECT -> "+ex.getMessage());
+        }
+
+        //Query iteration
+        if (qres1 != null) {
+          for(int i = 0; i < qres1.getSize(); i++) {
+            SObject sobj1 = qres1.getRecords()[i];
+            JSONObject registroEmpresa = new JSONObject();
+            registroEmpresa.put("ID_Externo__c", sobj1.getField("ID_Externo__c").toString());
+            registroEmpresa.put("Chave_OIC_Integracao__c", "old_"+sobj1.getField("Chave_OIC_Integracao__c"));
+            registroEmpresa.put("Data__c", DateUtil.dateToString(hoje, "dd/MM/yyyy"));
+             records.put(registroEmpresa);
+          }
+        }
+        
+       
+
+    } catch(Exception e) {
+      logger.logInfo("ERROR TRYING TO CONNECT"+e.getMessage());
+    }
+
+    return records;
+}

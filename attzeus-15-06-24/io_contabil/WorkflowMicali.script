@@ -28,14 +28,6 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 	config.setTraceMessage(false);
 	logger.logInfo("API SALES SHR: runWorkflowEndpointA WorkflowUnico 1");
 	
-    String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
-
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
@@ -85,7 +77,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 		
 		int idFila = 0;
 		// logger.logInfo("Acima do postStatus");
-		postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 		JSONObject objetoFila = buscaDiretorioArquivoProcessado(dbIOContOtt, logger);
         if (objetoFila.has("DIRETORIO")) {
@@ -324,7 +316,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA pagar = " + empresa + " | " + fl.getName());
                             
-                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -753,6 +745,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
                                                             if (FileUtil.dirHasFiles(diretoriArquivos)) {
                                                                 for (File fileDePara: filesArquivos) {
+																	// logger.logInfo("FLDPGN " + fileDePara.getName());
                                                                     
 
                                                                     if (!fileDePara.getName().toUpperCase().contains("_ID")) continue;
@@ -765,7 +758,6 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
                                                                     if (!idLoteFila.equals(idfileDePara)) continue;
                                                                     
-																	logger.logInfo("FLDPGN " + fileDePara.getName());
 
                                                                     LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 
@@ -801,7 +793,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -977,7 +969,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA receber = " + empresa);
                             
-                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -1423,7 +1415,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1796,8 +1788,6 @@ public void verificaPendenciasGeraArquivo(String nomeContabilidade, String proto
 		.param("LOTE_ENCERRADO")
 		.param("%"+protocolo+"%")
 		.query();
-		
-		logger.logInfo("PROT " + protocolo + " | " + recs.length());
 
 		// Verificar pendencias do lote
 		for (int i = 0; i < recs.length(); i++) {
@@ -1863,10 +1853,6 @@ public void verificaPendenciasGeraArquivo(String nomeContabilidade, String proto
 				js.put("HISTORICO", rec1.optString("HISTORICO"));
 
 				records.put(js);
-				
-				logger.logInfo("LALA " + js.toString());
-				
-				
 
 				try {
 					dbIOCont.delete("IO_MOVIMENTO")
@@ -1882,11 +1868,7 @@ public void verificaPendenciasGeraArquivo(String nomeContabilidade, String proto
 		} // End -> For LOTE.
 		
 		if (records.length() > 0) {
-			try {
-				GeraArquivoPadrao(records, logger);
-			} catch (Exception e) {
-				logger.logInfo("testt " + e.getMessage());
-			}
+			GeraArquivoPadrao(records, logger);
 		}
 	} catch (Exception eSql1) {
 		logger.logError("EndpointB: ERROR SELECT LOTE IO_MOVIMENTO", eSql1);
@@ -1945,7 +1927,7 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		StringBuilder codigoRoteiro = new StringBuilder();
 		
 		FileReader reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualEndpointA.script");
-		if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
+		// if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
 		try {
 			reader.openFile();
 			String line = "";
@@ -1990,11 +1972,8 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 						lineRoteiro = readerRoteiro.nextLine();
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
-						
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -2016,23 +1995,17 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		if (!codigoRoteiro.toString().equals("")) {
 		
 			empresaProperties = "";
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
-			
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);			
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
-			// logger.logInfo("RR " + codigoExtratos);
-			
-			codigoRoteiro.append("\r\n");
 			
 		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);			
+			writer.writeNewFile(codigoRoteiro.toString());			
 
 		}		
  	}
@@ -2107,10 +2080,7 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 						// Processa a linha
 						// ....
 						
-						if (lineRoteiro.contains("public boolean read")) break;
-						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -2143,100 +2113,22 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 		if (!codigoRoteiro.toString().equals("")) {
 		
 			empresaProperties = "";
-			
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);		
-			
-			// FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			// String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia_especifico.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
-			codigoRoteiro.append("\r\n");
-			
-		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);	
+			writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+			writer.writeNewFile(codigoRoteiro.toString());	
 		}		
  	}
 	catch (Exception xx) {}
 	return;
 }
-
-public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
-
-	StringBuilder sb = new StringBuilder();
-	
-	String linha = "";
-	String listaPadroes = "";
-	String listaPadroesLidos = "";
-	
-    try {
-        readerRoteiro.openFile();
-	while(readerRoteiro.hasNextLine()) {
-		// Le a proxima linha do arquivo
-		linha = readerRoteiro.nextLine();
-		if (linha.contains("Planilhas_Padroes")) {
-			// logger.logInfo("PEPE " + linha);
-			listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
-			break;
-		}
-	}
-
-	if (!listaPadroes.equals("")) {
-		String [] padroes = listaPadroes.toString().replaceAll(" ", "").split(";");
-		String rn = "\r\n";
-		
-		for(int kk = 0; kk < padroes.length;  kk++){
-			
-			if (listaPadroesLidos.contains(padroes[kk])) continue;
-			
-			listaPadroesLidos += ";"+padroes[kk];
-			
-			File toRead;
-				toRead = new File(String.format(
-					"c:/inout/scriptlib/io_contabil/oicOnDemand/%s.script",
-					padroes[kk].trim()
-				));
-            /*else {
-				try {
-					toRead = new File(String.format(
-						"c:/inout/scriptlib/io_contabil/oicOnDemand/empty/%s.script",
-						padroes[kk].trim()
-					));
-				} catch (Exception e) {
-					continue;
-				}
-			}*/
-			
-			try {
-				FileReader reader = new FileReader(toRead);		
-
-				reader.openFile();
-				sb.append(rn);
-				sb.append(reader.readAll());
-				/*while (reader.hasNextLine()) {
-					String line = reader.nextLine();
-					sb.append(line);
-				}*/
-				sb.append(rn);
-				
-				
-			} catch (Exception to) {
-				//logger.logError("Erro lendo arquivo padrao -> "+padroes[kk]);
-				//logger.logError("Erro -> "+to.getMessage());
-			}
-		}
-	}
-    } catch (Exception e) {}
-	return sb;
-}
-
 
 
 public void criaAvisoErroLayout (String arquivo,InoutLogger logger) {
@@ -2621,8 +2513,6 @@ public boolean converteuPDF(String protocolo_id, LancamentosApi apiWeb, InoutLog
 	String diretorio = "C:/Conversor/Pdf";
 	File file2 = new File(diretorio);
 	
-	boolean achouCSV = false;
-	
 	File [] files = file2.listFiles();
 	// logger.logDebug("ACHANDO");
 	
@@ -2633,10 +2523,10 @@ public boolean converteuPDF(String protocolo_id, LancamentosApi apiWeb, InoutLog
 		for (File fl: files) {
 			if (fl.getAbsolutePath().contains(protocolo_id)) {
 				// logger.logInfo("ACHOUID " + fl.getAbsolutePath());
-				// if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".CSV") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
-					// logger.logInfo("ACHOUCSV " + fl.getAbsolutePath());
-					// return true;
-				// }
+				if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".CSV") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
+					// logger.logDebug("ACHOUCSV " + fl.getAbsolutePath());
+					return true;
+				}
 				//2310-020397 adicionado o if abaixo para nao travar quando houver .pdferr
 				if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".PDFERR") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
 					// logger.logDebug("ACHOUCSV " + fl.getAbsolutePath());
@@ -2647,11 +2537,7 @@ public boolean converteuPDF(String protocolo_id, LancamentosApi apiWeb, InoutLog
 					}
 					return true;
 				}
-				if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".PDF") && !fl.getAbsolutePath().toUpperCase().contains(".CSV") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
-					// logger.logDebug("ACHOUCSV " + fl.getAbsolutePath());
-					
-					return false;
-				}
+				return false;
 			}
 		}
 	}
@@ -3052,7 +2938,7 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 
 
     } catch (Exception e) {
-        logger.logInfo("*** por algum motivo cai no catch geral da rota -> "+e.getMessage());
+        logger.logDebug("*** por algum motivo cai no catch geral da rota -> "+e.getMessage());
     } finally {
         if (db != null) db.closeConnection();
 		

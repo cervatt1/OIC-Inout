@@ -12,47 +12,50 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 ////////////////////  ////   WORKFLOW  OTW (Endpoint A)    ////  ////////////////
 /////////////////////////////////////////////////////////////////////////////////
 JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
-    JSONArray records    = new JSONArray();
+	JSONArray records    = new JSONArray();
+    DataBase dbIOContOtt = null;
+	// DBPostgreSQL dbFila = null;
+    try {
+	
+	//logger.logInfo("Iniciou aq");
 
     SysProperties routesProperties = SysProperties.getInstance();
     SysProperties contabilidadesAtivas = SysProperties.getInstance();
     SysProperties props  = SysProperties.getInstance();
     SysProperties props2 = SysProperties.getInstance();
 	SysProperties propsOtt = SysProperties.getInstance();
-
-	propsOtt.load("contabil/Ottimizza/contabil.properties");
-	
+	try {
+		propsOtt.load("contabil/Ottimizza/contabil.properties");
+	} catch (Exception e) {
+		logger.logError("Problema ao carregar propriedades Ottimizza " + e.getMessage());
+	}
 	ConnectorConfig config = new ConnectorConfig();
+
 	config.setUsername("fabrica@ottimizza.com.br");
 	config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
+	//config.setUsername("suporte@ottimizza.com.br");
+	//config.setPassword("ottimizza@123qhhKqbBI0kfkInUku3C5q54L");
 	config.setTraceMessage(false);
-	logger.logInfo("API SALES SHR: runWorkflowEndpointA WorkflowUnico 1");
+	// logger.logInfo("API SALES SHR: runWorkflowEndpointA WorkflowUnico 1");
 	
-    String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
-
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
 
 	double tempoInicial = System.currentTimeMillis();
 	boolean rodouRota = false;
-
+	
     String arquivoGrande = "";
     String jSdir = "";
     String operacao = "";
 
     boolean converteu = false;
+    boolean converteuXlsx = false;
     boolean oicEmpresaNao = false;
 	boolean naoGerouDepara = true;
+	boolean temConversorXlsx = false;
 	boolean gerouArquivoFinal = false;
 
-    DataBase dbIOContOtt = null;
     double sizeLimit = 4;               //tamanho maximo processavel                        //-
     // if (contabilidade.toUpperCase().contains("TECOLMG")) sizeLimit = 40; // #Fabrica(2019-07-24) @Becker
     sizeLimit = sizeLimit * (Math.pow(1024,2)); //MiB                                       //-
@@ -70,24 +73,38 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
     try {
         // tenta carregar propriedades de rotas.
         try { routesProperties.load(String.format("/contabil/ottimizza/routes.properties", RouteEngine.INOUT_HOME));
-            } catch (Exception ex) { logger.logDebug("Nao foi poss?iel ler arquivo de propriedades.");
+            } catch (Exception ex) { logger.logError("Nao foi possivel ler arquivo de propriedades.");
             }
 		// tenta carregar propriedades de contabilidades Ativas.
         try { contabilidadesAtivas.load(String.format("/contabil/ottimizza/contabilidadesativas.properties", RouteEngine.INOUT_HOME));
-            } catch (Exception ex) { logger.logDebug("Nao foi poss?iel ler arquivo de propriedades.");
+            } catch (Exception ex) { logger.logError("Nao foi possivel ler arquivo de propriedades.");
             }
 
         File dirInoutContabil = new File(String.format("%s/contabil/", RouteEngine.INOUT_HOME));
 
 		if (dbIOContOtt == null) {
+			try {
 			dbIOContOtt = connectIOContabil(propsOtt, logger);
+			} catch (Exception e) {
+				logger.logInfo("Erro ao contectar no banco da ottimizza" + e.getMessage());
+				return new JSONArray();
+			}
 		}
 		
+		/*DatabasePostgreSQL postgreFila = new DatabasePostgreSQL();
+		
+		try {
+			dbFila = postgreFila.connectDatabase("fila-workers", logger);
+		} catch (Exception e) {
+			logger.logError("Erro ao conextar fila-workers " + e.getMessage());
+			return new JSONArray();
+		}*/
 		int idFila = 0;
-		// logger.logInfo("Acima do postStatus");
-		postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		logger.logInfo("Acima do postStatus");
+		postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), logger);
 
 		JSONObject objetoFila = buscaDiretorioArquivoProcessado(dbIOContOtt, logger);
+		// JSONObject objetoFila = buscaDiretorioArquivoProcessado(dbFila, logger);
         if (objetoFila.has("DIRETORIO")) {
 			diretorioArquivo = objetoFila.optString("DIRETORIO");
 			idFila = objetoFila.optInt("ID");
@@ -101,14 +118,18 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 				// protocoloPrincipal = cutString(objetoFila.optString("NOMEARQUIVO").toUpperCase(), "_ID", "_");
 			// }
 		} else {
-			// logger.logInfo("Tentou ler duplicado");
+			if (dbIOContOtt != null) {
+				dbIOContOtt.closeConnection();
+				dbIOContOtt = null;
+			}
+			logger.logInfo("Nada para Pegar");
 			return new JSONArray();
 		}
 		// if (true) return new JSONArray();
   
 
 		logger.logInfo("LENDO ARQV " + diretorioArquivo + " | " + idFila);
-		
+		LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 		// if (diretorioArquivo.toUpperCase().contains("MICALICONTABIL")) return records;
 
 		if (!diretorioArquivo.equals("")) {
@@ -144,15 +165,15 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
                 String oicContabil  = props.get("OIC_LIBERADO");
 
-                String diretorioConversorExcel = "C:/Conversor/Excel";
-                File file2 = new File(diretorioConversorExcel);
+                // String diretorioConversorExcel = "C:/Conversor/Excel";
+                // File file2 = new File(diretorioConversorExcel);
                 
-                File[] files = file2.listFiles();
+                // File[] files = file2.listFiles();
 
                 String oicEmpresa = props.get(empresa.substring(0,empresa.indexOf("_#")).toUpperCase() + "_LIBERA_OIC");
 
 
-                if (FileUtil.dirHasFiles(diretorioConversorExcel)) {
+               /* if (FileUtil.dirHasFiles(diretorioConversorExcel)) {
                     for (File fl: files) {
                         if (fl.getAbsolutePath().contains("aba[") && (fl.getAbsolutePath().toUpperCase().contains("PAGAR") || fl.getAbsolutePath().toUpperCase().contains("RECEBER")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().contains("_ancora_") && fl.length() > 0){
                             String diretorioArquivoCsv = "C:/inout/contabil/";
@@ -224,7 +245,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                         }
                     }
                 }
-
+*/
 
                 if (!contabilidade.equals("")) {
                     ///////////////////////////////////////////////////////////
@@ -324,7 +345,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA pagar = " + empresa + " | " + fl.getName());
                             
-                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), logger);
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -341,6 +362,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     }
                                     catch (Exception xx) {
 										logger.logInfo("Quebrou 1 " + xx.getMessage());
+										return new JSONArray();
 									}
                                     
                                     try {
@@ -354,6 +376,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     }
                                     catch (Exception xx) {
 										logger.logInfo("Quebrou 2 " + xx.getMessage());
+										return new JSONArray();
 									}
                                 }
                                 
@@ -370,9 +393,10 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     }
                                     catch (Exception xx) {
 										logger.logInfo("Quebrou 3 " + xx.getMessage());
+										return new JSONArray();
 									}
                                 }
-								// if (!fl.getName().toUpperCase().equals("PROCESSADO")) insereLog(dbIOContOtt, diretorioArquivo, INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), fl.getName(), logger);
+								if (!fl.getName().toUpperCase().equals("PROCESSADO")) insereLog(dbIOContOtt, diretorioArquivo, INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), fl.getName(), logger);
                             }
                         }
 
@@ -380,20 +404,22 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                         // FINAL renomeia arquivos com extens?o .XLSX 
 						
 						logger.logInfo("ANTES FOR EQUIPE FECHAMENTO");
-
-
-                        files = file.listFiles();
+						
+						file = new File(diretorioArquivo);
+						File[] files = file.listFiles();
 
                         if (FileUtil.dirHasFiles(diretorioArquivo)) {
                             for (File fl: files) {
                                 
-                                String rodaConversor = props.get(empresa.toUpperCase() + "_EQUIPE_FECHAMENTO");
+                                String rodaConversor = props.get(empresa.substring(0,empresa.indexOf("_#")).toUpperCase() + "_EQUIPE_FECHAMENTO");
+								String[] rodaConversorAux = rodaConversor.split(",");
                                 //Conversor
                                 if (rodaConversor != null) {
-                                    if (rodaConversor.contains(",") && rodaConversor.toUpperCase().contains("CONVERTE") && !fl.getAbsolutePath().toUpperCase().contains(".CSV")
+                                    if (rodaConversor.contains(",") && ((rodaConversor.toUpperCase().contains("CONVERTE") && rodaConversor.contains("XLSX")) || rodaConversorAux[1].toUpperCase().equals("TRUE")) && !fl.getAbsolutePath().toUpperCase().contains(".CSV")
                                         && fl.getAbsolutePath().toUpperCase().contains(".XLSX")) {
                                             
-                                        if (fl.getAbsolutePath().toUpperCase().contains(".XLSX") && rodaConversor.contains("XLSX")) {
+                                        // if (fl.getAbsolutePath().toUpperCase().contains(".XLSX") && rodaConversor.contains("XLSX")) {
+                                        if (fl.getAbsolutePath().toUpperCase().contains(".XLSX")) {
                                             File arquivoDeploy  = new File("C:/Conversor/Excel/" + "pagar_" + contabilidade + "_" + empresa + "_ancora_" + cutString(fl.getAbsolutePath(), fl.getAbsolutePath().replaceAll("\\\\", "/").lastIndexOf("/")+1));
                                             
                                             try { FileUtil.copyFolder(fl, arquivoDeploy);}
@@ -402,7 +428,8 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                             try { 
                                                 FileUtil.deleteFile(fl);
                                             } catch (Exception XX) {} 
-                                                
+                                            
+											temConversorXlsx = true;
                                             continue;
                                         }
                                     }
@@ -441,30 +468,42 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     continue;
                                 }
                                 
-                                arquivoGrande = verificaArquivoGrande(fl, sizeLimit, "PAG");
+                                if (arquivoGrande.equals("")) arquivoGrande = verificaArquivoGrande(fl, sizeLimit, "PAG");
                                 
-                                /*
-                                else {
-                                
-                                    double sizeBig = (Math.pow(1024,2)); //MiB  
+									/*
+									else {
+									
+										double sizeBig = (Math.pow(1024,2)); //MiB  
 
-                                    if(fl.length() >= sizeBig) {
-                                        String filenameGrande = fl.getAbsolutePath();
-                                        filenameGrande = filenameGrande.replaceAll("\\\\", "/");
-                                        if (!filenameGrande.endsWith("/Processado")) {
-                                            if (!FileUtil.fileExists(diretorio + "/Processado/Grande")) {
-                                                FileUtil.mkDir(diretorio + "/Processado/Grande");
-                                            }
-                                            FileUtil.moveToDir(filenameGrande, diretorio + "/Processado/Grande");
-                                        }
-                                    }
-                                }*/
+										if(fl.length() >= sizeBig) {
+											String filenameGrande = fl.getAbsolutePath();
+											filenameGrande = filenameGrande.replaceAll("\\\\", "/");
+											if (!filenameGrande.endsWith("/Processado")) {
+												if (!FileUtil.fileExists(diretorio + "/Processado/Grande")) {
+													FileUtil.mkDir(diretorio + "/Processado/Grande");
+												}
+												FileUtil.moveToDir(filenameGrande, diretorio + "/Processado/Grande");
+											}
+										}
+									}*/
                                         
                             }
+							
+							if (temConversorXlsx) {
+								converteuXlsx = converteuXlsx(protocoloPrincipal, apiWeb, logger);
+								while (!converteuXlsx) {
+									converteuXlsx = converteuXlsx(protocoloPrincipal, apiWeb, logger);
+									
+								}
+								buscaConversorXlsx(protocoloPrincipal, apiWeb, logger);
+							}
+							
+							file = new File(diretorioArquivo);
+							files = file.listFiles();
 
                             for (File fl: files) {
+								if (fl.getName().equals("Processado")) continue;
                                 if (arquivoGrande.equals("")) {
-									if (fl.getName().equals("Processado")) continue;
 									
 									atualizaLog(protocoloPrincipal, "DATA_INICIO_PROCESSAMENTO", dbIOContOtt, logger);
 									
@@ -489,7 +528,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                             
                                             if (fl.getName().toUpperCase().contains("_ID")){
                         
-                                                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                 // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                 // String protocolo_id = cutString(fl.getName().toUpperCase(), "_ID", "_");
                                                 String protocolo_id = getProtocoloId(fl.getName());
@@ -502,9 +541,13 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
                                         } else if(fl.isFile() && oicContabil.equals("SIM")){
 											
-											logger.logInfo("Protocolos dentro da leitura " + protocoloPrincipal + " | " + getProtocoloId(fl.getName()));
+											logger.logInfo("Protocolos dentro da leitura " + protocoloPrincipal + " | " + getProtocoloId(fl.getName()) + " | " + protocoloAnterior);
 											
-											if (!protocoloPrincipal.equals(getProtocoloId(fl.getName())) || protocoloPrincipal.equals(protocoloAnterior)) break;
+											if (/*!protocoloPrincipal.equals(getProtocoloId(fl.getName())) ||*/ protocoloPrincipal.equals(protocoloAnterior)){
+												logger.logInfo("BREAK - WORKER - 520");
+												break;
+											} 
+											if (!protocoloPrincipal.equals(getProtocoloId(fl.getName()))) continue;
 											
 											logger.logInfo("Comecou o processo pagas");
 
@@ -525,7 +568,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                 // logger.logInfo("TESTANDODOO " + fl.getName() + " | " + extensaoArquivo.toUpperCase());
                                                 //Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - In?cio
                                                 if (fl.getName().toUpperCase().contains("_ID")) {
-                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                     // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                     // String protocolo_id = cutString(fl.getName().toUpperCase(), "_ID", "_");
                                                     String protocolo_id = getProtocoloId(fl.getName());
@@ -534,7 +577,12 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                     while (!converteu) {
                                                         converteu = converteuPDF(protocolo_id, apiWeb, logger);
                                                     }
+													
+													String rodaConversor = props.get(empresa.toUpperCase() + "_EQUIPE_FECHAMENTO");
+													
+													
                                                 }
+												
                                                 
                                                 try{
                                                 
@@ -661,7 +709,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         String nomeArquivoApagado = cutString(fl.getName().toUpperCase(), "_ID");
                                                                         nomeArquivoApagado = cutString(nomeArquivoApagado, "_", nomeArquivoApagado.lastIndexOf("."));
                                                                         boolean continuaConversor = false;
-                                                                        LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                        // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                                         
                                                                         // if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
                                                                             String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
@@ -705,7 +753,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                     if (!idLoteFila.equals(idfileDePara)) continue;
 
 
-                                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 
                                                                     // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                                     if(fl.getName().toUpperCase().contains("_ID")) {
@@ -729,7 +777,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 														
 														
 														if (!rodouRota) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "NAOLEULICENCA", "/inout/contabil/"+contabilidade+"/"+empresa+"/DePara/", getProtocoloId(fl.getName()), apiWeb, logger);
 															return records;
 														}
@@ -767,7 +815,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                     
 																	logger.logInfo("FLDPGN " + fileDePara.getName());
 
-                                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 
                                                                     JSONObject jBucket = new JSONObject();
                                                                     jBucket.put("cnpjContabilidade",	cnpjContabilidade);
@@ -801,7 +849,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -826,22 +874,30 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
 
                                                                         }
+																		
+																		if(fl.getName().toUpperCase().contains("_ID")) gerouArquivoFinal = true;
 
                                                                         // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
-                                                                        if(fl.getName().toUpperCase().contains("_ID")) {
+                                                                        /*if(fl.getName().toUpperCase().contains("_ID")) {
                                                                             String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
                                                                             String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
 																			
 																			gerouArquivoFinal = true;
                                                                         
-                                                                        } 
+                                                                        } */
                                                                     }
 
                                                                 }
 
                                                             }
-															if (gerouArquivoFinal) return records;
-                                                        }
+															if (gerouArquivoFinal) {
+																// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+																String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocoloPrincipal, "", logger);
+																String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
+																if (diretorioArquivo.toUpperCase().contains("MARLIAN")) logger.logInfo("Gerou o arquivo final");
+																return records;
+															}
+														}
                                                         catch (Exception xx) {}
                                                     }
 
@@ -868,7 +924,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                         writerErro.writeNewFile(planilhaErro.toString() + "<<>>" + antesRodar + "<<>>" + depoisRodar);
 														
 														if (fl.getName().contains("_ID")) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "CAIRNOELSE", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 															return records;
 														}
@@ -885,7 +941,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                     
                                                     if (FileUtil.fileExists(dirName + empresa + "/DePara" + "/02--Etapa 2 de 4--PAGAR.status")) {
 														if (fl.getName().contains("_ID")) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "CAIRNOELSE", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 															return records;
 														}
@@ -930,7 +986,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     filename = filename.replaceAll("\\\\", "/");
                                     
                                     if (arquivoGrande.toUpperCase().contains("_ID")) {
-                                        LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                        // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                         // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                         String protocolo_id = cutString(arquivoGrande.toUpperCase(), "_ID", "_");
                                         
@@ -946,7 +1002,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             }
                             if (oicEmpresaNao) {
 								logger.logInfo("oen");
-                                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                 atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "OICEMPRESANAO", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 								return records;
 
@@ -956,7 +1012,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 						logger.logInfo("Fez o retorno final de pagas " +contabilidade + "<<>>>"  +  empresa + "<<>>" + protocoloPrincipal + "<<>>" + naoGerouDepara + "<<>>" + gerouArquivoFinal);
 						
 						if (!gerouArquivoFinal && naoGerouDepara) {
-							LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+							// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 							atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "NAOGEROUARQUIVO", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 						}
 						
@@ -977,7 +1033,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA receber = " + empresa);
                             
-                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), logger);
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -1016,7 +1072,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     }
                                     catch (Exception xx) {}
                                 }
-								// if (!fl.getName().toUpperCase().equals("PROCESSADO")) insereLog(dbIOContOtt, diretorioArquivo, INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), fl.getName(), logger);
+								if (!fl.getName().toUpperCase().equals("PROCESSADO")) insereLog(dbIOContOtt, diretorioArquivo, INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), fl.getName(), logger);
                             }
                         }
 
@@ -1024,18 +1080,22 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                         // FINAL renomeia arquivos com extens?o .XLSX 
 
 
-                        files = file.listFiles();
+                        file = new File(diretorioArquivo);
+						File[] files = file.listFiles();
 
                         if (FileUtil.dirHasFiles(diretorioArquivo)) {
                             for (File fl: files) {
                                 
                                 String rodaConversor = props.get(empresa.substring(0,empresa.indexOf("_#")).toUpperCase() + "_EQUIPE_FECHAMENTO");
+								String[] rodaConversorAux = rodaConversor.split(",");
+								
+								// logger.logInfo("RODA CONVERSOR AUX -> " + rodaConversorAux[1]);
                                 //Conversor
                                 if (rodaConversor != null) {
-                                    if (rodaConversor.contains(",") && rodaConversor.toUpperCase().contains("CONVERTE") && !fl.getAbsolutePath().toUpperCase().contains(".CSV")
+                                    if (rodaConversor.contains(",") && (rodaConversor.toUpperCase().contains("CONVERTE") && rodaConversor.contains("XLSX") || rodaConversorAux[1].contains("true")) && !fl.getAbsolutePath().toUpperCase().contains(".CSV")
                                         && fl.getAbsolutePath().toUpperCase().contains(".XLSX")) {
                                             
-                                        if (fl.getAbsolutePath().toUpperCase().contains(".XLSX") && rodaConversor.contains("XLSX")) {
+                                        if (fl.getAbsolutePath().toUpperCase().contains(".XLSX")) {
                                             File arquivoDeploy  = new File("C:/Conversor/Excel/" + "receber_" + contabilidade + "_" + empresa + "_ancora_" + cutString(fl.getAbsolutePath(), fl.getAbsolutePath().replaceAll("\\\\", "/").lastIndexOf("/")+1));
                                             
                                             try { FileUtil.copyFolder(fl, arquivoDeploy);}
@@ -1044,7 +1104,8 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                             try { 
                                                 FileUtil.deleteFile(fl);
                                             } catch (Exception XX) {} 
-                                                
+                                            
+											temConversorXlsx = true;
                                             continue;
                                         }
                                     }
@@ -1082,7 +1143,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     continue;
                                 }
                                 
-                                arquivoGrande = verificaArquivoGrande(fl, sizeLimit, "REC");
+                                if (arquivoGrande.equals("")) arquivoGrande = verificaArquivoGrande(fl, sizeLimit, "REC");
                                 
                                 /*
                                 else {
@@ -1102,11 +1163,23 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                 }*/
                                         
                             }
+							
+							
+							if (temConversorXlsx) {
+								converteuXlsx = converteuXlsx(protocoloPrincipal, apiWeb, logger);
+								while (!converteuXlsx) {
+									converteuXlsx = converteuXlsx(protocoloPrincipal, apiWeb, logger);
+								}
+								buscaConversorXlsx(protocoloPrincipal, apiWeb, logger);
+							}
+							
+							file = new File(diretorioArquivo);
+							files = file.listFiles();
 
                             for (File fl: files) {
+								if (fl.getName().equals("Processado")) continue;
                                 if (arquivoGrande.equals("")) {
 									
-									if (fl.getName().equals("Processado")) continue;
 									
 									atualizaLog(protocoloPrincipal, "DATA_INICIO_PROCESSAMENTO", dbIOContOtt, logger);
 
@@ -1127,7 +1200,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                             
                                             if (fl.getName().toUpperCase().contains("_ID")){
                         
-                                                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                 // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                 String protocolo_id = cutString(fl.getName().toUpperCase(), "_ID", "_");
                                                 
@@ -1140,9 +1213,15 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                         } else if(fl.isFile() && oicContabil.equals("SIM")){
 											
 											
-											logger.logInfo("Protocolos dentro da leitura " + protocoloPrincipal + " | " + getProtocoloId(fl.getName()));
+											logger.logInfo("Protocolos dentro da leitura " + protocoloPrincipal + " | " + getProtocoloId(fl.getName()) + " | " + protocoloAnterior);
 											
-											if (!protocoloPrincipal.equals(getProtocoloId(fl.getName())) || protocoloPrincipal.equals(protocoloAnterior)) break;
+											if (/*!protocoloPrincipal.equals(getProtocoloId(fl.getName())) || */protocoloPrincipal.equals(protocoloAnterior)){
+												logger.logInfo("BREAK - WORKER - 1191");
+												break;
+												
+											} 
+											
+											if (!protocoloPrincipal.equals(getProtocoloId(fl.getName()))) continue;
 
                                             extensaoArquivo = fl.getName().substring(fl.getName().lastIndexOf(".")).toLowerCase();
                                             if(oicEmpresa.equals("NAO")){
@@ -1162,7 +1241,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                 // logger.logInfo("TESTANDODOO " + fl.getName() + " | " + extensaoArquivo.toUpperCase());
                                                 //Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - In?cio
                                                 if (fl.getName().toUpperCase().contains("_ID")) {
-                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                     // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                     String protocolo_id = cutString(fl.getName().toUpperCase(), "_ID", "_");
                                                     
@@ -1170,6 +1249,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                     while (!converteu) {
                                                         converteu = converteuPDF(protocolo_id, apiWeb, logger);
                                                     }
+													
                                                 }
                                                 
                                                 try{
@@ -1206,7 +1286,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                         logger.logInfo("ERRO AO RODAR ROTEIRO " + xx.getMessage());
                                                     }
                                                     
-                                                    logger.logInfo("WFIILI " + tipoProduto);
+                                                    logger.logInfo("WFIILI " + tipoProduto + " | " + fl.getName());
                                                     
                                                     if (!tipoProduto.contains("ILIMITADA")) {
                                                         preparaArquivoEspecifico(idRoteiro, "Contas RECEBER", contabilidade, empresa.substring(0,empresa.indexOf("_#")), dirName, dirNameW,  logger);
@@ -1289,7 +1369,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         String nomeArquivoApagado = cutString(fl.getName().toUpperCase(), "_ID");
                                                                         nomeArquivoApagado = cutString(nomeArquivoApagado, "_", nomeArquivoApagado.lastIndexOf("."));
                                                                         boolean continuaConversor = false;
-                                                                        LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                        // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                                                         
                                                                         // if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
                                                                             String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
@@ -1331,7 +1411,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                     if (!idLoteFila.equals(idfileDePara)) continue;
 
 
-                                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 
                                                                     // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                                                     if(fl.getName().toUpperCase().contains("_ID")) {
@@ -1354,7 +1434,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 														
 														
 														if (!rodouRota) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "NAOLEULICENCA", "/inout/contabil/"+contabilidade+"/"+empresa+"/DePara/", getProtocoloId(fl.getName()), apiWeb, logger);
 															return records;
 														}
@@ -1383,13 +1463,16 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 
                                                                     if (!fileDePara.getName().toUpperCase().contains("_ID")) continue;
 
-                                                                    String idLoteFila   = cutString(fl.getName().toUpperCase(), "_ID", "_");
-                                                                    String idfileDePara = cutString(fileDePara.getName().toUpperCase(), "_ID", "_");
+                                                                    /*String idLoteFila   = cutString(fl.getName().toUpperCase(), "_ID", "_");
+                                                                    String idfileDePara = cutString(fileDePara.getName().toUpperCase(), "_ID", "_");*/
+																	
+																	String idLoteFila   = protocoloPrincipal;
+                                                                    String idfileDePara = getProtocoloId(fileDePara.getName());
 
                                                                     if (!idLoteFila.equals(idfileDePara)) continue;
                                                                     
 
-                                                                    LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                                                    // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 
                                                                     JSONObject jBucket = new JSONObject();
                                                                     jBucket.put("cnpjContabilidade",	cnpjContabilidade);
@@ -1423,7 +1506,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1444,23 +1527,31 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         }
                                                                         catch (Exception xx) {
                                                                             
-                                                                            logger.logDebug(" erro genericPostId 2526 "  + xx);
+                                                                            logger.logInfo(" erro genericPostId 2526 "  + xx);
 
 
                                                                         }
+																		
+																		if (fl.getName().toUpperCase().contains("_ID")) gerouArquivoFinal = true;
 
                                                                         // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
-                                                                        if(fl.getName().toUpperCase().contains("_ID")) {
+                                                                        /*if(fl.getName().toUpperCase().contains("_ID")) {
                                                                             String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
                                                                             String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
 																			if (diretorioArquivo.toUpperCase().contains("MARLIAN")) logger.logInfo("Gerou o arquivo final");
 																			gerouArquivoFinal = true;
                                                                         
-                                                                        } 
+                                                                        } */
                                                                     }
 
                                                                 }
-																if (gerouArquivoFinal) return records;
+																if (gerouArquivoFinal) {
+																	// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+																	String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocoloPrincipal, "", logger);
+																	String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
+																	if (diretorioArquivo.toUpperCase().contains("MARLIAN")) logger.logInfo("Gerou o arquivo final");
+																	return records;
+																}
 
                                                             }
                                                         }
@@ -1490,7 +1581,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                         writerErro.writeNewFile(planilhaErro.toString() + "<<>>" + antesRodar + "<<>>" + depoisRodar);
 														
 														if (fl.getName().contains("_ID")) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "CAIRNOELSE", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 															return records;
 														}
@@ -1507,7 +1598,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                     
                                                     if (FileUtil.fileExists(dirName + empresa + "/DePara" + "/02--Etapa 2 de 4--RECEBER.status")) {
 														if (fl.getName().contains("_ID")) {
-															LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+															// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 															atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "CAIRNOELSE", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 															return records;
 														}
@@ -1548,7 +1639,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                     filename = filename.replaceAll("\\\\", "/");
                                     
                                     if (arquivoGrande.toUpperCase().contains("_ID")) {
-                                        LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                        // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                         // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                         String protocolo_id = cutString(arquivoGrande.toUpperCase(), "_ID", "_");
                                         
@@ -1564,7 +1655,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             }
 
                             if (oicEmpresaNao) {
-                                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                 atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "OICEMPRESANAO", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 								return records;
 
@@ -1575,7 +1666,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 						
 						logger.logInfo("Fez o retorno final de recebidas " +contabilidade + "<<>>>"  +  empresa + "<<>>" + protocoloPrincipal + "<<>>" + naoGerouDepara + "<<>>" + gerouArquivoFinal);
 						if (!gerouArquivoFinal && naoGerouDepara) {
-							LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+							// LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 							atualizaProtocolo(diretorioArquivo.toUpperCase(), "", "NAOGEROUARQUIVO", "/inout/contabil/"+ contabilidade + "/" + empresa + "/DePara/", protocoloPrincipal, apiWeb, logger);
 						}
 						
@@ -1589,8 +1680,8 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                         
                         // logger.logDebug("DIRETORIO " + diretorio);
                         
-                        file2 = new File(diretorio);
-                        files = file2.listFiles();
+                        File file2 = new File(diretorio);
+                        File[] files = file2.listFiles();
                         try {
                             if (FileUtil.dirHasFiles(diretorio)) {
                                 for (File fileDePara: files) {
@@ -1726,7 +1817,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 										else if (diretorioArquivo.contains("AReceber") && fileDePara.getName().contains("PAGAR_")) continue;
                                         
                                         if (filename.contains("_ID")) {
-                                            LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+                                            // LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
                                             // adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
                                             String protocolo_id = cutString(filename.toUpperCase(), "_ID", "_");
                                             
@@ -1753,13 +1844,38 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
             deleteFila(objetoFila.optInt("ID"), dbIOContOtt, logger);
         }*/
 
-        if (dbIOContOtt != null) {
+        /* if (dbIOContOtt != null) {
+            dbIOContOtt.closeConnection();
+            dbIOContOtt = null;
+        }*/
+		
+		/*if (dbFila != null) {
+            dbFila.closeConnection();
+            dbFila = null;
+        }*/
+
+
+    } catch (Exception e) {
+		logger.logError("Erro geral worker " + e.getMessage());
+	}
+		
+	} catch (Exception e) {
+		logger.logInfo("Caiu no catch worker " + e.getMessage());
+	} finally {
+		/*if (dbFila != null) {
+			dbFila.closeConnection();
+			dbFila = null;
+		}*/
+		if (dbIOContOtt != null) {
             dbIOContOtt.closeConnection();
             dbIOContOtt = null;
         }
+	}
 
-
-    } catch (Exception e) {}
+	/*if (dbFila != null) {
+		dbFila.closeConnection();
+		dbFila = null;
+	}*/
 
     return records;
 }
@@ -1920,7 +2036,7 @@ public String verificaArquivoGrande(File fl, double sizeLimit, String tipoMovime
 }
 
 public void preparaArquivo(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, ConnectorConfig config, InoutLogger logger) {
-
+	boolean criaReader = false;
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -1938,14 +2054,14 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		writer = new FileWriter(empresaProperties);
 		writer.writeNewFile(txt1.toString());
 		
-		logger.logDebug("preparaArquivo padrao w - 3 " + contabilidade + "/" + empresa);
+		logger.logInfo("preparaArquivo padrao w - 3 " + contabilidade + "/" + empresa);
 
 	
 		StringBuilder codigoNovo    = new StringBuilder();
 		StringBuilder codigoRoteiro = new StringBuilder();
 		
 		FileReader reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualEndpointA.script");
-		if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
+		// if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
 		try {
 			reader.openFile();
 			String line = "";
@@ -1967,7 +2083,7 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		String tipoRoteiro = "_ContasPagasRoteiroPadrao.script";
 		if (tipoIntegracao.toUpperCase().contains("RECE")) tipoRoteiro = "_ContasRecebidasRoteiroPadrao.script";
 		
-		logger.logDebug("AQQ " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+		logger.logInfo("AQQ " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 		
  			
 		try {
@@ -1990,11 +2106,10 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 						lineRoteiro = readerRoteiro.nextLine();
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read")) break;
+						if (lineRoteiro.contains("public boolean read") || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
 						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
-						
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -2006,8 +2121,8 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
  
  				PartnerConnection connection = Connector.newConnection(config);  
 				codigoRoteiro.append(prepareScript(idRoteiro, "OTTPADRAO" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
-				logger.logDebug("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
-				
+				logger.logInfo("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
+				criaReader = true;
   				
 			}
 		} catch (Exception xx) {logger.logDebug("erro w3 " + xx);}
@@ -2016,23 +2131,25 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		if (!codigoRoteiro.toString().equals("")) {
 		
 			empresaProperties = "";
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
 			
+			if (criaReader) {
+				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+				writer.writeNewFile(codigoRoteiro.toString());		
+			}
+			
+			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);			
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);				
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
-			// logger.logInfo("RR " + codigoExtratos);
-			
-			codigoRoteiro.append("\r\n");
 			
 		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);			
+			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);		
 
 		}		
  	}
@@ -2042,7 +2159,7 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 
 
 public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, InoutLogger logger) {
-
+	boolean criaReader = false;
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -2106,8 +2223,7 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 						lineRoteiro = readerRoteiro.nextLine();
 						// Processa a linha
 						// ....
-						
-						if (lineRoteiro.contains("public boolean read")) break;
+						if (lineRoteiro.contains("public boolean read")  || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
 						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
@@ -2120,8 +2236,12 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 			}
 			else {
 				ConnectorConfig config = new ConnectorConfig();
+				
 				config.setUsername("fabrica@ottimizza.com.br");
 				config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
+				//config.setUsername("suporte@ottimizza.com.br");
+				//config.setPassword("ottimizza@123qhhKqbBI0kfkInUku3C5q54L");
+				
 				config.setTraceMessage(false);
 				 logger.logInfo("API SALES SHR: preparaArquivoEspecifico WorkflowUnico 2");
 				//config.setUsername("adm@ottimizza.com.br");
@@ -2134,6 +2254,8 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 				// estava dando erro de compilacao pois exportavamos o metodo mas ha dentro da rota o mesmo metodo
 				codigoRoteiro.append(prepareScript(idRoteiro, "" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
 				
+				criaReader = true;
+				
 				logger.logDebug("WF3 - login salesforce 3464" + contabilidade + "--" + empresa);
 				
 			}
@@ -2141,34 +2263,33 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 		
  
 		if (!codigoRoteiro.toString().equals("")) {
+			
+			if (criaReader) {
+				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+				writer.writeNewFile(codigoRoteiro.toString());		
+			}
 		
 			empresaProperties = "";
-			
 			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
+			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);		
 			
-			// FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			// String codigoExtratos = makeCodigoCartoes(readerRoteiro).toString();
-			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia_especifico.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
-			codigoRoteiro.append("\r\n");
-			
-		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);	
+			writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
+			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);
 		}		
  	}
 	catch (Exception xx) {}
 	return;
 }
-
-public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
+/*
+public StringBuilder makeCodigoCartoes(FileReader readerRoteiro, InoutLogger logger) {
 
 	StringBuilder sb = new StringBuilder();
 	
@@ -2182,7 +2303,7 @@ public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
 		// Le a proxima linha do arquivo
 		linha = readerRoteiro.nextLine();
 		if (linha.contains("Planilhas_Padroes")) {
-			// logger.logInfo("PEPE " + linha);
+			logger.logInfo("PEPE " + linha);
 			listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
 			break;
 		}
@@ -2194,9 +2315,11 @@ public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
 		
 		for(int kk = 0; kk < padroes.length;  kk++){
 			
+			if (padroes[kk].contains("ExtratosOFX")) continue;
 			if (listaPadroesLidos.contains(padroes[kk])) continue;
-			
 			listaPadroesLidos += ";"+padroes[kk];
+			
+			
 			
 			File toRead;
 				toRead = new File(String.format(
@@ -2212,7 +2335,7 @@ public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
 				} catch (Exception e) {
 					continue;
 				}
-			}*/
+			}
 			
 			try {
 				FileReader reader = new FileReader(toRead);		
@@ -2223,17 +2346,120 @@ public StringBuilder makeCodigoCartoes(FileReader readerRoteiro) {
 				/*while (reader.hasNextLine()) {
 					String line = reader.nextLine();
 					sb.append(line);
-				}*/
+				}
 				sb.append(rn);
 				
 				
 			} catch (Exception to) {
 				//logger.logError("Erro lendo arquivo padrao -> "+padroes[kk]);
-				//logger.logError("Erro -> "+to.getMessage());
+				logger.logError("Erro -> "+to.getMessage());
 			}
 		}
 	}
     } catch (Exception e) {}
+	return sb;
+}*/
+
+
+public StringBuilder makeCodigoCartoes(FileReader readerRoteiro, InoutLogger logger) {
+
+	StringBuilder sb = new StringBuilder();
+	
+	String linha = "";
+	String listaPadroes = "";
+	String listaPadroesLidos = "";
+	
+	StringBuilder listaEmpty = new StringBuilder().append( "Boticario_Excel.script;BySoft_i-Broker.script;Cartao_Abrapetite_Excel.script;Cartao_Aiquefome_Excel.script;Cartao_Alelo_Csv.script;Cartao_American_Express_Excel.script;Cartao_American_Express_Extrato_Excel.script;Cartao_Ame_Excel .script;Cartao_BenVisa_Excel.script;Cartao_Bin_Excel.script;Cartao_Bonus_Excel.script;Cartao_Cabal_Excel.script;Cartao_Calcard_Excel.script;Cartao_Carrefour_Excel.script;Cartao_Cielo.script;Cartao_Cielo_Simples_Sem_Bandeira.script;Cartao_Coopercard_Excel.script;Cartao_Credito_Santander.script;Cartao_Elavon_Excel.script;Cartao_Fidelidade_Excel.script;Cartao_GetNet_Excel.script;Cartao_Goodcard_Excel.script;Cartao_GreenCard_Excel.script;Cartao_IFood_Excel.script;Cartao_Liv_PDF.script;Cartao_MagaLU_Excel.script;Cartao_Masterfarma_Excel.script;Cartao_MercadoLivre_Excel.script;Cartao_Moip_Excel.script;Cartao_Mooz_CSV.script;Cartao_Netshoes_Excel.script;Cartao_Nutricard_Excel.script;Cartao_Nutricard_PDF.script;Cartao_PagarME_Excel.script;Cartao_PagSeguro_Excel.script;Cartao_Paguecom_CSV.script;Cartao_Paypal_Excel.script;Cartao_PoliCard_Excel.script;Cartao_Redecard_Excel.script;Cartao_Redecard_TXT.script;Cartao_Safra_CSV.script;Cartao_Sem_Parar_Csv.script;Cartao_Senff_Excel.script;Cartao_Sipag_Excel.script;Cartao_Sodexo_Excel.script;Cartao_Stelo_Excel.script;Cartao_Stone_Excel.script;Cartao_Sumup_Excel.script;Cartao_Ticket_Excel.script;Cartao_TrioCard_Excel.script;Cartao_Ubereats_Excel.script;Cartao_ValeCard_PDF.script;Cartao_VRAlimentacao_TXT.script;Citel_Software_frmRelCtpEncQuitados.script;ERP_DetalhamentosSispagItau_EXCEL.script;ERP_FolhaAlterdata_Progresso.script;ERP_FOLHADOMINIO_LELIS.script;ERP_FOLHAWK_RADAR.script;Extrato_Abc_Excel.script;Extrato_ABC_PDF.script;Extrato_AilosCivia_PDF.script;Extrato_Amazonia_PDF.script;Extrato_Amazonia_TXT.script;Extrato_ApliBB_PDF.script;Extrato_Arbi_Excel.script;Extrato_Asaas_Excel.script;Extrato_Asaas_PDF.script;Extrato_BancoDaycoval_PDF.script;Extrato_BancoNordeste_Excel.script;Extrato_BancoPaulista_PDF.script;Extrato_Banese_PDF.script;Extrato_Banestes_Excel.script;Extrato_Banpara_Excel.script;Extrato_Banpara_TXT.script;Extrato_Banrisul_PDF.script;Extrato_Banrisul_TXT.script;Extrato_BBM_PDF.script;Extrato_BBM_TXT.script;Extrato_BB_Excel.script;Extrato_BB_Financiamento.script;Extrato_BB_PDF.script;Extrato_BB_TXT.script;Extrato_BIB_PDF.script;Extrato_BKBank_PDF.script;Extrato_BMG_Excel.script;Extrato_BMG_PDF.script;Extrato_BMPMONEYPLUS_Excell.script;Extrato_Bradesco2_PDF.script;Extrato_Bradesco_Excel.script;Extrato_Bradesco_PDF.script;Extrato_Bradesco_TXT.script;Extrato_Brasilia_Excel.script;Extrato_BRB_PDF.script;Extrato_BS2_PDF.script;Extrato_BSCASH_PDF.script;Extrato_BTG_Excel.script;Extrato_Btg_PDF.script;Extrato_C6Bank_PDF.script;Extrato_C6_Excel.script;Extrato_Cef_Excel.script;Extrato_Cef_Html.script;Extrato_CEF_PDF.script;Extrato_CEF_TXT.script;Extrato_Civia_PDF.script;Extrato_ContaSimples_Excel.script;Extrato_ContaSimples_PDF.script;Extrato_Cora_Excel.script;Extrato_Cora_PDF.script;Extrato_Credisan_Excel.script;Extrato_Credisan_PDF.script;Extrato_Credisis_PDF.script;Extrato_Crehnor_PDF.script;Extrato_Cresol_Excel.script;Extrato_Cresol_PDF.script;Extrato_Daycoval_Excel.script;Extrato_Efi_Excel.script;Extrato_Efi_PDF.script;Extrato_Ewally_Excel.script;Extrato_Fibra_Excel.script;Extrato_Fibra_PDF.script;Extrato_Folha_Sage_Excel.script;Extrato_Grafeno_Excel.script;Extrato_Grafeno_PDF.script;Extrato_Guanabara_PDF.script;Extrato_HDT_Excel.script;Extrato_HSBC_Excel.script;Extrato_HSBC_PDF.script;Extrato_Industrial_Excel.script;Extrato_Infinitepay_PDF.script;Extrato_Inter_PDF.script;Extrato_ItauConsolidado_PDF.script;Extrato_Itau_Excel.script;Extrato_ITAU_PDF.script;Extrato_Itau_Txt.script;Extrato_Juno_Excel.script;Extrato_Linker_PDF.script;Extrato_MercadoPago_Excel.script;Extrato_MercadoPago_PDF.script;Extrato_Mercantil_PDF.script;Extrato_Movilepay_PDF.script;Extrato_NBC_PDF.script;Extrato_Next_PDF.script;Extrato_Nordeste_PDF.script;Extrato_Nubank_PDF.script;Extrato_OmieCash_PDF.script;Extrato_Original_Excel.script;Extrato_Original_PDF.script;Extrato_OTEROBANK_Excel.script;Extrato_Pagbank_PDF.script;Extrato_PagPixBank_PDF.script;Extrato_PagSeguro_Excel.script;Extrato_Paulista_Excel.script;Extrato_Paybrokers_PDF.script;Extrato_PinkPay_PDF.script;Extrato_Planner_PDF.script;Extrato_Poupecredi_PDF.script;Extrato_Safra_Excel.script;Extrato_Safra_PDF.script;Extrato_Santander_Excel.script;Extrato_Santander_PDF.script;Extrato_Sicoob.script;Extrato_SicoobCapital_PDF.script;Extrato_SicoobConvenios_PDF.script;Extrato_Sicoob_PDF.script;Extrato_Sicoob_Txt.script;Extrato_Sicredi_Excel.script;Extrato_Sicredi_PDF.script;Extrato_Sicredi_TXT.script;Extrato_Sisprime_Excel.script;Extrato_Sisprime_PDF.script;Extrato_Sofisa_Excel.script;Extrato_Sofisa_PDF.script;Extrato_Squid_Excel.script;Extrato_Squid_PDF.script;Extrato_Stone_Excel.script;Extrato_Stone_PDF.script;Extrato_Sulcredi_PDF.script;Extrato_Target_Excel.script;Extrato_Target_PDF.script;Extrato_Topazio_Excel.script;Extrato_Transfeera_PDF.script;Extrato_Tribanco2_PDF.script;Extrato_Tribanco_Excel.script;Extrato_Tribanco_PDF.script;Extrato_UBP_PDF.script;Extrato_Unicred2_PDF.script;Extrato_Unicred_Excel.script;Extrato_Unicred_PDF.script;Extrato_Unicred_TXT.script;Extrato_Uniprime_Excel.script;Extrato_Uniprime_PDF.script;Extrato_Uniprime_Txt.script;Extrato_Viacredi_Excel.script;Extrato_Viacredi_PDF.script;Extrato_Votorantim2_PDF.script;Extrato_Votorantim_Excel.script;Extrato_Votorantim_PDF.script;Extrato_XPInvestimentos_Excel.script;Extrato_XPInvestimentos_PDF.script;FaturaCartaoCredito_Banrisul_PDF.script;FaturaCartaoCredito_BB_PDF.script;FaturaCartaoCredito_Bradesco_PDF.script;FaturaCartaoCredito_Itau_EXCEL.script;FaturaCartaoCredito_Itau_PDF.script;FaturaCartaoCredito_Sicoob_PDF.script;FrancesinhaBradesco_PDF.script;FrancesinhaCresol_PDF.script;FrancesinhagrupoAilos_PDF.script;FrancesinhaItau_CSV.script;FrancesinhaItau_PDF.script;FrancesinhaSafra_PDF.script;FrancesinhaSantander_PDF.script;FrancesinhaSicoob_PDF.script;FrancesinhaSicredi_Excel.script;FrancesinhaSicredi_PDF.script;FrancesinhaSisprime_Excel.script;FrancesinhaUnicredi_PDF.script;Francesinha_Banrisul_TXT.script;Francesinha_BB_PDF.script;Francesinha_Bradesco2_Excel.script;Francesinha_Bradesco_Excel.script;Francesinha_Cef_PDF.script;Interfoc_Genesys_mcp002.script;INVESTIMENTO_BRADESCO.script;Layout_ERP_Posto_Ravanello.script;Linx_AutoSystem.script;Linx_Softpharma_fcpa200.script;Notas_Corretagem_XP_PDF.script;Prosyst.script;readExtratoUnicredDefault.script;Santander_RET.script;Sicoob_Comprovantes_PDF.script;Sindisoft_Relatorio_Movimentacao_Caixa.script;SISJURI_BCS_FINANCEIRO.script;Sisplan_Sistema_Planejamento.script;Systextil.script");
+	String [] listaEmptyArray = listaEmpty.toString().split(";");
+
+       /* readerRoteiro.openFile();
+	while(readerRoteiro.hasNextLine()) {
+		// Le a proxima linha do arquivo
+		linha = readerRoteiro.nextLine();
+		if (linha.contains("Planilhas_Padroes")) {
+			logger.logInfo("PEPE " + linha);
+			listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
+			break;
+		}
+	}*/
+	
+	try {
+		readerRoteiro.openFile();
+		while(readerRoteiro.hasNextLine()) {
+			// Le a proxima linha do arquivo
+			linha = readerRoteiro.nextLine();
+			if (linha.contains("Planilhas_Padroes")) {
+				// logger.logInfo("PEPE " + linha);
+				listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
+				break;
+			}
+		}
+	
+// logger.logInfo("depoisss " + linha);
+		// if (!listaPadroes.equals("")) {
+			// String [] padroes = listaPadroes.toString().replaceAll(" ", "").split(";");
+			String rn = "\r\n";
+			
+			// logger.logInfo("anetes "+ listaEmptyArray.length);
+			
+			for(int kk = 0; kk < listaEmptyArray.length;  kk++){
+				
+				if (listaEmptyArray[kk].contains("ExtratosOFX")) continue;
+				if (listaPadroesLidos.contains(listaEmptyArray[kk])) continue;
+				listaPadroesLidos += ";"+listaEmptyArray[kk];
+				
+				// logger.logInfo("anetesRead");
+				
+				File toRead = new File(".");			
+				if (listaPadroes.contains(cutString(listaEmptyArray[kk], 0, "."))) {
+					// logger.logInfo("Lp " + listaEmptyArray[kk]);
+					try {
+						toRead = new File(String.format(
+							"c:/inout/scriptlib/io_contabil/oicOnDemand/%s",
+							listaEmptyArray[kk].trim()
+						));
+					} catch (Exception e) {
+						logger.logInfo("Primeiro problema OicOnDemand " + e.getMessage());
+						continue;
+					}
+				}
+				else {
+					try {
+						// logger.logInfo("LpDois " + listaEmptyArray[kk]);
+						toRead = new File(String.format(
+							"c:/inout/scriptlib/io_contabil/oicOnDemand/empty/%s",
+							listaEmptyArray[kk].trim()
+						));
+					} catch (Exception e) {
+						logger.logInfo("Segundo problema OicOnDemand " + e.getMessage());
+						continue;
+					}
+				}
+				
+				try {
+					// logger.logInfo("Chegou no reader");
+					FileReader reader = new FileReader(toRead);		
+
+					reader.openFile();
+					sb.append(rn);
+					sb.append(reader.readAll());
+					/*while (reader.hasNextLine()) {
+						String line = reader.nextLine();
+						sb.append(line);
+					}*/
+					sb.append(rn);
+					
+					
+				} catch (Exception to) {
+					//logger.logError("Erro lendo arquivo padrao -> "+padroes[kk]);
+					logger.logError("Erro -> "+to.getMessage());
+				}
+			}
+		// }
+    } catch (Exception e) {
+		logger.logError("Deu ruim aqui " + e.getMessage());
+	}
+	logger.logInfo("Retornou");
 	return sb;
 }
 
@@ -2360,14 +2586,16 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 //-------------------------------------------------------------------------------------
 
 
-public void postStatus(String servidor, String workflow, String contabilidade, String empresa, String tipo, String id) {
+public void postStatus(String servidor, String workflow, String contabilidade, String empresa, String tipo, String id, InoutLogger logger) {
     String url = "https://api-status-server.herokuapp.com/status";
-
+	
+	if (servidor == null || servidor.equals("")) return; 
+    
+	JSONObject body = new JSONObject();
 
     try {
 
 
-        JSONObject body = new JSONObject();
 
         body.put("servidor", servidor);
         body.put("workflow", workflow);
@@ -2391,7 +2619,7 @@ public void postStatus(String servidor, String workflow, String contabilidade, S
             os.flush();
             os.close();
         } catch (Exception ex1) {
-            logger.logError("Erro tentando enviar informa??es para o status server -> " + ex1);
+            logger.logError("Erro tentando enviar informacoes para o status server -> " + ex1);
         } 
 
         try {
@@ -2413,6 +2641,9 @@ public void postStatus(String servidor, String workflow, String contabilidade, S
     } catch (Exception ex2) {
         logger.logError("Segundo Catch " + ex2);
     }
+	
+	logger.logInfo("Atualizando status servidor 40 - " + body.toString());
+
 
 }
 
@@ -2540,8 +2771,12 @@ public void atualizaProtocolo(String tipoLancamento, String liberaOic, String ti
 	if(!diretoriArquivos.equals("")){
 		putStatus(diretoriArquivos, tipoLancamento, new JSONObject(), logger);
 	}
-	String atualizaStatus = apiWeb.atualizaStatusProtocolo("https://integrador-contabil.herokuapp.com", protocolo_id, bodyProtocolo);
-	
+	String atualizaStatus = "";
+	try {
+		atualizaStatus = apiWeb.atualizaStatusProtocolo("https://integrador-contabil.herokuapp.com", protocolo_id, bodyProtocolo);
+	} catch (Exception e) {
+		logger.logError("Erro ao atualizar status " + e.getMessage());
+	}
 	logger.logInfo("Attstts " + atualizaStatus);
 }
 
@@ -2614,6 +2849,132 @@ public boolean buscaProtocoloConversor(String protocolo_id, LancamentosApi apiWe
 	}
 	return false;
 }
+
+
+public void buscaConversorXlsx(String protocoloPrincipal, LancamentosApi apiWeb, InoutLogger logger) throws Exception {
+	// logger.logInfo("ENTROU BUSCA CONVERSOR");
+	String diretorioConversorExcel = "C:/Conversor/Excel";
+	File file2 = new File(diretorioConversorExcel);
+	File[] files = file2.listFiles();
+	
+	if (FileUtil.dirHasFiles(diretorioConversorExcel)) {
+		for (File fl: files) {
+			// logger.logInfo(" FL -> " + fl.getAbsolutePath());
+			if (fl.getAbsolutePath().contains("aba[") && (fl.getAbsolutePath().toUpperCase().contains("PAGAR") || fl.getAbsolutePath().toUpperCase().contains("RECEBER")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().contains("_ancora_") && fl.getAbsolutePath().contains(protocoloPrincipal) && fl.length() > 0){
+				String diretorioArquivoCsv = "C:/inout/contabil/";
+				String testeCsv = "";
+				String abaCsv = "";
+				String contabilidadeCsv = "";
+				String empresaCsv = "";
+				
+				// if (fl.getAbsolutePath().toUpperCase().contains("MICALI")) continue;
+				
+				// long time1 = fl.lastModified();
+				// double timeDouble = (double) time1;
+				
+				// double times = (System.currentTimeMillis() - timeDouble) / 1000;
+				
+				// int longTime1 = time1.intValue();
+				// logger.logInfo("ULTIMA MODIFICACAO " + fl.getAbsolutePath() + " | " + time1 + " | " + System.currentTimeMillis());
+				// \("ULTIMA MODIFICACAOTEMPOS " + times);
+
+				// if (times > 10) {
+				
+					if (fl.getAbsolutePath().contains("_pagar_")) {
+						try {
+							abaCsv = cutString(fl.getAbsolutePath(),"aba[","_pagar_");
+							testeCsv = cutString(fl.getAbsolutePath(), "_pagar_");
+							contabilidadeCsv = testeCsv.substring(0, testeCsv.indexOf("_"));
+							empresaCsv = testeCsv.substring(testeCsv.indexOf("_")+1);
+							empresaCsv = empresaCsv.substring(0, empresaCsv.indexOf("_ancora_"));
+							diretorioArquivoCsv += contabilidadeCsv + "/" + empresaCsv + "/APagar";
+						} catch (Exception e) {
+							logger.logInfo("ERRO AO CORTAR ARQUIVO " + e.getMessage());
+						}
+					}
+					else if (fl.getAbsolutePath().contains("_receber_")) {
+						try {
+							abaCsv = cutString(fl.getAbsolutePath(),"aba[","_receber_");
+							testeCsv = cutString(fl.getAbsolutePath(), "_receber_");
+							contabilidadeCsv = testeCsv.substring(0, testeCsv.indexOf("_"));
+							empresaCsv = testeCsv.substring(testeCsv.indexOf("_")+1);
+							
+							// logger.logInfo("ECS " + empresaCsv);
+							empresaCsv = empresaCsv.substring(0, empresaCsv.indexOf("_ancora_"));
+							// logger.logInfo("ECS3" + empresaCsv);
+							diretorioArquivoCsv += contabilidadeCsv + "/" + empresaCsv + "/AReceber";
+						} catch (Exception e) {
+							logger.logInfo("ERRO AO CORTAR ARQUIVO " + e.getMessage());
+						}
+					}
+					String arquivoDeployStr = "";
+					try {
+						arquivoDeployStr = "aba_"+abaCsv.replace("[","").replace("]","")+"_"+fl.getAbsolutePath().substring(fl.getAbsolutePath().indexOf("_ancora_")+8);
+						//arquivoDeployStr = fl.getAbsolutePath().substring(fl.getAbsolutePath().indexOf("_ancora_")+8);
+					} catch (Exception e) {
+						logger.logInfo("NAOCRIOURODACONVERSOR " + e.getMessage());
+					}
+					// logger.logInfo("arquivoDeployStr -> " + arquivoDeployStr);	
+					if (!arquivoDeployStr.equals("")) {
+						File arquivoDeploy  = new File(diretorioArquivoCsv + "/" + arquivoDeployStr);
+						// DHF C:\Conversor\Excel\aba[0]_PAGAR_Micalicontabil_Velasquesamaraldall_ott_oud__id4418_pago0218_modelo 05-2022.csv RODACONVERSOR
+						FileUtil.copyFolder(fl, arquivoDeploy);
+					
+						try { 
+							FileUtil.deleteFile(fl);
+						} catch (Exception XX) {}
+					}
+				// }
+			
+				continue;
+			}
+		}
+	}
+}
+
+public boolean converteuXlsx(String protocolo_id, LancamentosApi apiWeb, InoutLogger logger) throws Exception {
+	//Conversor
+	
+	String diretorio = "C:/Conversor/Excel";
+	File file2 = new File(diretorio);
+	boolean achouCSV = false;
+	
+	File [] files = file2.listFiles();
+	// logger.logDebug("ACHANDO");
+	
+	if (FileUtil.dirHasFiles(diretorio)) {
+		
+		boolean notificouProtocolo = false;	
+		
+		for (File fl: files) {
+			if (fl.getAbsolutePath().contains(protocolo_id)) {
+				// logger.logInfo("ACHOUID " + fl.getAbsolutePath());
+				// if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".CSV") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
+					// logger.logInfo("ACHOUCSV " + fl.getAbsolutePath());
+					// return true;
+				// }
+				//2310-020397 adicionado o if abaixo para nao travar quando houver .pdferr
+				if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".XLSXERR") && fl.getAbsolutePath().contains("_ancora_") /*&& fl.length() > 0*/) {
+					// logger.logDebug("ACHOUCSV " + fl.getAbsolutePath());
+					try {
+						FileUtil.deleteFile(fl);
+					} catch (Exception XX) {
+						logger.logDebug("PROBLEMA APAGANDO PASTA CONVERSOR " + XX.getMessage());
+					}
+					return true;
+				}
+				if ((fl.getAbsolutePath().contains("pagar") || fl.getAbsolutePath().contains("receber")) && fl.getAbsolutePath().contains("#") && fl.getAbsolutePath().toUpperCase().contains(".XLSX") && !fl.getAbsolutePath().toUpperCase().contains(".CSV")/* && fl.getAbsolutePath().contains("aba[")*/ /*&& fl.length() > 0*/) {
+					// logger.logDebug("ACHOUCSV " + fl.getAbsolutePath());
+					
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
 
 public boolean converteuPDF(String protocolo_id, LancamentosApi apiWeb, InoutLogger logger) throws Exception {
 	//Conversor
@@ -2701,7 +3062,10 @@ public synchronized JSONObject buscaDiretorioArquivoProcessado(DataBase db, Inou
 		logger.logInfo("ERRO SELECT NA FILA " + e.getMessage());
 	}
 	
-	if (!jdiretorioArquivo.has("DIRETORIO")) return new JSONObject();
+	if (!jdiretorioArquivo.has("DIRETORIO")) {
+		logger.logInfo("buscaDiretorioArquivoProcessado ");
+		return new JSONObject();
+	}
 	
 	int numLinhasDeletadas = 0;
     String sql = "DELETE FROM IO_FILA WHERE ID = ?";
@@ -2733,6 +3097,54 @@ public synchronized JSONObject buscaDiretorioArquivoProcessado(DataBase db, Inou
 
 	return jdiretorioArquivo;
 }
+/*
+public synchronized JSONObject buscaDiretorioArquivoProcessado(DBPostgreSQL db, InoutLogger logger) {
+	JSONObject jdiretorioArquivo = new JSONObject();
+		
+	try {
+		jdiretorioArquivo = db.sql("SELECT DIRETORIO, ID, NOMEARQUIVO FROM IO_FILA ORDER BY ID ASC")
+								.setFields("DIRETORIO, ID, NOMEARQUIVO")
+								.debug(logger)
+								.queryUnique();
+	} catch (Exception e) {
+		logger.logInfo("ERRO SELECT NA FILA " + e.getMessage());
+	}
+	
+	if (!jdiretorioArquivo.has("DIRETORIO")) {
+		logger.logInfo("buscaDiretorioArquivoProcessado ");
+		return new JSONObject();
+	}
+	
+	int numLinhasDeletadas = 0;
+    String sql = "DELETE FROM IO_FILA WHERE ID = " + jdiretorioArquivo.optString("ID");
+    try {
+        Connection conn = java.sql.DriverManager.getConnection("jdbc:postgresql://ec2-100-27-73-125.compute-1.amazonaws.com:5432/da46s1mi5dpi25", "uam6495i69kkqt", "p69a20d01650b808caee3340b498ce5f144f017befa24de25c65bcd0292fda4e9");
+    	
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        
+        // stmt.setString(1, jdiretorioArquivo.optString("ID"));
+        
+        numLinhasDeletadas = stmt.executeUpdate();
+        
+        logger.logInfo(numLinhasDeletadas + " registro(s) deletado(s).");
+		
+		if (conn != null) {
+			conn.close();
+		}
+    } catch (SQLException e) {
+          logger.logInfo("Erro ao deletar da fila: " + e.getMessage());
+    }
+	
+	logger.logInfo("Leu Id " + jdiretorioArquivo.optString("ID"));
+	
+	
+	if (numLinhasDeletadas == 0) {
+		logger.logInfo("Deletou nada");
+		return new JSONObject();
+	}
+
+	return jdiretorioArquivo;
+}*/
 
 public void insereLog(DataBase db, String diretorio, String workflow, String nomeArquivo, InoutLogger logger) {
 	
@@ -2943,12 +3355,15 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 								cloudAPI.doPost(urnExportados, idsRoteiros);
 							}
 							catch (Exception xx) {
-								logger.logDebug("ERROR -> "+xx.getMessage());
+								logger.logError("ERROR -> "+xx.getMessage());
 							}
 							listaIds	= new StringBuilder();
 							listaIds.append("[");							
 						}
 						
+							logger.logInfo("passou pelo Post worker linha 3170 ");
+
+
                         try {
                             JSONObject roteiroInfosObj = new JSONObject(roteiroObj.optString("info_roteiros").replaceAll("\\\\",""));
 
@@ -2986,7 +3401,10 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
                             String idRoteiroProperties = "";
 							
 							String licencaProduto = "";
-							
+
+							logger.logInfo("antes do props " + contabilidade + " -- " + cnpjEmpresa);
+
+
 							try {
 								// contabilidade	= toDisplayCase(propsCont.get(cnpjContabilidade));
 								props.load("/contabil/" + contabilidade + "/contabil.properties");
@@ -3001,6 +3419,8 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 								continue;
 							}
 							logger.logInfo("IRR " + idRoteiroProperties + " | " + idRoteiro);
+							
+							
 							if (!idRoteiroProperties.contains(idRoteiro)){
 							
 								JSONObject roteiroLog = new JSONObject(roteiroString);
@@ -3015,8 +3435,12 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 
 								
 							if (connection == null) {
+								
 								config.setUsername("fabrica@ottimizza.com.br");
 								config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
+								//config.setUsername("suporte@ottimizza.com.br");
+								//config.setPassword("ottimizza@123qhhKqbBI0kfkInUku3C5q54L");
+								
 								config.setTraceMessage(false);
 								connection = Connector.newConnection(config);  
 								logger.logInfo("API SALES SHR: atualizaArquivoRoteiro WorkflowUnico 3");
@@ -3052,7 +3476,7 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 
 
     } catch (Exception e) {
-        logger.logInfo("*** por algum motivo cai no catch geral da rota -> "+e.getMessage());
+        logger.logDebug("*** por algum motivo cai no catch geral da rota -> "+e.getMessage());
     } finally {
         if (db != null) db.closeConnection();
 		

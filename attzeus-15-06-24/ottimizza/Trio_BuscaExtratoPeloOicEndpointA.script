@@ -1,0 +1,380 @@
+{import: io_contabil.Util};
+{import: io_contabil.Trio};
+{import: io_contabil.Regras};
+{import: io_contabil.Database};
+{import: io_contabil.DatabasePostgreSQL};
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import jcifs.smb.*; 
+
+public JSONArray run(InoutLogger logger) throws Exception {
+ 
+    File file = new File("smb://172.31.22.111/testeaaS1/xavier/teste.txt");
+/*
+    try {
+        byte[] bytes = Files.readAllBytes(Paths.get(file.getAbsolutePath())); "smb////EC2AMAZ-QJL5KQ8//testeaaS1//xavier//teste.txt"
+    } catch (IOException ex) {
+        Logger.getLogger(JavaApplication25.class.getName()).log(Level.SEVERE, null, ex);
+    }*/
+    
+     String user = "DevOtt";
+        String pass = "7CjX60IS6pj%";
+    String path = "smb://172.31.22.111/testeaaS1/xavier/teste.txt";
+        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(null, user, pass);
+        
+         try {
+            SmbFile smbFile = new SmbFile("smb://DevOtt:7CjX60IS6pj%@172.31.22.111/testeaaS1/xavier/teste.txt");
+    
+            //smbFile = new SmbFile(path, auth);
+            
+            System.out.println(smbFile.exists());
+        } catch (Exception e) {
+            logger.logInfo(e.toString());
+        } 
+        
+    
+    return new JSONArray();
+    
+    
+ 
+/*
+
+    String usuario = "seu_usuario";
+    String senha = "sua_senha";
+    String caminhoPasta = "caminho_completo_da_pasta_compartilhada";
+
+    String url2 = "smb://" + "DevOtt" + ":" + "7CjX60IS6pj%" + "@" + "\\99.79.15.26\testeaaS1";
+    try {
+        URL urlPastaCompartilhada = new URL(url2);
+                logger.logInfo("Pasta url2: " +url2);
+
+        File pastaCompartilhada = new File(urlPastaCompartilhada.getFile());
+        logger.logInfo("Pasta compartilhada: " + pastaCompartilhada.getAbsolutePath());
+     } catch (MalformedURLException e) {
+        logger.logInfo(e.toString());
+    }    
+    
+    
+ */
+     
+    
+}
+ 
+ 
+ 
+/*
+
+String externalSharedFilePath = "file:Z:/images/";
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/images/**").addResourceLocations(externalSharedFilePath);
+
+}
+
+
+
+     
+
+    String usuario = "seu_usuario";
+    String senha = "sua_senha";
+    String caminhoPasta = "caminho_completo_da_pasta_compartilhada";
+
+    String url2 = "smb://" + "DevOtt" + ":" + "7CjX60IS6pj%" + "@" + "172.31.22.111/testeaaS1/xavier";
+    try {
+        URL urlPastaCompartilhada = new URL(url2);
+        File pastaCompartilhada = new File(urlPastaCompartilhada.getFile());
+        logger.logInfo("Pasta compartilhada: " + pastaCompartilhada.getAbsolutePath());
+     } catch (MalformedURLException e) {
+        logger.logInfo(e.toString());
+    }
+
+    jcifs.Config.setProperty( "jcifs.netbios.wins", "172.31.22.111" );
+    NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("domain", "username", "password");
+    SmbFileInputStream in = new SmbFileInputStream("smb://172.31.22.111/c/TESTE AA S1/xavier/teste.txt", auth);
+    byte[] b = new byte[8192];
+    int n;
+    while(( n = in.read( b )) > 0 ) {
+        System.out.write( b, 0, n );
+    }
+
+                  
+                 
+    if (1 < 2) return new JSONArray();
+    
+    
+
+	////////////////////////////////////////////
+	// * testa usando cnpj ottimizza
+	boolean testeD			= false;
+	boolean possuiMCTeste	= false;
+
+
+	// gera seguranca nas conexoes com Heroku
+	// Create a trust manager that does not validate certificate chains
+	javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[] {
+		new javax.net.ssl.X509TrustManager(){
+			public java.security.cert.X509Certificate[] getAcceptedIssuers(){ return null; }
+			public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+			public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) { }
+		}
+	};
+
+	// Install the all-trusting trust manager
+	try {
+		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("TLS");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+	} catch (Exception e) {
+		// 
+	}
+
+
+	DatabasePostgreSQL integrador	= new DatabasePostgreSQL();
+    DBPostgreSQL dbPartner			= null;
+
+	JSONArray connections = new JSONArray();
+	JSONObject connection  = new JSONObject();
+	LancamentosApi trio	= new LancamentosApi();
+	StringBuilder uri	= new StringBuilder();
+	JSONObject accountsInfo	= new JSONObject();
+	JSONObject accounts = new JSONObject();
+	JSONObject objTrio = new JSONObject();
+	JSONObject infosReprocessamento = new JSONObject();
+
+	StringBuilder bankStatementPAG = new StringBuilder();
+	StringBuilder bankStatementREC = new StringBuilder();
+
+	String url			 = trio.TRIO_SERVER_URL;
+	String urlPartners 	 = trio.OTTIMIZZA_PARTNERS_SERVER_URL;
+	String urlIntegrador = "";
+	String urn			 = "";
+	String authorization = "";
+	String webhookId     = ""; 
+	
+	Integer contador = 0;
+
+	StringBuilder podemLer = new StringBuilder();
+
+	String cnpjContabilidade = "";
+	String cpfCnpj	= "";
+	String cnpj			= "";
+	String connectionId = "";
+	String bankInfos = "";
+	String empresa = "";
+	String codEmpresa = "";
+	String banco = "";
+	String lote = "";
+	String tipoMovimento = "";
+	String start	= "";	// yyyy-MM-dd
+	String end		= "";	// yyyy-MM-dd
+
+	SysProperties propsCont	= SysProperties.getInstance(); 
+	SysProperties props		= SysProperties.getInstance(); 
+	String contabilidade	= "";
+	boolean possuiMeuCaixa	= false;
+
+	String hoje			= DateUtil.dateToString(new Date(),"dd/MM/yyyy");
+	String anoMes		= DateUtil.dateToString(new Date(),"yyyy-MM");
+	String dia			= cutString(hoje, 0, "/");
+	String lastDay = cutString(getLastDayOfMonth(hoje), 0, "/"); 
+	double saldo		= 0;
+	String beginDate = "";
+    
+	try { 
+		end 	= anoMes+"-"+lastDay;
+		start   = anoMes+"-01";
+	} catch (Exception e) {
+		start		= "";
+		end			= "";
+	}
+
+	beginDate = DateUtil.dateToString(subDaysToDate(new Date(), 90),"dd/MM/yyyy");
+    start = getCampoDate(beginDate,"dd/MM/yyyy","yyyy-MM-dd");
+  
+  
+	try {
+		propsCont.load("/contabil/Ottimizza/routes.properties");
+        
+		dbPartner		= DatabasePostgreSQL.connectDatabase("api-partner", logger);
+		
+		File f = new File(RouteEngine.INOUT_HOME + "/contabil/ottimizza/processar/Trio");
+		String[] nomesArquivos = f.list();
+		for (String nomeArquivo : nomesArquivos) {	
+			Boolean leuLancamentos = false;			
+			if(nomeArquivo.contains("Processado")) continue;
+			if(contador == 0) {
+				JSONObject authPartner = integrador.buscaAutorizationTrio(dbPartner, logger);	
+				JSONObject authObj = new JSONObject(authPartner.optString("oauth_client_details").replaceAll("\\\\",""));
+				String authInfos = authObj.optString("client_id")+":"+authObj.optString("client_secret");
+				authorization = Base64.getEncoder().encodeToString(authInfos.getBytes());
+				contador ++;
+			}
+			try {
+				logger.logInfo("LENDO ARQUIVO > "+nomeArquivo);
+				FileReader readerProps = new FileReader(RouteEngine.INOUT_HOME + "/contabil/ottimizza/processar/Trio/"+nomeArquivo);
+                String conteudo = readerProps.readAll();
+				infosReprocessamento = new JSONObject(conteudo);
+				
+				String dateRange = infosReprocessamento.optString("dateRange");
+				List<String> datas = Arrays.asList(dateRange.split(";"));
+				start = datas.get(0).toString();
+				end = datas.get(1).toString();
+				
+				cnpj = infosReprocessamento.optString("cpfCnpj");
+				cnpjContabilidade = infosReprocessamento.optString("cnpjAccounting");
+				lote = infosReprocessamento.optString("lote");
+				tipoMovimento = infosReprocessamento.optString("tipoMovimento");
+				
+				banco = Arrays.asList(nomeArquivo.split("_")).get(1).toString();		
+				connectionId = integrador.buscaAutorizationTrioPorCnpjBanco(dbPartner, cnpj, banco, logger);
+		
+				bankStatementREC = new StringBuilder();
+				bankStatementPAG = new StringBuilder();
+				
+				if (cnpjContabilidade.equals("")) {
+					logger.logInfo("NAO ACHOU CONTABILIDADE da empresa " + cnpj);
+					continue; 
+				}
+			
+				uri	= new StringBuilder();
+				uri.append(url).append("/accounts?connection_id="+connectionId);
+                String accountsString = "";
+				try{
+					accountsString = trio.genericGet(uri.toString(),authorization, logger);
+				} 	
+				catch(Exception ex1) {
+						logger.logError("ERROR TRYING TO GET ACCOUNTS INFO "+ex1.getMessage());
+						continue;
+				}
+				if (accountsString.equals("")) continue;
+				accounts = new JSONObject(accountsString);
+				
+				if (accounts == null) continue;
+				
+				JSONArray data = new JSONArray(accounts.optString("data"));				
+				if (data == null) continue;
+				
+				for(int j = 0; j < data.length(); j++) {
+					if (!data.optJSONObject(j).has("id")) continue;
+					String accountId = data.optJSONObject(j).optString("id");
+						
+					uri	= new StringBuilder();
+					
+					
+					uri.append(url).append("/accounts/"+accountId+"/transactions")
+						.append("?date_from=").append(start)
+						.append("&date_to=").append(end)
+						.append("&limit=").append("1000");
+		
+					String buscaTrio = "";
+					try{
+						buscaTrio = trio.genericGet(uri.toString(),authorization, logger);
+					
+					} 	catch(Exception ex2) {
+							logger.logError("ERROR TRYING TO GET RECIEPTS "+ex2.getMessage());
+							continue;
+						}
+					if (buscaTrio.equals("")) continue;
+					
+					objTrio	= new JSONObject(buscaTrio);
+		
+					JSONArray jArr		= new JSONArray(objTrio.optString("data"));
+					JSONObject obj 		= new JSONObject();
+					JSONObject amount   = new JSONObject();
+		
+					for(int i = 0; i < jArr.length(); i++) {
+						obj = jArr.optJSONObject(i);
+						obj.put("PARTNER_OTTIMIZZA", "TRIO");
+						
+						amount = new JSONObject(obj.optString("amount"));
+						if(amount.optString("amount").contains("-")) {
+							if(leuLancamentos == false && tipoMovimento.contains("PAG"))
+								leuLancamentos = true;
+							
+							bankStatementPAG.append(obj.toString());
+							bankStatementPAG.append("\r\n");
+						} else {
+							if(leuLancamentos == false && tipoMovimento.contains("REC"))
+								leuLancamentos = true;
+							
+							bankStatementREC.append(obj.toString());
+							bankStatementREC.append("\r\n");
+						}
+		
+					}
+				}
+			}
+			catch (Exception e) {
+				//ATUALIZAR LOTE NO OUD STATUS DE ERRO
+				logger.logInfo("ERROR 75 "+e.getMessage());
+				continue;
+			}
+						
+			try {
+				contabilidade	= toDisplayCase(propsCont.get(cnpjContabilidade));
+				props.load("/contabil/" + contabilidade + "/contabil.properties");
+				empresa	= props.get(cnpj);             
+				codEmpresa = props.get(empresa.toUpperCase() + "_COD_EMPRESA");			
+			} catch (Exception xx) {
+				logger.logError("ERROR 118 "+cnpjContabilidade);
+				try{
+					FileUtil.moveToDir(RouteEngine.INOUT_HOME+"/contabil/ottimizza/processar/Trio/"+nomeArquivo, "C:/inout/contabil/Ottimizza/processar/trio/Processado");
+				}
+				catch(Exception ex) {
+					logger.logInfo("ERROR SEND TO FOLDER "+ ex.getMessage());
+				}
+				continue;
+			}
+			
+			String compDirName = empresa + "_#" + codEmpresa;
+			
+			if(tipoMovimento.contains("PAG")) {
+				if(leuLancamentos == false)
+					bankStatementPAG = new StringBuilder();
+				
+				String dirName = RouteEngine.INOUT_HOME+"/contabil/"+contabilidade+"/"+compDirName+ +"/Apagar"+"/ott_oud_id"+lote+"_TRIO_OIC"+"-"+start+"-"+end+"-"+cnpj+"-"+banco+"_PAG.omc";
+				FileWriter 	arquivoPag = new FileWriter(dirName);
+				arquivoPag.writeNewFile(bankStatementPAG.toString()); 
+			}
+			else {
+				if(leuLancamentos == false)
+					bankStatementREC = new StringBuilder();
+				
+				String dirName = RouteEngine.INOUT_HOME+"/contabil/"+contabilidade+"/"+compDirName+ "/Areceber"+"/ott_oud_id"+lote+"_TRIO_OIC-"+start+"-"+end+"-"+cnpj+"-"+banco+"_REC.omc";
+				FileWriter 	arquivoRec = new FileWriter(dirName);
+				arquivoRec.writeNewFile(bankStatementREC.toString()); 
+			}
+            
+              //VITOR 25/02/2022 TXT GENERATOR TEST
+            try {
+                String conteudoTXT = TXTcontentGenerator( "TRIO-" + banco, 
+                                                         props.get("CONTABILIDADE_NOME"), 
+                                                         props.get("CONTABILIDADE_ID"), 
+                                                         empresa);
+                // logger.logInfo(conteudoTXT);
+                String result = TXTfileGenerator(conteudoTXT);
+                // logger.logInfo(result);
+            } catch(Exception e) {
+                logger.logError("ERROR TRYING TO GET PROPERTIES" +e.toString());
+            }
+			
+            try{
+				FileUtil.moveToDir(RouteEngine.INOUT_HOME+"/contabil/ottimizza/processar/Trio/"+nomeArquivo, "C:/inout/contabil/Ottimizza/processar/trio/Processado");
+            }
+            catch(Exception ex) {
+                logger.logInfo("ERROR SEND TO FOLDER "+ ex.getMessage());
+            }
+        }
+
+	} finally {
+		if (dbPartner	 != null) dbPartner.closeConnection();
+	}
+
+	return new JSONArray();
+	}
+
+
+
+*/

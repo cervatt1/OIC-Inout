@@ -31,15 +31,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
  	config.setUsername("fabrica@ottimizza.com.br");
 	config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 	config.setTraceMessage(false);
-				
-	String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
-
+	logger.logInfo("API SALES SHR: runWorkflowEspecificoEndpointA workflow3 1");
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
@@ -68,6 +60,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
         String oicContabil  = props.get("OIC_LIBERADO");
         String emailCanal   = props.get("EMAIL_CANAL");
+        String codigoCanal  = props.get("CODIGO_CANAL");
 		String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
 	    String versaoOtzWebApp = "02_Conecta_Via_Portal_Ottimizza";
 		String fornecedorUnico = props.get("FORNECEDOR_UNICO");
@@ -97,7 +90,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 		FileWriter writerLog = new FileWriter(fileLog);
 		writerLog.writeNewFile(conteudo.toString());
 		
-		postStatus(servDinamic.toUpperCase(), contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus("S1", contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
   
  
         // verifica se a empresa existe no diretorio /inout/contabil/contabilidade
@@ -119,6 +112,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 			}
 		}
 		
+	
+        if (codigoCanal == null) codigoCanal = "Admin";
+
         if (rotasLO != null) {
 
             for (String nome : rotasLO) {
@@ -481,7 +477,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
                         if (FileUtil.dirHasFiles(diretorio)) {
 
  							
-							postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+							postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 							for (File fl: files) {
 								
@@ -824,7 +820,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																		&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																		File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																		FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																		nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																		nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																		jBucket.put("linkArquivo", nomeArquivo64);
 																		try {
 																			FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1033,7 +1029,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
                             if (FileUtil.dirHasFiles(diretorio)) {
 							
-								postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+								postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
                                 for (File fl: files) {
 									
@@ -1357,7 +1353,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																			&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																			File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																			FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-																			nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+																			nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																			jBucket.put("linkArquivo", nomeArquivo64);
 																			try {
 																				FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1592,6 +1588,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 	config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 	config.setTraceMessage(false);
 	
+	logger.logInfo("API SALES SHR: runWorkflowEndpointA workflow3 2");
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
@@ -1602,7 +1599,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
  
 	
 	//logger.logInfo("INICIANDO WORKFLOW");
-	postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+	postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
     
     try {
         // tenta carregar propriedades de rotas.
@@ -1700,6 +1697,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                         // }
 
                         String emailCanal   = props.get("EMAIL_CANAL");
+                        String codigoCanal  = props.get("CODIGO_CANAL");
                         String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
                         String versaoOtzWebApp = "02_Conecta_Via_Portal_Ottimizza";
 						String fornecedorUnico = props.get("FORNECEDOR_UNICO");
@@ -1734,10 +1732,14 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 								
 								// comentado para rodar apenas em outra parte do codugo, onde a conatbilidade eh a Futuro
 								//RouteEngine.execRoute("Ottimizza.Atualiza_Properties");
-								logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
+								// logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
 							}
 						}
-						
+
+
+                        if (codigoCanal == null) codigoCanal = "Admin";					
+
+
                         if (rotasLO != null) {
 
                             for (String nome : rotasLO) {
@@ -2079,7 +2081,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 											
 												logger.logDebug("LENDO EMPRESA pagar = " + empresa);
 											
-												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -2216,18 +2218,22 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                             }
                                             for (File fl: files) {
 												
-												// logger.logInfo(" Size limit " +arquivoGrande+ " <<>> " + fl.getName());
+												logger.logInfo(" Size limit " + oicContabil +" | " +arquivoGrande+ " <<>> " + fl.getName() + " | " + fl.isFile());
 												
                                                 if (arquivoGrande.equals("")) {
 													
                                                     try {
 
                                                         //renomear arquivo que nao possua extensao para (.txt)
-                                                        if(fl.isFile() && !fl.getName().contains(".")){
+                                                        try {
+														if(fl.isFile() && !fl.getName().contains(".")){
                                                             String flStr = fl.getAbsolutePath()+".txt";
                                                             File flTemp = new File(flStr);
                                                             fl.renameTo(flTemp);
                                                         }
+														} catch (Exception e) {
+															logger.logInfo("ERRO1 " + e.getMessage());
+														}
 
                                                         if (fl.isFile() && oicContabil.equals("NAO")) {
 
@@ -2238,7 +2244,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                             filename = fl.getAbsolutePath();
                                                             filename = filename.replaceAll("\\\\", "/");
                                                             FileUtil.moveToDir(filename, diretorio + "/Processado");
-															
+															try {
 															if (fl.getName().toUpperCase().contains("_ID")){
 										
 																LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
@@ -2248,6 +2254,10 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																String diretorioProtocolo = "/inout/contabil/"+getNomeContabilidadeWorkflow() + "/" + nome + "/DePara/";
 																
 																atualizaProtocolo(oicContabil, "", diretorioProtocolo, protocolo_id, apiWeb, logger);
+															}
+															
+															} catch (Exception e) {
+																logger.logInfo("ERRO2 " + e.getMessage());
 															}
 															continue;
 
@@ -2509,7 +2519,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						//estah jogando direto para o enviados. Obs: eh um arquivo .omc
 																						
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -2632,7 +2642,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                             }
                                                         }
                                                     } catch (Exception eee) {
-                                                        logger.logError("Erro processando o arquivo " + fl.getAbsolutePath(), eee);
+                                                        logger.logError("1Erro processando o arquivo " + fl.getAbsolutePath(), eee);
                                                     }
                                                 }else{ // envia email e move pra processado
                                                     //////////////////
@@ -2724,7 +2734,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
                                             for (File fl: files) {
 												
- 												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+ 												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
                                                 
 												String rodaConversor = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_EQUIPE_FECHAMENTO");
 												
@@ -3088,7 +3098,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
 																						File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -3202,7 +3212,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                             }
                                                         }
                                                     } catch (Exception eee) {
-                                                        logger.logError("Erro processando o arquivo " + fl.getAbsolutePath(), eee);
+                                                        logger.logError("2Erro processando o arquivo " + fl.getAbsolutePath(), eee);
                                                     }
                                                 }else{                  // envia email e move pra processado
 
@@ -3326,7 +3336,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 ////////////////////////////////////////////////////////////////////////////////////
 
 public void preparaArquivo(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, ConnectorConfig config, InoutLogger logger) {
-	boolean criaReader = false;
+
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -3336,8 +3346,6 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		txt1.append("NOME_CONTABILIDADE = " + contabilidade);
 		txt1.append("\r\n");
 		txt1.append("MANTEM_ARQUIVO = SIM");
-		logger.logDebug("tt " + txt1.toString());
-		
 		writer.writeNewFile(txt1.toString());
 
 		empresaProperties = dirNameW + "empresa.properties";
@@ -3351,7 +3359,6 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		StringBuilder codigoRoteiro = new StringBuilder();
 		
 		FileReader reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualEndpointA.script");
-		// if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
 		try {
 			reader.openFile();
 			String line = "";
@@ -3373,19 +3380,17 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		String tipoRoteiro = "_ContasPagasRoteiroPadrao.script";
 		if (tipoIntegracao.toUpperCase().contains("RECE")) tipoRoteiro = "_ContasRecebidasRoteiroPadrao.script";
 		
-		logger.logInfo("AQQ " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-		
  			
 		try {
 			File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
   
 
-			//logger.logDebug("fileRoteiro w - 3 " + contabilidade + "/" + empresa);
+			//logger.logInfo("fileRoteiro w - 3 " + contabilidade + "/" + empresa);
 
 		    //if (fileRoteiro.exists() && tipoRoteiro.contains("TESTE XAVIER")) {
-			//if (fileRoteiro.exists() &&
-			//    !(/*contabilidade.toUpperCase().contains("MICALI") ||*/ contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
-			if (fileRoteiro.exists()) {
+			if (fileRoteiro.exists() &&
+			    !(contabilidade.toUpperCase().contains("MICALI") || contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
+				
   				
 				FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 				try {
@@ -3396,10 +3401,8 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 						lineRoteiro = readerRoteiro.nextLine();
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read") || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -3411,8 +3414,8 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
  
  				PartnerConnection connection = Connector.newConnection(config);  
 				codigoRoteiro.append(prepareScript(idRoteiro, "OTTPADRAO" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
-				logger.logDebug("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
-				criaReader = true;
+				logger.logInfo("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
+				
   				
 			}
 		} catch (Exception xx) {logger.logInfo("erro w3 " + xx);}
@@ -3421,27 +3424,17 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		if (!codigoRoteiro.toString().equals("")) {
 		
 			empresaProperties = "";
-			
-			if (criaReader) {
-				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-				writer.writeNewFile(codigoRoteiro.toString());		
-			}
-			
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			
-			logger.logInfo("nome reader " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);				
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
 		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);		
+			writer.writeNewFile(codigoRoteiro.toString());			
 
 		}		
  	}
@@ -3451,7 +3444,7 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 
 
 public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, InoutLogger logger) {
-	boolean criaReader = false;
+
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -3467,7 +3460,7 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 		writer = new FileWriter(empresaProperties);
 		writer.writeNewFile(txt1.toString());
 		
- 		logger.logDebug("preparaArquivoEspecifico w3 " + contabilidade + "/" + empresa);
+ 		logger.logInfo("preparaArquivoEspecifico w3 " + contabilidade + "/" + empresa);
 
 	
 		StringBuilder codigoNovo    = new StringBuilder();
@@ -3503,9 +3496,9 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
  
  			File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 
-			//if (fileRoteiro.exists() &&
-			//    !(/*contabilidade.toUpperCase().contains("MICALI") ||*/ contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
- 			if (fileRoteiro.exists()) {
+			if (fileRoteiro.exists() &&
+			    !(contabilidade.toUpperCase().contains("MICALI") || contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
+ 				
 				FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 				try {
 					readerRoteiro.openFile();
@@ -3515,10 +3508,8 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 						lineRoteiro = readerRoteiro.nextLine();
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read")  || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -3531,7 +3522,8 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 				config.setUsername("fabrica@ottimizza.com.br");
 				config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 				config.setTraceMessage(false);
-				 logger.logInfo("API SALES SHR: preparaArquivoEspecifico WorkflowUnico 2");
+				 
+				 logger.logInfo("API SALES SHR: preparaArquivoEspecifico workflow3 3");
 				//config.setUsername("adm@ottimizza.com.br");
 				//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 				//config.setTraceMessage(true);
@@ -3542,134 +3534,30 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 				// estava dando erro de compilacao pois exportavamos o metodo mas ha dentro da rota o mesmo metodo
 				codigoRoteiro.append(prepareScript(idRoteiro, "" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
 				
-				criaReader = true;
-				
-				logger.logDebug("WF3 - login salesforce 3464" + contabilidade + "--" + empresa);
+				logger.logInfo("WF3 - login salesforce 3464" + contabilidade + "--" + empresa);
 				
 			}
 		} catch (Exception xx) {logger.logDebug("XX " + xx);}
 		
  
 		if (!codigoRoteiro.toString().equals("")) {
-			
-			if (criaReader) {
-				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-				writer.writeNewFile(codigoRoteiro.toString());		
-			}
 		
 			empresaProperties = "";
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);		
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia_especifico.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
 			writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);
+			writer.writeNewFile(codigoRoteiro.toString());	
 		}		
  	}
 	catch (Exception xx) {}
 	return;
-}
-
-public StringBuilder makeCodigoCartoes(FileReader readerRoteiro, InoutLogger logger) {
-
-	StringBuilder sb = new StringBuilder();
-	
-	String linha = "";
-	String listaPadroes = "";
-	String listaPadroesLidos = "";
-	
-	StringBuilder listaEmpty = new StringBuilder().append( "Boticario_Excel.script;BySoft_i-Broker.script;Cartao_Abrapetite_Excel.script;Cartao_Aiquefome_Excel.script;Cartao_Alelo_Csv.script;Cartao_American_Express_Excel.script;Cartao_American_Express_Extrato_Excel.script;Cartao_Ame_Excel .script;Cartao_BenVisa_Excel.script;Cartao_Bin_Excel.script;Cartao_Bonus_Excel.script;Cartao_Cabal_Excel.script;Cartao_Calcard_Excel.script;Cartao_Carrefour_Excel.script;Cartao_Cielo.script;Cartao_Cielo_Simples_Sem_Bandeira.script;Cartao_Coopercard_Excel.script;Cartao_Credito_Santander.script;Cartao_Elavon_Excel.script;Cartao_Fidelidade_Excel.script;Cartao_GetNet_Excel.script;Cartao_Goodcard_Excel.script;Cartao_GreenCard_Excel.script;Cartao_IFood_Excel.script;Cartao_Liv_PDF.script;Cartao_MagaLU_Excel.script;Cartao_Masterfarma_Excel.script;Cartao_MercadoLivre_Excel.script;Cartao_Moip_Excel.script;Cartao_Mooz_CSV.script;Cartao_Netshoes_Excel.script;Cartao_Nutricard_Excel.script;Cartao_Nutricard_PDF.script;Cartao_PagarME_Excel.script;Cartao_PagSeguro_Excel.script;Cartao_Paguecom_CSV.script;Cartao_Paypal_Excel.script;Cartao_PoliCard_Excel.script;Cartao_Redecard_Excel.script;Cartao_Redecard_TXT.script;Cartao_Safra_CSV.script;Cartao_Sem_Parar_Csv.script;Cartao_Senff_Excel.script;Cartao_Sipag_Excel.script;Cartao_Sodexo_Excel.script;Cartao_Stelo_Excel.script;Cartao_Stone_Excel.script;Cartao_Sumup_Excel.script;Cartao_Ticket_Excel.script;Cartao_TrioCard_Excel.script;Cartao_Ubereats_Excel.script;Cartao_ValeCard_PDF.script;Cartao_VRAlimentacao_TXT.script;Citel_Software_frmRelCtpEncQuitados.script;ERP_DetalhamentosSispagItau_EXCEL.script;ERP_FolhaAlterdata_Progresso.script;ERP_FOLHADOMINIO_LELIS.script;ERP_FOLHAWK_RADAR.script;Extrato_Abc_Excel.script;Extrato_ABC_PDF.script;Extrato_AilosCivia_PDF.script;Extrato_Amazonia_PDF.script;Extrato_Amazonia_TXT.script;Extrato_ApliBB_PDF.script;Extrato_Arbi_Excel.script;Extrato_Asaas_Excel.script;Extrato_Asaas_PDF.script;Extrato_BancoDaycoval_PDF.script;Extrato_BancoNordeste_Excel.script;Extrato_BancoPaulista_PDF.script;Extrato_Banese_PDF.script;Extrato_Banestes_Excel.script;Extrato_Banpara_Excel.script;Extrato_Banpara_TXT.script;Extrato_Banrisul_PDF.script;Extrato_Banrisul_TXT.script;Extrato_BBM_PDF.script;Extrato_BBM_TXT.script;Extrato_BB_Excel.script;Extrato_BB_Financiamento.script;Extrato_BB_PDF.script;Extrato_BB_TXT.script;Extrato_BIB_PDF.script;Extrato_BKBank_PDF.script;Extrato_BMG_Excel.script;Extrato_BMG_PDF.script;Extrato_BMPMONEYPLUS_Excell.script;Extrato_Bradesco2_PDF.script;Extrato_Bradesco_Excel.script;Extrato_Bradesco_PDF.script;Extrato_Bradesco_TXT.script;Extrato_Brasilia_Excel.script;Extrato_BRB_PDF.script;Extrato_BS2_PDF.script;Extrato_BSCASH_PDF.script;Extrato_BTG_Excel.script;Extrato_Btg_PDF.script;Extrato_C6Bank_PDF.script;Extrato_C6_Excel.script;Extrato_Cef_Excel.script;Extrato_Cef_Html.script;Extrato_CEF_PDF.script;Extrato_CEF_TXT.script;Extrato_Civia_PDF.script;Extrato_ContaSimples_Excel.script;Extrato_ContaSimples_PDF.script;Extrato_Cora_Excel.script;Extrato_Cora_PDF.script;Extrato_Credisan_Excel.script;Extrato_Credisan_PDF.script;Extrato_Credisis_PDF.script;Extrato_Crehnor_PDF.script;Extrato_Cresol_Excel.script;Extrato_Cresol_PDF.script;Extrato_Daycoval_Excel.script;Extrato_Efi_Excel.script;Extrato_Efi_PDF.script;Extrato_Ewally_Excel.script;Extrato_Fibra_Excel.script;Extrato_Fibra_PDF.script;Extrato_Folha_Sage_Excel.script;Extrato_Grafeno_Excel.script;Extrato_Grafeno_PDF.script;Extrato_Guanabara_PDF.script;Extrato_HDT_Excel.script;Extrato_HSBC_Excel.script;Extrato_HSBC_PDF.script;Extrato_Industrial_Excel.script;Extrato_Infinitepay_PDF.script;Extrato_Inter_PDF.script;Extrato_ItauConsolidado_PDF.script;Extrato_Itau_Excel.script;Extrato_ITAU_PDF.script;Extrato_Itau_Txt.script;Extrato_Juno_Excel.script;Extrato_Linker_PDF.script;Extrato_MercadoPago_Excel.script;Extrato_MercadoPago_PDF.script;Extrato_Mercantil_PDF.script;Extrato_Movilepay_PDF.script;Extrato_NBC_PDF.script;Extrato_Next_PDF.script;Extrato_Nordeste_PDF.script;Extrato_Nubank_PDF.script;Extrato_OmieCash_PDF.script;Extrato_Original_Excel.script;Extrato_Original_PDF.script;Extrato_OTEROBANK_Excel.script;Extrato_Pagbank_PDF.script;Extrato_PagPixBank_PDF.script;Extrato_PagSeguro_Excel.script;Extrato_Paulista_Excel.script;Extrato_Paybrokers_PDF.script;Extrato_PinkPay_PDF.script;Extrato_Planner_PDF.script;Extrato_Poupecredi_PDF.script;Extrato_Safra_Excel.script;Extrato_Safra_PDF.script;Extrato_Santander_Excel.script;Extrato_Santander_PDF.script;Extrato_Sicoob.script;Extrato_SicoobCapital_PDF.script;Extrato_SicoobConvenios_PDF.script;Extrato_Sicoob_PDF.script;Extrato_Sicoob_Txt.script;Extrato_Sicredi_Excel.script;Extrato_Sicredi_PDF.script;Extrato_Sicredi_TXT.script;Extrato_Sisprime_Excel.script;Extrato_Sisprime_PDF.script;Extrato_Sofisa_Excel.script;Extrato_Sofisa_PDF.script;Extrato_Squid_Excel.script;Extrato_Squid_PDF.script;Extrato_Stone_Excel.script;Extrato_Stone_PDF.script;Extrato_Sulcredi_PDF.script;Extrato_Target_Excel.script;Extrato_Target_PDF.script;Extrato_Topazio_Excel.script;Extrato_Transfeera_PDF.script;Extrato_Tribanco2_PDF.script;Extrato_Tribanco_Excel.script;Extrato_Tribanco_PDF.script;Extrato_UBP_PDF.script;Extrato_Unicred2_PDF.script;Extrato_Unicred_Excel.script;Extrato_Unicred_PDF.script;Extrato_Unicred_TXT.script;Extrato_Uniprime_Excel.script;Extrato_Uniprime_PDF.script;Extrato_Uniprime_Txt.script;Extrato_Viacredi_Excel.script;Extrato_Viacredi_PDF.script;Extrato_Votorantim2_PDF.script;Extrato_Votorantim_Excel.script;Extrato_Votorantim_PDF.script;Extrato_XPInvestimentos_Excel.script;Extrato_XPInvestimentos_PDF.script;FaturaCartaoCredito_Banrisul_PDF.script;FaturaCartaoCredito_BB_PDF.script;FaturaCartaoCredito_Bradesco_PDF.script;FaturaCartaoCredito_Itau_EXCEL.script;FaturaCartaoCredito_Itau_PDF.script;FaturaCartaoCredito_Sicoob_PDF.script;FrancesinhaBradesco_PDF.script;FrancesinhaCresol_PDF.script;FrancesinhagrupoAilos_PDF.script;FrancesinhaItau_CSV.script;FrancesinhaItau_PDF.script;FrancesinhaSafra_PDF.script;FrancesinhaSantander_PDF.script;FrancesinhaSicoob_PDF.script;FrancesinhaSicredi_Excel.script;FrancesinhaSicredi_PDF.script;FrancesinhaSisprime_Excel.script;FrancesinhaUnicredi_PDF.script;Francesinha_Banrisul_TXT.script;Francesinha_BB_PDF.script;Francesinha_Bradesco2_Excel.script;Francesinha_Bradesco_Excel.script;Francesinha_Cef_PDF.script;Interfoc_Genesys_mcp002.script;INVESTIMENTO_BRADESCO.script;Layout_ERP_Posto_Ravanello.script;Linx_AutoSystem.script;Linx_Softpharma_fcpa200.script;Notas_Corretagem_XP_PDF.script;Prosyst.script;readExtratoUnicredDefault.script;Santander_RET.script;Sicoob_Comprovantes_PDF.script;Sindisoft_Relatorio_Movimentacao_Caixa.script;SISJURI_BCS_FINANCEIRO.script;Sisplan_Sistema_Planejamento.script;Systextil.script");
-	String [] listaEmptyArray = listaEmpty.toString().split(";");
-
-       /* readerRoteiro.openFile();
-	while(readerRoteiro.hasNextLine()) {
-		// Le a proxima linha do arquivo
-		linha = readerRoteiro.nextLine();
-		if (linha.contains("Planilhas_Padroes")) {
-			logger.logInfo("PEPE " + linha);
-			listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
-			break;
-		}
-	}*/
-	
-	try {
-		readerRoteiro.openFile();
-		while(readerRoteiro.hasNextLine()) {
-			// Le a proxima linha do arquivo
-			linha = readerRoteiro.nextLine();
-			if (linha.contains("Planilhas_Padroes")) {
-				logger.logInfo("PEPE " + linha);
-				listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
-				break;
-			}
-		}
-	
-		if (!listaPadroes.equals("")) {
-			// String [] padroes = listaPadroes.toString().replaceAll(" ", "").split(";");
-			String rn = "\r\n";
-			
-			
-			for(int kk = 0; kk < listaEmptyArray.length;  kk++){
-				
-				if (listaEmptyArray[kk].contains("ExtratosOFX")) continue;
-				if (listaPadroesLidos.contains(listaEmptyArray[kk])) continue;
-				listaPadroesLidos += ";"+listaEmptyArray[kk];
-				
-				File toRead = new File(".");			
-				if (listaPadroes.contains(cutString(listaEmptyArray[kk], 0, "."))) {
-					try {
-						toRead = new File(String.format(
-							"c:/inout/scriptlib/io_contabil/oicOnDemand/%s",
-							listaEmptyArray[kk].trim()
-						));
-					} catch (Exception e) {
-						logger.logInfo("Primeiro problema OicOnDemand " + e.getMessage());
-						continue;
-					}
-				}
-				else {
-					try {
-						toRead = new File(String.format(
-							"c:/inout/scriptlib/io_contabil/oicOnDemand/empty/%s",
-							listaEmptyArray[kk].trim()
-						));
-					} catch (Exception e) {
-						logger.logInfo("Segundo problema OicOnDemand " + e.getMessage());
-						continue;
-					}
-				}
-				
-				try {
-					FileReader reader = new FileReader(toRead);		
-
-					reader.openFile();
-					sb.append(rn);
-					sb.append(reader.readAll());
-					/*while (reader.hasNextLine()) {
-						String line = reader.nextLine();
-						sb.append(line);
-					}*/
-					sb.append(rn);
-					
-					
-				} catch (Exception to) {
-					//logger.logError("Erro lendo arquivo padrao -> "+padroes[kk]);
-					logger.logError("Erro -> "+to.getMessage());
-				}
-			}
-		}
-    } catch (Exception e) {
-		logger.logError("Deu ruim aqui " + e.getMessage());
-	}
-	logger.logInfo("Retornou");
-	return sb;
 }
 
 
@@ -3762,599 +3650,31 @@ public void criaAvisoErroLayout (String arquivo,InoutLogger logger) {
 
 public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutLogger logger) throws Exception {
 	
-	// logger.logInfo("Chegou 01 atualizaArquivoRoteiro");
 	
-	SysProperties props  = SysProperties.getInstance();
+    SysProperties props  = SysProperties.getInstance();
+    SysProperties props2 = SysProperties.getInstance(); 
 	 // Carrega as propriedades
     props.load("contabil/" + contabilidade + "/contabil.properties");
     
 	String cnpjEmpresa = props.get(empresa.toUpperCase() + "_CNPJ_EMPRESA");
+	logger.logInfo("Antes Atualizando Roteiro - " + cnpjEmpresa);
+
+
+	String arquivoRoteiro  = RouteEngine.INOUT_HOME +  "/contabil/ottimizza/atualizaRoteiros/atualizaRoteiros_"+cnpjEmpresa+"_wf3.txt";
+	FileWriter writerWorkflow = new FileWriter(arquivoRoteiro);
+ 	writerWorkflow.writeNewFile(cnpjEmpresa);
 	
+	//RouteEngine.execRoute("Ottimizza.Oud_AtualizacaoRoteiros");
+	RouteEngine.execRoute("Ottimizza.AtualizaRoteiros40");
 	
-    DatabasePostgreSQL postgre	= new DatabasePostgreSQL();
-    DBPostgreSQL db				= null;
-    CloudAPI cloudAPI			= new CloudAPI();
-
-    JSONArray cnpjs				= new JSONArray();
-    JSONArray roteiros		= new JSONArray();
-
-
-    String tipoMov				= "";
-    String rn					= "\r\n";
-    String aspas				= "\"";
-
-    SysProperties propsCont		   = SysProperties.getInstance();
-
-    String urnExportados = "https://api-regrasoud-listener.herokuapp.com/api/v1/atualiza_roteiros/exportados";
-
-    ConnectorConfig config = new ConnectorConfig();
-    PartnerConnection connection = null;
-
-
-    /* tabela: atualiza_roteiros
-	campos
-		BigInt - id
-		Boolean - exportado
-		JSON - info_roteiros -> {"idRoteiro": "a0A6R00000vgk78", "cnpjEmpresa": "92435747000190", "tipoLancamento": "1"}
-
-	POST url: https://api-regrasoud-listener.herokuapp.com/api/v1/atualiza_roteiros/exportados
-	BODY(ids da tabela atualiza_roteiros sequence) 
-		[
-			1,
-			2
-		]
-    */
-
-
-
-
-    try {
-        // routes.properties atualizado pelo atualiza_otwpadrao
-        propsCont.load("/contabil/Ottimizza/routes.properties");
-
-        db				= DatabasePostgreSQL.connectDatabase("api-listener-exporta-roteiros", logger);
-
-        boolean conectado		= false;
-        StringBuilder listaIds	= new StringBuilder();
-        listaIds.append("[");
-
-        StringBuilder lancPg		= new StringBuilder();
-        StringBuilder lancRc		= new StringBuilder();
-        StringBuilder jaLidos       = new StringBuilder();
-
-        String listaIdsStr			= "";
-        String codErp				= "";
-        String nomeBanco			= "";
-        String cnpj = "";
-        String idsRoteiros = "";
-		
-        int contadorArquivos = 0;
-
-        // for (MemoryFile memFile: fileLoader2.getMemFiles()) {
-            // while (memFile.hasNextLine()) {
-
-                // logger.logInfo("CNPJ EMP == "+cnpjEmpresa);
-				try {
-                    roteiros = postgre.buscaRoteiros(db, cnpjEmpresa, logger);
-                } 
-                catch(Exception ex) {
-                    logger.logInfo("ERRRO buscaRoteiros -> "+ex.getMessage());
-                } 
-
-				// logger.logInfo("ROTEIROS LENGTH <> "+roteiros.length());
-                if (roteiros.length() > 0) {
-
-                  
-                    for (int tt=0; tt<roteiros.length(); tt++) {
-						
-						logger.logInfo("lendo " + roteiros.length() + " | " + tt);
-
-                        String roteiroString = roteiros.optJSONObject(tt).toString().replaceAll("\\\\","");
-						
-						// logger.logInfo("Roteiro lido " + roteiroString);
-
-                        roteiroString = roteiroString.replace("\"{","{");                 
-                        roteiroString = roteiroString.replace("}\"","}"); 
-                        JSONObject roteiroObj = new JSONObject(roteiroString);
-
-                        listaIds.append(roteiroObj.optString("id")).append(",");
-						
-						if(!listaIds.toString().equals("[")) {
-							idsRoteiros = listaIds.toString().substring(0, listaIds.toString().length() - 1)+"]";			
-							try {
-								cloudAPI.doPost(urnExportados, idsRoteiros);
-							}
-							catch (Exception xx) {
-								logger.logInfo("ERROR -> "+xx.getMessage());
-							}
-							listaIds	= new StringBuilder();
-							listaIds.append("[");							
-						}
-						
-                        try {
-                            JSONObject roteiroInfosObj = new JSONObject(roteiroObj.optString("info_roteiros").replaceAll("\\\\",""));
-
-                            String idRoteiro       =  roteiroInfosObj.optString("idRoteiro");
-                            String tipoLancamento  =  roteiroInfosObj.optString("tipoLancamento");
-
-
-                            idRoteiro = cutString(idRoteiro, 0,15);
-							if (idRoteiro.equals("")) {
-								continue;
-							}
-
-
-                            if (!roteiroInfosObj.has("cnpjContabilidade")) {
-								continue;
-							}
-
-                            String cnpjContabilidade  =  roteiroInfosObj.optString("cnpjContabilidade");
-
-                            String codEmpresa		 = "";
-							
-                            if (jaLidos.toString().contains(idRoteiro)) {
-								continue;
-                            }
-							
-							jaLidos.append(idRoteiro).append(";");
-
-                            if (cnpjContabilidade == null || cnpjContabilidade.equals("")) {
-								continue;
-							}
-
-
-                            String diretorio = "";
-
-                            String idRoteiroProperties = "";
-							
-							String licencaProduto = "";
-									
-							try {
-								// contabilidade	= toDisplayCase(propsCont.get(cnpjContabilidade));
-								props.load("/contabil/" + contabilidade + "/contabil.properties");
-								empresa	= props.get(cnpjEmpresa);             
-								codEmpresa = props.get(empresa.toUpperCase() + "_COD_EMPRESA");
-								idRoteiroProperties = props.get(empresa.toUpperCase() + "_ID_ROTEIRO_PAGAR");
-								idRoteiroProperties = idRoteiroProperties + ";" +  props.get(empresa.toUpperCase() + "_ID_ROTEIRO_RECEBER");
-								licencaProduto      = props.get(empresa.toUpperCase() + "_TIPO_PRODUTO"); 
-								
-							} catch (Exception xx) {
-								logger.logInfo("erro props " + contabilidade + "--" + codEmpresa + "--" + empresa);
-								continue;
-							}
-							
-							if (!idRoteiroProperties.contains(idRoteiro)){
-								
-								JSONObject roteiroLog = new JSONObject(roteiroString);
-								roteiroLog.put("Erro","ErroID");  
-								roteiroLog.put("Contabilidade",contabilidade);
-								roteiroLog.put("Empresa",empresa);
-								roteiroLog.put("ID Properties",idRoteiroProperties);
-								roteiroLog.put("IdRoteiro", idRoteiro);
-								
-								continue;
-							}
-
-							/*if (!contabilidade.toUpperCase().equals("MICALICONTABIL") && !contabilidade.toUpperCase().equals("LUZOLIVEIRA") 
-								&& !contabilidade.toUpperCase().equals("MARLIAN") && !contabilidade.toUpperCase().equals("SZXCONSULTORIA") 
-								&& !contabilidade.toUpperCase().equals("GAFFA") && !contabilidade.toUpperCase().equals("DCCONT") 
-								&& !contabilidade.toUpperCase().equals("CONTTROLARE") && !contabilidade.toUpperCase().equals("GPS") 
-								&& !contabilidade.toUpperCase().equals("PROPAR") && !contabilidade.toUpperCase().equals("TWBPO") 
-								&& !contabilidade.toUpperCase().equals("JBQUALITYCONTABILIDADE") && !contabilidade.toUpperCase().equals("ASSECONTRI")) {
-								try {
-
-									StringBuilder regrasToSF = new StringBuilder();
-									regrasToSF.append("[");
-									int contadorRegras = 0;
-									int contadorRegrasTotal = 0;
-
-									StringBuilder historicosToSF = new StringBuilder();
-									historicosToSF.append("[");
-									int contadorHistoricos = 0;
-									int contadorHistoricosTotal = 0;
-									
-									String licencaProduto = "";
-									
-									try {
-										// contabilidade	= toDisplayCase(propsCont.get(cnpjContabilidade));
-										props.load("/contabil/" + contabilidade + "/contabil.properties");
-										empresa	= props.get(cnpjEmpresa);             
-										codEmpresa = props.get(empresa.toUpperCase() + "_COD_EMPRESA");
-										idRoteiroProperties = props.get(empresa.toUpperCase() + "_ID_ROTEIRO_PAGAR");
-										idRoteiroProperties = idRoteiroProperties + ";" +  props.get(empresa.toUpperCase() + "_ID_ROTEIRO_RECEBER");
-										licencaProduto      = props.get(empresa.toUpperCase() + "_TIPO_PRODUTO"); 
-										
-									} catch (Exception xx) {
-										logger.logInfo("erro props " + contabilidade + "--" + codEmpresa + "--" + empresa);
-										continue;
-									}
-
-									//EXPORTACAO DE HISTORICOS PARA O SALESFORCE
-
-									JSONArray historicos = buscaHistoricos(cnpjContabilidade, cnpjEmpresa, tipoLancamento, dbIntegrador, logger);
-									for(int h = 0; h < historicos.length(); h++) {
-										try {
-											JSONObject historico = historicos.optJSONObject(h);
-											String idExternoHistorico = historico.optString("id");
-											String contaMovimentoHistorico = historico.optString("contaMovimento");
-											String historicoCompleto = historico.optString("historico");
-											String grupoRegraId = historico.optString("grupoRegraId");
-
-											String codigoHistorico = "";
-											String texto01 = "";
-											String campoHistorico01 = "";
-											String texto02 = "";
-											String campoHistorico02 = "";
-											String texto03 = "";
-											String campoHistorico03 = "";
-											String texto04 = "";
-											String campoHistorico04 = "";
-											String texto05 = "";
-											String campoHistorico05 = "";
-
-											JSONObject historicoSf = new JSONObject();	
-											if(grupoRegraId != null && !grupoRegraId.equals("")) {
-
-												JSONArray regrasBd = buscaRegrasPorGrupoRegraId(grupoRegraId, dbIntegrador, logger);
-												JSONArray regras = new JSONArray();
-												for(int r = 0; r < regrasBd.length(); r++) {
-													String campo = regrasBd.optJSONObject(r).optString("campo");
-													if(!campo.contains("tipoMovimento")) 
-														regras.put(regrasBd.optJSONObject(r));
-												}
-
-												if(regras.length() > 0)
-													historicoSf = criaHistoricoSfPorRegra(historico, regras, logger);
-												else {
-													try{ 
-														historicoSf = criaHistoricoSf(historico, logger);
-													}
-													catch(Exception ex) { 
-														logger.logInfo("Error transformando historico para Salesforce -> "+ex.getMessage()); 
-														contadorHistoricosTotal++; 
-														continue;
-													}
-												}
-											}
-											else {
-												try{ 
-													historicoSf = criaHistoricoSf(historico, logger);
-												}
-												catch(Exception ex) { 
-													logger.logInfo("Error transformando historico para Salesforce -> "+ex.getMessage()); 
-													contadorHistoricosTotal++; 
-													continue;
-												}
-											}
-
-											historicoSf.put("Roteiro__c", idRoteiro);
-											historicosToSF.append(historicoSf.toString()).append(",");
-											contadorHistoricos++;
-											contadorHistoricosTotal++; 
-
-											if(contadorHistoricos == 200 || contadorHistoricosTotal == historicos.length()) {
-												historicosToSF.append("]");
-												contadorHistoricos = 0;
-
-												String dirName = RouteEngine.INOUT_HOME +"/contabil/Ottimizza/EnvioHisotricoSalesforce/arquivo_"+idRoteiro+"_"+String.valueOf(tt) + ".txt";
-												FileWriter txtHistoricos = new FileWriter(dirName);
-												txtHistoricos.writeNewFile(historicosToSF.toString()); 
-												RouteEngine.execRoute("Ottimizza.AtualizaHistoricosOUDnoSalesforce");
-
-												historicosToSF = new StringBuilder();
-												historicosToSF.append("[");
-											}
-										}
-										catch(Exception ex) {
-											logger.logInfo("EXCEPTION HISTORICOS -> "+ex.getMessage());
-											continue;
-										}
-									}
-								}
-								catch (Exception xx) {
-									logger.logInfo("ERROR -> "+xx.getMessage());
-								} 
-
-
-								
-
-
-
-								if (!idRoteiroProperties.contains(idRoteiro)){
-								
-									JSONObject roteiroLog = new JSONObject(roteiroString);
-									roteiroLog.put("Erro","ErroID");  
-									roteiroLog.put("Contabilidade",contabilidade);
-									roteiroLog.put("Empresa",empresa);
-									roteiroLog.put("ID Properties",idRoteiroProperties);
-									roteiroLog.put("IdRoteiro", idRoteiro);
-									
-									if (!contabilidade.toUpperCase().equals("MICALICONTABIL") && !contabilidade.toUpperCase().equals("LUZOLIVEIRA") 
-									&& !contabilidade.toUpperCase().equals("MARLIAN") && !contabilidade.toUpperCase().equals("SZXCONSULTORIA") 
-									&& !contabilidade.toUpperCase().equals("GAFFA") && !contabilidade.toUpperCase().equals("DCCONT") 
-									&& !contabilidade.toUpperCase().equals("CONTTROLARE") && !contabilidade.toUpperCase().equals("GPS") 
-									&& !contabilidade.toUpperCase().equals("PROPAR") && !contabilidade.toUpperCase().equals("TWBPO") 
-									&& !contabilidade.toUpperCase().equals("JBQUALITYCONTABILIDADE") && !contabilidade.toUpperCase().equals("ASSECONTRI")
-									&& !contabilidade.toUpperCase().contains("ORGANO") ) continue;
-								}
-								
-								
-								// aguarda um segundo para dar tempo das regras estarem salvas no salesforce.
-								Thread.sleep(1000);
-							}*/
-                            
-
-								
-							if (connection == null) {
-								config.setUsername("fabrica@ottimizza.com.br");
-								config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
-								config.setTraceMessage(false);
-								connection = Connector.newConnection(config);  
-								// logger.logInfo("API SALES SHR: atualizaArquivoRoteiro workflow4 4");
-							}	
-                             
-
-
-                            if (tipoLancamento.equals("1"))  preparaArquivo40(idRoteiro, "Contas PAGAS", contabilidade, empresa, "", "", connection, logger);
-                            if (tipoLancamento.equals("2"))  preparaArquivo40(idRoteiro, "Contas RECEBIDAS", contabilidade, empresa, "", "", connection, logger);
-                            if (tipoLancamento.equals("1"))  preparaArquivoEspecifico40(idRoteiro, "Contas PAGAS", contabilidade, empresa, "", "", connection, logger);
-                            if (tipoLancamento.equals("2"))  preparaArquivoEspecifico40(idRoteiro, "Contas RECEBIDAS", contabilidade, empresa, "", "", connection, logger);
-
-
-
-                        }
-                        catch (Exception xx) {
-                            logger.logInfo("ERROR -> "+xx.getMessage());
-                        }
-                    }
-
-                }
-            // }
-            if(!listaIds.toString().equals("[")) {
-                idsRoteiros = listaIds.toString().substring(0, listaIds.toString().length() - 1)+"]";			
-                try {
-                    cloudAPI.doPost(urnExportados, idsRoteiros);
-                }
-                catch (Exception xx) {
-                    logger.logInfo("ERROR -> "+xx.getMessage());
-                }                    
-            }
-        // }	
-
-
-    } catch (Exception e) {
-        logger.logInfo("*** por algum motivo cai no catch geral da rota -> "+e.getMessage());
-    } finally {
-        if (db != null) db.closeConnection();
-		
-    }
+	logger.logInfo("Atualizando arquivo Roteiro 40 - " + cnpjEmpresa);
 	
-	// logger.logInfo("Terminou 01 atualizaArquivoRoteiro");
+																		
+	// aguarda 5 segundo para dar tempo das regras estarem salvas no salesforce.
+	// Thread.sleep(5000);
+
+	
  	
-}
-
-public void preparaArquivo40(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, PartnerConnection connection, InoutLogger logger) {
-	try {
-        StringBuilder codigoNovo    = new StringBuilder();
-        StringBuilder codigoRoteiro = new StringBuilder();
-
-
-        try {
-            String tipoRoteiro = "_ContasPagasRoteiroPadrao.script";
-            if (tipoIntegracao.toUpperCase().contains("RECE")) tipoRoteiro = "_ContasRecebidasRoteiroPadrao.script";
-            File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-
-            codigoRoteiro.append(prepareScript(idRoteiro, "OTTPADRAO" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
-
-
-            if (!codigoRoteiro.toString().equals("")) {
-                logger.logInfo("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-
-                FileWriter writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-                writer.writeNewFile(codigoRoteiro.toString());			
-
-
-            }	
-
-
-        } catch (Exception xx) {logger.logInfo("XX " + xx);}
-
-
-    }
-
-
-    catch (Exception xx) {}
-
-    return;
-}
-
-
-
-public void preparaArquivoEspecifico40(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, PartnerConnection connection, InoutLogger logger) {
-	try {
-        StringBuilder codigoNovo    = new StringBuilder();
-        StringBuilder codigoRoteiro = new StringBuilder();
-
-
-        try {
-            String tipoRoteiro = "_ContasPagasRoteiro.script";
-            if (tipoIntegracao.toUpperCase().contains("RECE")) tipoRoteiro = "_ContasRecebidasRoteiro.script";
-            File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-
-            codigoRoteiro.append(prepareScript(idRoteiro, "OTTPADRAO" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
-
-
-            if (!codigoRoteiro.toString().equals("")) {
-                logger.logInfo("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-
-                FileWriter writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-                writer.writeNewFile(codigoRoteiro.toString());			
-
-
-            }	
-
-
-        } catch (Exception xx) {logger.logInfo("XX " + xx);}
-
-	}
-
-
-    catch (Exception xx) {}
-
-    return;
-}
-
-public String trataCampoHistorico(String campo) throws Exception {
-    if(campo.contains("descricao")) {
-        campo = "Fornecedor/Cliente";
-    }
-    if(campo.contains("portador")) {
-        campo = "Portador";
-    }
-    if(campo.contains("competencia")) {
-        if(campo.contains("Anterior"))
-            campo = "Mes-Ano Anterior";
-        else
-            campo = "Mes-Ano Atual";
-    }
-    if(campo.contains("documento")) {
-        campo = "Documento/NF";
-    }
-    if (campo.contains("complemento")) {
-        campo = campo.replaceFirst("c", "C").replace("o0", "o (0").concat(")");
-    }
-    if(campo.contains("nenhum")) {
-        campo = "";
-    }
-    return campo;
-}
-
-public String trataCampoRegra(String campo, int condicao) {
-
-    if (campo.contains("complemento")) {
-        campo = campo.replaceFirst("c", "C").replace("o0", "o (0").concat(")");
-    }
-    else if (campo.contains("tipoPlanilha")) {
-        campo = "Tipo Planilha";
-    }
-    else if (campo.contains("portador")) {
-        campo = "Portador";
-    }
-    else if (campo.contains("descricao")) {
-        campo = "Fornecedor/Cliente";
-    }
-    else if (campo.contains("documento")) {
-        campo = "Documento/NF";
-    }
-    else if(campo.contains("nomeArquivo")) {
-        campo = "Nome do Arquivo";
-    }
-
-    //TRATANDO CONDICAO 
-
-    if(condicao == 1) {
-        campo = campo.concat(" cont" + (char)233 + "m");
-    }
-    else if(condicao == 2) {
-        campo = campo.concat(" n" + (char)227 + "o " + "cont" + (char)233 + "m");
-    }
-    else if(condicao == 3) {
-        campo = campo.concat(" come" + (char)231 + "a com");
-    }
-    else if(condicao == 4) {
-        campo = campo.concat(" igual a");
-    }
-    return campo;
-
-}
-
-
-public JSONArray buscaRegrasPorGrupoRegraId(String grupoRegraId, DBPostgreSQL db, InoutLogger logger) throws SQLException {
-    String sql = "select campo as campo, condicao as condicao, valor as valor "
-    + "from regras r "
-    + "where fk_grupo_regras_id = "+grupoRegraId+" ";			
-    try {
-        JSONArray records = db.sql(sql)
-        .setFields("campo, condicao,  valor")
-        .debug(logger)
-        .query();
-
-        return records;
-
-    } catch (Exception e) {
-        logger.logInfo("ERROR buscaRegrasPorGrupoRegraId: "+e.getMessage());
-    }
-    return null;
-}
-
-public JSONArray buscaGrupoRegras(String cnpjContabilidade, String cnpjEmpresa, String tipoLancamento, DBPostgreSQL db, InoutLogger logger) throws SQLException {
-	//String currentDate = "'" + DateUtil.dateToString(new Date(), "yyyy-MM-dd 00:00:00") + "'";
-	Calendar cal = Calendar.getInstance();
-    try {
-		cal = DateUtil.dateToCalendar(new Date());
-		cal.add(Calendar.DATE, -30);
-    } catch (Exception e) {
-        logger.logInfo("ERROR buscaGrupoRegras add date: "+e.getMessage());
-    }
-	String currentDate = "'" + DateUtil.dateToString(cal.getTime(), "yyyy-MM-dd 00:00:00") + "'";
-	
-    String sql = "select id as id, conta_movimento as contaMovimento, id_roteiro as idRoteiro, posicao as posicao, conta_desconto as contaDesconto, "
-    + "conta_juros as contaJuros, conta_multa as contaMulta, conta_portador as contaPortador, inverte_contas as inverteContas "
-    + "from grupo_regras gr "					
-    + "where gr.cnpj_empresa = '"+cnpjEmpresa+"' "
-    + "and gr.cnpj_contabilidade = '"+cnpjContabilidade+"' "
-    + "and gr.tipo_lancamento = "+tipoLancamento+" "
-    + "and gr.ativo = true "
-	+ "and gr.data_atualizacao >= " + currentDate + "::date "
-    + "and (SELECT COUNT(r.id) FROM regras r WHERE r.fk_grupo_regras_id = gr.id) > 0 "
-    + "order by gr.posicao asc ";			
-
-    try {
-        JSONArray records = db.sql(sql)
-        .setFields("id, contaMovimento, idRoteiro, posicao, contaDesconto, contaJuros, contaMulta, contaPortador, inverteContas")
-        .debug(logger)
-        .query();
-        return records;
-
-    } catch (Exception e) {
-        logger.logInfo("ERROR buscaGrupoRegras: "+e.getMessage());
-    }
-    return null;
-}
-
-public JSONArray buscaHistoricos(String cnpjContabilidade, String cnpjEmpresa, String tipoLancamento, DBPostgreSQL db, InoutLogger logger) throws SQLException {
-	//String currentDate = "'" + DateUtil.dateToString(new Date(), "yyyy-MM-dd 00:00:00") + "'";
-	Calendar cal = Calendar.getInstance();
-    try {
-		cal = DateUtil.dateToCalendar(new Date());
-		cal.add(Calendar.DATE, -30);
-    } catch (Exception e) {
-        logger.logInfo("ERROR buscaHistoricos add date: "+e.getMessage());
-    }
-	String currentDate = "'" + DateUtil.dateToString(cal.getTime(), "yyyy-MM-dd 00:00:00") + "'";
-	
-    String sql = "SELECT id as id, conta_movimento as contaMovimento, historico as historico, id_roteiro as idRoteiro, fk_grupo_regras_id as grupoRegraId, historico_padrao as historicoPadrao "
-    + "FROM historicos h "
-    + "WHERE h.cnpj_contabilidade = '"+cnpjContabilidade+"' "
-    + "and h.cnpj_empresa = '"+cnpjEmpresa+"' "
-    + "and h.tipo_lancamento = "+tipoLancamento+" "
-    + "and h.ativo = true "
-	+ "and h.data_atualizacao >= " + currentDate + "::date ";
-
-    try {
-        JSONArray records = db.sql(sql)
-        .setFields("id, contaMovimento, historico, idRoteiro, grupoRegraId, historicoPadrao")
-        .debug(logger)
-        .query();
-
-        
-		// logger.logInfo("HST RECORDS -> "+records.toString());
-		return records;
-
-    } catch (Exception e) {
-        logger.logInfo("ERROR buscaHistoricos: "+e.getMessage());
-    }
-    return null;
 }
 
 //-------------------------------------------------------------------------------------

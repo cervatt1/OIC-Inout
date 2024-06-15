@@ -31,15 +31,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
  	config.setUsername("fabrica@ottimizza.com.br");
 	config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 	config.setTraceMessage(false);
-				
-	String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
-
+	
+	
+	logger.logInfo("API SALES SHR: runWorkflowEspecificoEndpointA workflow4 1");
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
@@ -68,6 +62,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
         String oicContabil  = props.get("OIC_LIBERADO");
         String emailCanal   = props.get("EMAIL_CANAL");
+        String codigoCanal  = props.get("CODIGO_CANAL");
 		String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
 	    String versaoOtzWebApp = "02_Conecta_Via_Portal_Ottimizza";
 		String fornecedorUnico = props.get("FORNECEDOR_UNICO");
@@ -97,7 +92,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 		FileWriter writerLog = new FileWriter(fileLog);
 		writerLog.writeNewFile(conteudo.toString());
 		
-		postStatus(servDinamic.toUpperCase(), contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus("S1", contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
   
  
         // verifica se a empresa existe no diretorio /inout/contabil/contabilidade
@@ -108,17 +103,18 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
  			File fileProperties = new File(diretorioDestino);
 			String[] listaProperties = fileProperties.list();
   			if (listaProperties.length > 1) {
-				
-				// vamos rodar apenas quando processar futuro, assim nao ocorre o risco de rodarmos 2 conatbilidade
-		     	// ao mesmo tempo
-				
+				//RouteEngine.execRoute("Ottimizza.Atualiza_Properties");
+				// logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
 				if (contabilidade.toUpperCase().contains("FUTURO")) {
 					RouteEngine.execRoute("Ottimizza.Atualiza_Properties");
-					logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
+					logger.logInfo("Forcando Criar empresa na Contabilidade " + contabilidade);
 				}
 			}
 		}
 		
+	
+        if (codigoCanal == null) codigoCanal = "Admin";
+
         if (rotasLO != null) {
 
             for (String nome : rotasLO) {
@@ -131,6 +127,8 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 						 
                         String emailResponsavel = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_EMAIL_RESPONSAVEL");
                         String oicEmpresa = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_LIBERA_OIC");
+						
+						if (empresa.contains("EXPORTADORA")) logger.logInfo("Empresa no inicio " + empresa + " | " + contabilidade);
 						
                         //-------------------------------------------------------------------------------------
 						// GERA ARQUIVO COM log da ultima contabilidade que foi rodada.
@@ -260,7 +258,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 												fileDePara.getName().toUpperCase().contains("PLANO") &&
 												((fileDePara.getName().toUpperCase().startsWith("PLANO DE CONTA") && fileDePara.getName().toUpperCase().endsWith(".CSV")) || 
 												 (fileDePara.getName().toUpperCase().contains("PLANO_CONTAS_QUESTOR") && fileDePara.getName().toUpperCase().endsWith(".CSV")) || 
-												 fileDePara.getName().toUpperCase().endsWith(".XLSX") || fileDePara.getName().toUpperCase().endsWith(".LST") || fileDePara.getName().toUpperCase().endsWith(".TXT") || fileDePara.getName().toUpperCase().endsWith(".PDF"))) {                    
+												 fileDePara.getName().toUpperCase().endsWith(".XLSX") || fileDePara.getName().toUpperCase().endsWith(".LST") || fileDePara.getName().toUpperCase().endsWith(".TXT"))) {                    
 												File txtImportaPlanoContas = new File(String.format("%s/contabil/Ottimizza/ImportaPlanoContas/PlanoContas_%s.txt", RouteEngine.INOUT_HOME, nome));
 
 												// Criar diretorio ottimizza/ImportaPlanoContas se n?o existe.
@@ -268,7 +266,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
 												// QUANDO FOR CSV, joga em pasta /inout/contabil/ottimizza/planocontas para poder importar
 												// sem dar conflito com os .csv de depara. 
-												if (fileDePara.getName().toUpperCase().endsWith(".CSV") || fileDePara.getName().toUpperCase().endsWith(".PDF")) {
+												if (fileDePara.getName().toUpperCase().endsWith(".CSV")) {
 													filename = fileDePara.getAbsolutePath();
 													filename = filename.replaceAll("\\\\", "/");
 
@@ -481,7 +479,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
                         if (FileUtil.dirHasFiles(diretorio)) {
 
  							
-							postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+							postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 							for (File fl: files) {
 								
@@ -603,7 +601,6 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 											String nomeRota = getNomeContabilidadeWorkflow() + "." + nome.substring(0,nome.indexOf("_#")) + "_ContasPagas";
 											
 											//Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - Início
-											//Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - Início
 											if (fl.getName().toUpperCase().contains("_ID")) {
 												LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 												// adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
@@ -612,10 +609,15 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 												boolean converteu = converteuPDF(protocolo_id, apiWeb, logger);
 												
 												if (!converteu) continue;
+												
+												/*long timeRota = fl.lastModified();
+												double timeRotaDouble = (double) timeRota;
+												double timeRotasDouble = (System.currentTimeMillis() - timeRotaDouble) / 1000;
+												
+												if (timeRotasDouble < 60) continue;*/
 											}
 											
 											try{
-
 
 												// executa rota que atualiza os roteiros das empresas
 												//RouteEngine.execRoute("Ottimizza.Oud_AtualizacaoRoteiros");
@@ -630,7 +632,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 												try {
 
 													
-													if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {															
+													if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {	
+
+														logger.logInfo("Antes Padrao   " + contabilidade +"_"+ nome.substring(0,nome.indexOf("_#")));
 														//PartnerConnection connection = Connector.newConnection(config);
 														//preparaArquivo(idRoteiro, "Contas PAGAS", contabilidade, nome.substring(0,nome.indexOf("_#")), dirName, connection, logger);
 														// PartnerConnection connection = Connector.newConnection(config);  
@@ -638,7 +642,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 														
 														
 														nomeRota = getNomeContabilidadeWorkflow() + "." + getNomeContabilidadeWorkflow() +  "_ContasPagas";
+														double tempoInicio1 = System.currentTimeMillis();
 														RouteEngine.execRoute(nomeRota);
+														logger.logInfo("Tempo Rota; " + String.format("%.2f", (System.currentTimeMillis() - tempoInicio1) / 1000));
 													} 
 												
 
@@ -720,10 +726,10 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																		// if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
 																			String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
 																			// JWR 03072023
-																			/*if(fileDePara.exists()) {
-																				fileDePara.delete();
-																				continue;
-																			}*/
+																			// if(fileDePara.exists()) {
+																				// fileDePara.delete();
+																				// continue;
+																			// }
 																		// }
 																		//Sprint conversorpdf
 																		//Verifica se encontramos algum erro ou status 3 de 4 na pasta do depara, da empresa
@@ -824,7 +830,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																		&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																		File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																		FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																		nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																		nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																		jBucket.put("linkArquivo", nomeArquivo64);
 																		try {
 																			FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -847,9 +853,8 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
  																			
 																		// adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
 																		if(fl.getName().toUpperCase().contains("_ID")) {
- 																			String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
+																			String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
 																			String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado",  logger);
-
 																			
 																		} 
 																	}
@@ -936,7 +941,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 											filename = filename.replaceAll("\\\\", "/");
 											FileUtil.moveToDir(filename, diretorio + "/Processado");
 
-										} else {
+										} else if (!extensaoArquivo.equals(".tempomc")) {
 											//emailArquivoErrado outros arquivos
 											subject = "Arquivo nao suportado por OTTIMIZZA Contabil";
 
@@ -1033,7 +1038,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
                             if (FileUtil.dirHasFiles(diretorio)) {
 							
-								postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+								postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
                                 for (File fl: files) {
 									
@@ -1150,7 +1155,6 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
                                                 //executa a rota
                                                 String nomeRota = getNomeContabilidadeWorkflow() + "." + nome.substring(0,nome.indexOf("_#")) + "_ContasRecebidas";
 												
-												//Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - Início
 												if (fl.getName().toUpperCase().contains("_ID")) {
 													LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
 													// adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
@@ -1159,6 +1163,12 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 													boolean converteu = converteuPDF(protocolo_id, apiWeb, logger);
 													
 													if (!converteu) continue;
+													
+													/*long timeRota = fl.lastModified();
+													double timeRotaDouble = (double) timeRota;
+													double timeRotasDouble = (System.currentTimeMillis() - timeRotaDouble) / 1000;
+													
+													if (timeRotasDouble < 60) continue;*/
 												}
 												
                                                 try{
@@ -1167,7 +1177,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 													// RouteEngine.execRoute("Ottimizza.Oud_AtualizacaoRoteiros");
 
 													atualizaArquivoRoteiro(getNomeContabilidadeWorkflow(), nome.substring(0,nome.indexOf("_#")), logger);
-													// logger.logInfo("fl.getName() -> " + fl.getName());
+
 
 													String rodaPadrao = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_PLANILHA_PADRAO_RECEBER");
 													String tipoProduto = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_TIPO_PRODUTO");
@@ -1177,7 +1187,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 			
 													try {
 
-														if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {															
+														if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {
+
+															logger.logInfo("Antes Padrao   " + contabilidade +"_"+ nome.substring(0,nome.indexOf("_#")));
 															//PartnerConnection connection = Connector.newConnection(config);
 															//preparaArquivo(idRoteiro, "Contas RECEBIDAS", contabilidade,  nome.substring(0,nome.indexOf("_#")), dirName, connection, logger);
 															// PartnerConnection connection = Connector.newConnection(config);  
@@ -1185,7 +1197,9 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
   
  
 															nomeRota = getNomeContabilidadeWorkflow() + "." + getNomeContabilidadeWorkflow() +  "_ContasRecebidas";
+															double tempoInicio1 = System.currentTimeMillis();
 															RouteEngine.execRoute(nomeRota);
+															logger.logInfo("Tempo Rota; " + String.format("%.2f", (System.currentTimeMillis() - tempoInicio1) / 1000));
 														}
 														
 														if (!tipoProduto.contains("ILIMITADA")) {
@@ -1258,10 +1272,10 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																			
 																			// if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
 																				String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
-																				/*if(fileDePara.exists()) {
-																					fileDePara.delete();
-																					continue;
-																				}*/
+																				// if(fileDePara.exists()) {
+																					// fileDePara.delete();
+																					// continue;
+																				// }
 																			// }
 																			//Sprint conversorpdf
 																			//Verifica se encontramos algum erro ou status 3 de 4 na pasta do depara, da empresa
@@ -1357,7 +1371,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																			&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																			File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																			FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-																			nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+																			nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																			jBucket.put("linkArquivo", nomeArquivo64);
 																			try {
 																				FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1382,7 +1396,6 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																			if(fl.getName().toUpperCase().contains("_ID")) {
 																				String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
 																				String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado",  logger);
-																				
 																			} 
 																		}
 
@@ -1462,7 +1475,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
                                                 filename = filename.replaceAll("\\\\", "/");
                                                 FileUtil.moveToDir(filename, diretorio + "/Processado");
 
-                                            } else {
+                                            } else if (!extensaoArquivo.equals(".tempomc")) {
                                                 //enviaAvisoSobreArquivo outros arquivos
                                                 subject = "Arquivo nao suportado por OTTIMIZZA Contabil";
                                                 enviaAvisoSobreArquivoErrado(fl.getName(), nome,  subject, emailResponsavel, sendToName, "OUTROS", "AReceber", logger);
@@ -1592,6 +1605,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 	config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 	config.setTraceMessage(false);
 	
+	logger.logInfo("API SALES SHR: runWorkflowEndpointA workflow4 2");
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
@@ -1602,7 +1616,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
  
 	
 	//logger.logInfo("INICIANDO WORKFLOW");
-	postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+	postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
     
     try {
         // tenta carregar propriedades de rotas.
@@ -1655,7 +1669,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                         String arquivoGrande = "";
                         String jSdir = "";
 
-                        //logger.logDebug("AVALIANDO CONTABILIDADE  === " + contabilidade);
+                        // logger.logInfo("AVALIANDO CONTABILIDADE  === " + contabilidade);
                         if (contabilidade.toUpperCase().equals("ESCRILEX")) continue;
                         if (contabilidade.toUpperCase().equals("ONNEGESTAO")) continue;
                         //if (!contabilidade.toUpperCase().equals("FUTURO")) continue;
@@ -1666,8 +1680,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 						
 						// quando travar, mascarcar aqui
 						//logger.logDebug("Lendo " + contabilidade);
-
-
+ 
                         File file = new File(dirName); // -> dirContabilidade
 
 
@@ -1684,14 +1697,12 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                         double sizeLimit = 4;               //tamanho maximo processavel                        //-
                         // if (contabilidade.toUpperCase().contains("TECOLMG")) sizeLimit = 40; // #Fabrica(2019-07-24) @Becker
                         sizeLimit = sizeLimit * (Math.pow(1024,2)); //MiB                                       //-
-
+ 
                         String extensaoArquivo  = "";
 
                         // Carrega as propriedades
                         props.load("contabil/" + contabilidade + "/contabil.properties");
-                        props2.load("contabil/" + INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) + "/empresa.properties");
-
-
+ 						props2.load("contabil/" + INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) + "/empresa.properties");
                         String oicContabil  = props.get("OIC_LIBERADO");
                         //06092023 Comentado pois estava barrando a mensagem de erro no 4.0
 						// if (oicContabil.equals("NAO")) {
@@ -1700,6 +1711,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                         // }
 
                         String emailCanal   = props.get("EMAIL_CANAL");
+                        String codigoCanal  = props.get("CODIGO_CANAL");
                         String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
                         String versaoOtzWebApp = "02_Conecta_Via_Portal_Ottimizza";
 						String fornecedorUnico = props.get("FORNECEDOR_UNICO");
@@ -1710,15 +1722,19 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                         String empresa      = "";
                         String operacao     = "";
 						
-						//logger.logInfo("CONTZINHA " + contabilidade);
+						// logger.logInfo("Antes LOG " + contabilidade + "<<>>" + INOUT_ROUTE_ID);
  
 						//-------------------------------------------------------------------------------------
 						// GERA ARQUIVO COM log da ultima contabilidade que foi rodada.
 						//-------------------------------------------------------------------------------------
+						 
 						String fileLog = "/inout/logs/workflow/" + INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) + "_ultimaRota.csv";
 						Date ultimoLog = new Date();
 
 						String conteudo = contabilidade + ";" + ultimoLog.getTime();
+						
+						// logger.logInfo("depois LOG " + contabilidade + "<<>>" + INOUT_ROUTE_ID);
+
 
 						FileWriter writerLog = new FileWriter(fileLog);
 						writerLog.writeNewFile(conteudo.toString());
@@ -1731,13 +1747,15 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 							File fileProperties = new File(diretorioDestino);
 							String[] listaProperties = fileProperties.list();
 							if (listaProperties.length > 1) {
-								
-								// comentado para rodar apenas em outra parte do codugo, onde a conatbilidade eh a Futuro
 								//RouteEngine.execRoute("Ottimizza.Atualiza_Properties");
-								logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
+								// logger.logInfo("Forcando Crar empresa na Contabilidade " + contabilidade);
 							}
 						}
-						
+
+
+                        if (codigoCanal == null) codigoCanal = "Admin";					
+
+
                         if (rotasLO != null) {
 
                             for (String nome : rotasLO) {
@@ -1889,7 +1907,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                             if (!fileDePara.getName().toUpperCase().contains("PARTICIPANTE") && 
                                                                 fileDePara.getName().toUpperCase().contains("PLANO") &&
 															   (((fileDePara.getName().toUpperCase().startsWith("PLANO DE CONTA") || fileDePara.getName().toUpperCase().startsWith("PLANOCONTAS")) && fileDePara.getName().toUpperCase().endsWith(".CSV")) || 
-                                                                 fileDePara.getName().toUpperCase().endsWith(".XLSX") || fileDePara.getName().toUpperCase().endsWith(".LST") || fileDePara.getName().toUpperCase().endsWith(".TXT") || fileDePara.getName().toUpperCase().endsWith(".PDF"))) {                    
+                                                                 fileDePara.getName().toUpperCase().endsWith(".XLSX") || fileDePara.getName().toUpperCase().endsWith(".LST") || fileDePara.getName().toUpperCase().endsWith(".TXT"))) {                    
                                                                 File txtImportaPlanoContas = new File(String.format("%s/contabil/Ottimizza/ImportaPlanoContas/PlanoContas_%s.txt", RouteEngine.INOUT_HOME, nome));
 
 
@@ -1898,7 +1916,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
                                                                 // QUANDO FOR CSV, joga em pasta /inout/contabil/ottimizza/planocontas para poder importar
                                                                 // sem dar conflito com os .csv de depara. 
-                                                                if (fileDePara.getName().toUpperCase().endsWith(".CSV") || fileDePara.getName().toUpperCase().endsWith(".PDF")) {
+                                                                if (fileDePara.getName().toUpperCase().endsWith(".CSV")) {
                                                                     filename = fileDePara.getAbsolutePath();
                                                                     filename = filename.replaceAll("\\\\", "/");
 
@@ -2079,7 +2097,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 											
 												logger.logDebug("LENDO EMPRESA pagar = " + empresa);
 											
-												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -2279,7 +2297,42 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																	boolean converteu = converteuPDF(protocolo_id, apiWeb, logger);
 																	
 																	if (!converteu) continue;
+																	
+																	/*long timeRota = fl.lastModified();
+																	double timeRotaDouble = (double) timeRota;
+																	double timeRotasDouble = (System.currentTimeMillis() - timeRotaDouble) / 1000;
+																	
+																	if (timeRotasDouble < 60) continue;*/
 																}
+																//Alterado para esperar uns segundos antes de copiar o arquivo dessa contabilidade por causa do tamanho - Início
+																// boolean continueModified = false;
+																
+																// if (nomeRota.toUpperCase().contains("RUSSELLBED")) {//Russellbed
+																/*	String diretorioModified = "/inout/contabil/"+getNomeContabilidadeWorkflow() + "/" + nome +"/APagar";
+																	
+																	file2 = new File(diretorioModified);
+																	File []  arquivosModified = file2.listFiles();
+																	
+																	if (FileUtil.dirHasFiles(diretorio)) {
+																		for (File fl: arquivosModified) {
+																			long timeRota = fl.lastModified();
+																			double timeRotaDouble = (double) timeRota;
+																			double timeRotasDouble = (System.currentTimeMillis() - timeRotaDouble) / 1000;
+																			
+																			if (extensaoArquivo.toUpperCase().contains("PDF")) {
+																				if (timeRotasDouble < 60) {
+																					continueModified = true;
+																					break;
+																				} else {
+																					continueModified = false;
+																				}
+																			} else {
+																				continueModified = false;
+																			}
+																		}
+																	}
+																	if (continueModified) continue;*/
+																// }
 																
                                                                 try{
 																
@@ -2292,30 +2345,28 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																	// executa rota que atualiza os roteiros das empresas
 																	// RouteEngine.execRoute("Ottimizza.Oud_AtualizacaoRoteiros");
 																	atualizaArquivoRoteiro(contabilidade, nome.substring(0,nome.indexOf("_#")), logger);
-																	// logger.logInfo("fl.getName() -> " + fl.getName());
 
 
-                                                                    try {
-																		String rodaPadrao = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_PLANILHA_PADRAO_PAGAR");
-																		// logger.logInfo("PPP " + rodaPadrao + " | " + contabilidade);
+                                                                    try { 
+                                                                         String rodaPadrao = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_PLANILHA_PADRAO_PAGAR");
 
-                                                                        if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {															
-																			// PartnerConnection connection = Connector.newConnection(config);
-																			preparaArquivo(idRoteiro, "Contas PAGAS", contabilidade, nome.substring(0,nome.indexOf("_#")), dirName, dirNameW, config, logger);
+                                                                         if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {															
+																			// PartnerConnection connection = Connector.newConnection(config);  
+                                                                              preparaArquivo(idRoteiro, "Contas PAGAS", contabilidade, nome.substring(0,nome.indexOf("_#")), dirName, dirNameW, config, logger);
 
-																			nomeRota = getNomeContabilidade() + "." + getNomeContabilidade() +  "_ContasPagas";
- 																			double tempoInicio1 = System.currentTimeMillis();
-																			RouteEngine.execRoute(nomeRota);
-																		    logger.logInfo("Tempo Rota; " + String.format("%.2f", (System.currentTimeMillis() - tempoInicio1) / 1000));
-																			rodouRota = true;
-                                                                         }
+
+                                                                             nomeRota = getNomeContabilidade() + "." + getNomeContabilidade() +  "_ContasPagas";
+ 																			 double tempoInicio1 = System.currentTimeMillis();
+																			 RouteEngine.execRoute(nomeRota);
+																		     logger.logInfo("Tempo Rota; " + String.format("%.2f", (System.currentTimeMillis() - tempoInicio1) / 1000));
+																			 rodouRota = true;
+ 
+                                                                         } 
                                                                      }
 
                                                                     catch (Exception xx) {
-                                                                        logger.logInfo("ERRO AO RODAR ROTEIRO " + xx.getMessage());
+                                                                        logger.logDebug("ERRO AO RODAR ROTEIRO");
                                                                     }
-																	
-																	// logger.logInfo("WFIILI " + tipoProduto);
 																	
 																	if (!tipoProduto.contains("ILIMITADA")) {
 																		preparaArquivoEspecifico(idRoteiro, "Contas PAGAS", contabilidade, nome.substring(0,nome.indexOf("_#")), dirName, dirNameW,  logger);
@@ -2356,7 +2407,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																		nomeRota = INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) + "." + INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) +  "_ContasPagas";
 																		if (nome.substring(0,nome.indexOf("_#")).toUpperCase().startsWith("BUSSOLA") && !nome.substring(0,nome.indexOf("_#")).toUpperCase().endsWith("BUSSOLA")) nomeRota = "OTWBussola.LeituraBalancete";
 
-																		logger.logInfo("ROTA   " + nomeRota + "<>" + arquivoOrigem);
+																		// logger.logInfo("ROTA   " + nomeRota + "<>" + arquivoOrigem);
 
 																		double tempoInicio1 = System.currentTimeMillis();
 																		RouteEngine.execRoute(nomeRota);
@@ -2401,10 +2452,10 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						// if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
 																							String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
 																							// JWR 03072023
-																							/*if(fileDePara.exists()) {
-																								fileDePara.delete();
-																								continue;
-																							}*/
+																							// if(fileDePara.exists()) {
+																								// fileDePara.delete();
+																								// continue;
+																							// }
 																						// }
 																						//Sprint conversorpdf
 																						//Verifica se encontramos algum erro ou status 3 de 4 na pasta do depara, da empresa
@@ -2434,7 +2485,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
 																					// adiciona o campo ProtocoloID para avisar o OUD que o arquivo foi processado.
 																					if(fl.getName().toUpperCase().contains("_ID")) {
-																						String apagouConversor = apagaArquivoConversor(diretoriArquivos, cutString(fl.getName().toUpperCase(), "_ID", "_"), "", logger);
+																						String apagouConversor = apagaArquivoConversor(diretoriArquivos, cutString(fl.getName().toUpperCase(), "_ID", "_"), "", logger);				
 																						String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "1", "Pendencia de preenchimento de contas para este arquivo.",  logger);
  																						naoGerouDepara = false;
 																					} 
@@ -2509,7 +2560,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						//estah jogando direto para o enviados. Obs: eh um arquivo .omc
 																						
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -2537,7 +2588,6 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						if(fl.getName().toUpperCase().contains("_ID")) {
 																							String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
 																							String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
-																						
 																						} 
 																					}
 
@@ -2619,7 +2669,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                                 filename = filename.replaceAll("\\\\", "/");
                                                                 FileUtil.moveToDir(filename, diretorio + "/Processado");
 
-                                                            } else {
+                                                            } else if (!extensaoArquivo.equals(".tempomc")) {
                                                                 //emailArquivoErrado outros arquivos
                                                                 subject = "Arquivo nao suportado por OTTIMIZZA Contabil";
 
@@ -2724,7 +2774,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
                                             for (File fl: files) {
 												
- 												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+ 												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
                                                 
 												String rodaConversor = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_EQUIPE_FECHAMENTO");
 												
@@ -2869,6 +2919,12 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																	boolean converteu = converteuPDF(protocolo_id, apiWeb, logger);
 																	
 																	if (!converteu) continue;
+																	
+																	/*long timeRota = fl.lastModified();
+																	double timeRotaDouble = (double) timeRota;
+																	double timeRotasDouble = (System.currentTimeMillis() - timeRotaDouble) / 1000;
+																	
+																	if (timeRotasDouble < 60) continue;*/
 																}
 																
                                                                 try{
@@ -2882,18 +2938,16 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																	// executa rota que atualiza os roteiros das empresas
 																	// RouteEngine.execRoute("Ottimizza.Oud_AtualizacaoRoteiros");
 																	atualizaArquivoRoteiro(contabilidade, nome.substring(0,nome.indexOf("_#")), logger);
-																	// logger.logInfo("fl.getName() -> " + fl.getName());
 																		
  																	
                                                                    try {
 
                                                                         String rodaPadrao = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_PLANILHA_PADRAO_RECEBER");
-																		// logger.logInfo("PPP " + rodaPadrao + " | " + contabilidade);
 
                                                                         if (rodaPadrao.toUpperCase().trim().equals("TRUE")) {															
 																			// PartnerConnection connection = Connector.newConnection(config);  
                                                                              preparaArquivo(idRoteiro, "Contas RECEBIDAS", contabilidade,  nome.substring(0,nome.indexOf("_#")), dirName, dirNameW, config, logger);
-																			 // logger.logInfo("ANTES ROTA PADRAO  " + nomeRota);
+																			 logger.logDebug("ANTES ROTA PADRAO  " + nomeRota);
 
                                                                             nomeRota = getNomeContabilidade() + "." + getNomeContabilidade() +  "_ContasRecebidas";
                                                                             double tempoInicio1 = System.currentTimeMillis();
@@ -2907,7 +2961,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                                     }
 
                                                                     catch (Exception xx) {
-                                                                        logger.logInfo("ERRO AO RODAR ROTEIRO");
+                                                                        logger.logDebug("ERRO AO RODAR ROTEIRO");
                                                                     }
 																	
 																	if (!tipoProduto.contains("ILIMITADA")) {
@@ -2941,7 +2995,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																		FileUtil.copyFolder(arquivoOrigem, arquivoDestino);
 																		nomeRota = INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) + "." + INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")) +  "_ContasRecebidas";
 
-																		logger.logInfo("ROTA   " + nomeRota + "<>" + arquivoOrigem);
+																		// logger.logInfo("ROTA   " + nomeRota + "<>" + arquivoOrigem);
 
 																		double tempoInicio1 = System.currentTimeMillis();
 																		RouteEngine.execRoute(nomeRota);
@@ -2986,10 +3040,10 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																					// if (fileDePara.getName().toUpperCase().contains("LEUCONVERSORANTIGO")) {
 																						String apagouConversor = apagaArquivoConversor(diretoriArquivos, protocolo_id, nomeArquivoApagado, logger);
 																						// JWR 03072023
-																						/*if(fileDePara.exists()) {
-																							fileDePara.delete();
-																							continue;
-																						}*/
+																						// if(fileDePara.exists()) {
+																							// fileDePara.delete();
+																							// continue;
+																						// }
 																					// }
 																					//Sprint conversorpdf
 																					//Verifica se encontramos algum erro ou status 3 de 4 na pasta do depara, da empresa
@@ -3088,7 +3142,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
 																						File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -3113,7 +3167,6 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						if(fl.getName().toUpperCase().contains("_ID")) {
 																							String apagouConversor = apagaArquivoConversor(diretoriArquivos, idLoteFila, "", logger);
 																							String atualizaStatus = atualizaStatusProtocoloOic(apiWeb, fl, "2", "Arquivo Processado.",  logger);
-																							
 																						} 
 																					}
 
@@ -3190,7 +3243,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
                                                                 filename = filename.replaceAll("\\\\", "/");
                                                                 FileUtil.moveToDir(filename, diretorio + "/Processado");
 
-                                                            } else {
+                                                            } else if (!extensaoArquivo.equals(".tempomc")){
                                                                 //enviaAvisoSobreArquivo outros arquivos
                                                                 //subject = "Arquivo nao suportado por OTTIMIZZA Contabil";
                                                                 //enviaAvisoSobreArquivoErrado(fl.getName(), nome,  subject, emailResponsavel, sendToName, "OUTROS", "AReceber", logger);
@@ -3326,7 +3379,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 ////////////////////////////////////////////////////////////////////////////////////
 
 public void preparaArquivo(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, ConnectorConfig config, InoutLogger logger) {
-	boolean criaReader = false;
+
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -3336,8 +3389,6 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		txt1.append("NOME_CONTABILIDADE = " + contabilidade);
 		txt1.append("\r\n");
 		txt1.append("MANTEM_ARQUIVO = SIM");
-		logger.logDebug("tt " + txt1.toString());
-		
 		writer.writeNewFile(txt1.toString());
 
 		empresaProperties = dirNameW + "empresa.properties";
@@ -3351,7 +3402,9 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		StringBuilder codigoRoteiro = new StringBuilder();
 		
 		FileReader reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualEndpointA.script");
-		// if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
+		
+		if (contabilidade.toUpperCase().contains("MICALI")) reader = new FileReader("c:/ottimizza/dropbox/deploy/routes/ottimizza/TemplateOficialAtualDevEndpointA.script");
+		
 		try {
 			reader.openFile();
 			String line = "";
@@ -3373,19 +3426,16 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		String tipoRoteiro = "_ContasPagasRoteiroPadrao.script";
 		if (tipoIntegracao.toUpperCase().contains("RECE")) tipoRoteiro = "_ContasRecebidasRoteiroPadrao.script";
 		
-		logger.logInfo("AQQ " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-		
  			
 		try {
 			File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
   
 
-			//logger.logDebug("fileRoteiro w - 3 " + contabilidade + "/" + empresa);
+			//logger.logInfo("fileRoteiro w - 3 " + contabilidade + "/" + empresa);
 
 		    //if (fileRoteiro.exists() && tipoRoteiro.contains("TESTE XAVIER")) {
-			//if (fileRoteiro.exists() &&
-			//    !(/*contabilidade.toUpperCase().contains("MICALI") ||*/ contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
 			if (fileRoteiro.exists()) {
+				
   				
 				FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 				try {
@@ -3394,12 +3444,13 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 					while(readerRoteiro.hasNextLine()) {
 						// Le a proxima linha do arquivo
 						lineRoteiro = readerRoteiro.nextLine();
+						/*if (empresa.toUpperCase().contains("CARRER")) {
+							logger.logInfo("1LINHACARRER " + lineRoteiro);
+						}*/
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read") || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -3411,8 +3462,8 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
  
  				PartnerConnection connection = Connector.newConnection(config);  
 				codigoRoteiro.append(prepareScript(idRoteiro, "OTTPADRAO" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
-				logger.logDebug("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
-				criaReader = true;
+				logger.logInfo("WF3 - login salesforce 3350" + contabilidade + "--" + empresa);
+				
   				
 			}
 		} catch (Exception xx) {logger.logInfo("erro w3 " + xx);}
@@ -3421,27 +3472,17 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 		if (!codigoRoteiro.toString().equals("")) {
 		
 			empresaProperties = "";
-			
-			if (criaReader) {
-				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-				writer.writeNewFile(codigoRoteiro.toString());		
-			}
-			
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			
-			logger.logInfo("nome reader " + "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = RouteEngine.INOUT_HOME + "/routes/" + getNomeContabilidade() + "/" + getNomeContabilidade() + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);				
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
 		    writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);		
+			writer.writeNewFile(codigoRoteiro.toString());			
 
 		}		
  	}
@@ -3451,7 +3492,7 @@ public void preparaArquivo(String idRoteiro, String tipoIntegracao, String conta
 
 
 public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, String contabilidade, String empresa, String dirName, String dirNameW, InoutLogger logger) {
-	boolean criaReader = false;
+
 	try {
 		StringBuilder txt1 = new StringBuilder();    
 		String empresaProperties = dirName + "empresa.properties";
@@ -3467,7 +3508,7 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 		writer = new FileWriter(empresaProperties);
 		writer.writeNewFile(txt1.toString());
 		
- 		logger.logDebug("preparaArquivoEspecifico w3 " + contabilidade + "/" + empresa);
+ 		logger.logInfo("preparaArquivoEspecifico w3 " + contabilidade + "/" + empresa);
 
 	
 		StringBuilder codigoNovo    = new StringBuilder();
@@ -3500,12 +3541,13 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 			} finally {
 				reader.closeFile();
 			}
+					
+			 
  
  			File fileRoteiro = new File("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 
-			//if (fileRoteiro.exists() &&
-			//    !(/*contabilidade.toUpperCase().contains("MICALI") ||*/ contabilidade.toUpperCase().contains("CONCEITOCONTABILIDADE"))) {
- 			if (fileRoteiro.exists()) {
+			if (fileRoteiro.exists()) {
+ 				
 				FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
 				try {
 					readerRoteiro.openFile();
@@ -3513,12 +3555,13 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 					while(readerRoteiro.hasNextLine()) {
 						// Le a proxima linha do arquivo
 						lineRoteiro = readerRoteiro.nextLine();
+						if (empresa.toUpperCase().contains("CARRER")) {
+							logger.logInfo("2LINHACARRER " + lineRoteiro);
+						}
 						// Processa a linha
 						// ....
-						if (lineRoteiro.contains("public boolean read")  || lineRoteiro.contains("public HashMap read")) break;
 						
 						codigoRoteiro.append(lineRoteiro);
-						if (lineRoteiro.contains("FINALPARAMETRIZACAOREGRAS")) break;
  					}
 				} catch (IOException ioe) {
 					logger.logError(ioe);
@@ -3531,7 +3574,8 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 				config.setUsername("fabrica@ottimizza.com.br");
 				config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 				config.setTraceMessage(false);
-				 logger.logInfo("API SALES SHR: preparaArquivoEspecifico WorkflowUnico 2");
+				logger.logInfo("API SALES SHR: preparaArquivoEspecifico workflow4 3");
+				 
 				//config.setUsername("adm@ottimizza.com.br");
 				//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 				//config.setTraceMessage(true);
@@ -3542,134 +3586,30 @@ public void preparaArquivoEspecifico(String idRoteiro, String tipoIntegracao, St
 				// estava dando erro de compilacao pois exportavamos o metodo mas ha dentro da rota o mesmo metodo
 				codigoRoteiro.append(prepareScript(idRoteiro, "" + empresa, "", contabilidade, tipoIntegracao, connection, logger));
 				
-				criaReader = true;
-				
-				logger.logDebug("WF3 - login salesforce 3464" + contabilidade + "--" + empresa);
+				// logger.logInfo("WF3 - login salesforce 3464" + contabilidade + "--" + empresa);
 				
 			}
 		} catch (Exception xx) {logger.logDebug("XX " + xx);}
 		
  
 		if (!codigoRoteiro.toString().equals("")) {
-			
-			if (criaReader) {
-				writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-				writer.writeNewFile(codigoRoteiro.toString());		
-			}
 		
 			empresaProperties = "";
-			FileReader readerRoteiro = new FileReader("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			String codigoExtratos = makeCodigoCartoes(readerRoteiro, logger).toString();
  			
 			if (tipoIntegracao.toUpperCase().contains("PAGA"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasPagasEndpointA.script";
 			if (tipoIntegracao.toUpperCase().contains("RECE"))  empresaProperties = "c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + "_ContasRecebidasEndpointA.script";
 			writer = new FileWriter(empresaProperties);
-			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString() + codigoExtratos);		
+			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());			
 			
 			writer = new FileWriter("c:/inout/tmp/"+contabilidade+"_copia_especifico.txt");
 			writer.writeNewFile(codigoNovo.toString() + codigoRoteiro.toString());
 			
 			writer = new FileWriter("c:/ottimizza/dropbox/deploy/routes/" + contabilidade + "/" + empresa + tipoRoteiro);
-			writer.writeNewFile(codigoRoteiro.toString() + codigoExtratos);
+			writer.writeNewFile(codigoRoteiro.toString());	
 		}		
  	}
 	catch (Exception xx) {}
 	return;
-}
-
-public StringBuilder makeCodigoCartoes(FileReader readerRoteiro, InoutLogger logger) {
-
-	StringBuilder sb = new StringBuilder();
-	
-	String linha = "";
-	String listaPadroes = "";
-	String listaPadroesLidos = "";
-	
-	StringBuilder listaEmpty = new StringBuilder().append( "Boticario_Excel.script;BySoft_i-Broker.script;Cartao_Abrapetite_Excel.script;Cartao_Aiquefome_Excel.script;Cartao_Alelo_Csv.script;Cartao_American_Express_Excel.script;Cartao_American_Express_Extrato_Excel.script;Cartao_Ame_Excel .script;Cartao_BenVisa_Excel.script;Cartao_Bin_Excel.script;Cartao_Bonus_Excel.script;Cartao_Cabal_Excel.script;Cartao_Calcard_Excel.script;Cartao_Carrefour_Excel.script;Cartao_Cielo.script;Cartao_Cielo_Simples_Sem_Bandeira.script;Cartao_Coopercard_Excel.script;Cartao_Credito_Santander.script;Cartao_Elavon_Excel.script;Cartao_Fidelidade_Excel.script;Cartao_GetNet_Excel.script;Cartao_Goodcard_Excel.script;Cartao_GreenCard_Excel.script;Cartao_IFood_Excel.script;Cartao_Liv_PDF.script;Cartao_MagaLU_Excel.script;Cartao_Masterfarma_Excel.script;Cartao_MercadoLivre_Excel.script;Cartao_Moip_Excel.script;Cartao_Mooz_CSV.script;Cartao_Netshoes_Excel.script;Cartao_Nutricard_Excel.script;Cartao_Nutricard_PDF.script;Cartao_PagarME_Excel.script;Cartao_PagSeguro_Excel.script;Cartao_Paguecom_CSV.script;Cartao_Paypal_Excel.script;Cartao_PoliCard_Excel.script;Cartao_Redecard_Excel.script;Cartao_Redecard_TXT.script;Cartao_Safra_CSV.script;Cartao_Sem_Parar_Csv.script;Cartao_Senff_Excel.script;Cartao_Sipag_Excel.script;Cartao_Sodexo_Excel.script;Cartao_Stelo_Excel.script;Cartao_Stone_Excel.script;Cartao_Sumup_Excel.script;Cartao_Ticket_Excel.script;Cartao_TrioCard_Excel.script;Cartao_Ubereats_Excel.script;Cartao_ValeCard_PDF.script;Cartao_VRAlimentacao_TXT.script;Citel_Software_frmRelCtpEncQuitados.script;ERP_DetalhamentosSispagItau_EXCEL.script;ERP_FolhaAlterdata_Progresso.script;ERP_FOLHADOMINIO_LELIS.script;ERP_FOLHAWK_RADAR.script;Extrato_Abc_Excel.script;Extrato_ABC_PDF.script;Extrato_AilosCivia_PDF.script;Extrato_Amazonia_PDF.script;Extrato_Amazonia_TXT.script;Extrato_ApliBB_PDF.script;Extrato_Arbi_Excel.script;Extrato_Asaas_Excel.script;Extrato_Asaas_PDF.script;Extrato_BancoDaycoval_PDF.script;Extrato_BancoNordeste_Excel.script;Extrato_BancoPaulista_PDF.script;Extrato_Banese_PDF.script;Extrato_Banestes_Excel.script;Extrato_Banpara_Excel.script;Extrato_Banpara_TXT.script;Extrato_Banrisul_PDF.script;Extrato_Banrisul_TXT.script;Extrato_BBM_PDF.script;Extrato_BBM_TXT.script;Extrato_BB_Excel.script;Extrato_BB_Financiamento.script;Extrato_BB_PDF.script;Extrato_BB_TXT.script;Extrato_BIB_PDF.script;Extrato_BKBank_PDF.script;Extrato_BMG_Excel.script;Extrato_BMG_PDF.script;Extrato_BMPMONEYPLUS_Excell.script;Extrato_Bradesco2_PDF.script;Extrato_Bradesco_Excel.script;Extrato_Bradesco_PDF.script;Extrato_Bradesco_TXT.script;Extrato_Brasilia_Excel.script;Extrato_BRB_PDF.script;Extrato_BS2_PDF.script;Extrato_BSCASH_PDF.script;Extrato_BTG_Excel.script;Extrato_Btg_PDF.script;Extrato_C6Bank_PDF.script;Extrato_C6_Excel.script;Extrato_Cef_Excel.script;Extrato_Cef_Html.script;Extrato_CEF_PDF.script;Extrato_CEF_TXT.script;Extrato_Civia_PDF.script;Extrato_ContaSimples_Excel.script;Extrato_ContaSimples_PDF.script;Extrato_Cora_Excel.script;Extrato_Cora_PDF.script;Extrato_Credisan_Excel.script;Extrato_Credisan_PDF.script;Extrato_Credisis_PDF.script;Extrato_Crehnor_PDF.script;Extrato_Cresol_Excel.script;Extrato_Cresol_PDF.script;Extrato_Daycoval_Excel.script;Extrato_Efi_Excel.script;Extrato_Efi_PDF.script;Extrato_Ewally_Excel.script;Extrato_Fibra_Excel.script;Extrato_Fibra_PDF.script;Extrato_Folha_Sage_Excel.script;Extrato_Grafeno_Excel.script;Extrato_Grafeno_PDF.script;Extrato_Guanabara_PDF.script;Extrato_HDT_Excel.script;Extrato_HSBC_Excel.script;Extrato_HSBC_PDF.script;Extrato_Industrial_Excel.script;Extrato_Infinitepay_PDF.script;Extrato_Inter_PDF.script;Extrato_ItauConsolidado_PDF.script;Extrato_Itau_Excel.script;Extrato_ITAU_PDF.script;Extrato_Itau_Txt.script;Extrato_Juno_Excel.script;Extrato_Linker_PDF.script;Extrato_MercadoPago_Excel.script;Extrato_MercadoPago_PDF.script;Extrato_Mercantil_PDF.script;Extrato_Movilepay_PDF.script;Extrato_NBC_PDF.script;Extrato_Next_PDF.script;Extrato_Nordeste_PDF.script;Extrato_Nubank_PDF.script;Extrato_OmieCash_PDF.script;Extrato_Original_Excel.script;Extrato_Original_PDF.script;Extrato_OTEROBANK_Excel.script;Extrato_Pagbank_PDF.script;Extrato_PagPixBank_PDF.script;Extrato_PagSeguro_Excel.script;Extrato_Paulista_Excel.script;Extrato_Paybrokers_PDF.script;Extrato_PinkPay_PDF.script;Extrato_Planner_PDF.script;Extrato_Poupecredi_PDF.script;Extrato_Safra_Excel.script;Extrato_Safra_PDF.script;Extrato_Santander_Excel.script;Extrato_Santander_PDF.script;Extrato_Sicoob.script;Extrato_SicoobCapital_PDF.script;Extrato_SicoobConvenios_PDF.script;Extrato_Sicoob_PDF.script;Extrato_Sicoob_Txt.script;Extrato_Sicredi_Excel.script;Extrato_Sicredi_PDF.script;Extrato_Sicredi_TXT.script;Extrato_Sisprime_Excel.script;Extrato_Sisprime_PDF.script;Extrato_Sofisa_Excel.script;Extrato_Sofisa_PDF.script;Extrato_Squid_Excel.script;Extrato_Squid_PDF.script;Extrato_Stone_Excel.script;Extrato_Stone_PDF.script;Extrato_Sulcredi_PDF.script;Extrato_Target_Excel.script;Extrato_Target_PDF.script;Extrato_Topazio_Excel.script;Extrato_Transfeera_PDF.script;Extrato_Tribanco2_PDF.script;Extrato_Tribanco_Excel.script;Extrato_Tribanco_PDF.script;Extrato_UBP_PDF.script;Extrato_Unicred2_PDF.script;Extrato_Unicred_Excel.script;Extrato_Unicred_PDF.script;Extrato_Unicred_TXT.script;Extrato_Uniprime_Excel.script;Extrato_Uniprime_PDF.script;Extrato_Uniprime_Txt.script;Extrato_Viacredi_Excel.script;Extrato_Viacredi_PDF.script;Extrato_Votorantim2_PDF.script;Extrato_Votorantim_Excel.script;Extrato_Votorantim_PDF.script;Extrato_XPInvestimentos_Excel.script;Extrato_XPInvestimentos_PDF.script;FaturaCartaoCredito_Banrisul_PDF.script;FaturaCartaoCredito_BB_PDF.script;FaturaCartaoCredito_Bradesco_PDF.script;FaturaCartaoCredito_Itau_EXCEL.script;FaturaCartaoCredito_Itau_PDF.script;FaturaCartaoCredito_Sicoob_PDF.script;FrancesinhaBradesco_PDF.script;FrancesinhaCresol_PDF.script;FrancesinhagrupoAilos_PDF.script;FrancesinhaItau_CSV.script;FrancesinhaItau_PDF.script;FrancesinhaSafra_PDF.script;FrancesinhaSantander_PDF.script;FrancesinhaSicoob_PDF.script;FrancesinhaSicredi_Excel.script;FrancesinhaSicredi_PDF.script;FrancesinhaSisprime_Excel.script;FrancesinhaUnicredi_PDF.script;Francesinha_Banrisul_TXT.script;Francesinha_BB_PDF.script;Francesinha_Bradesco2_Excel.script;Francesinha_Bradesco_Excel.script;Francesinha_Cef_PDF.script;Interfoc_Genesys_mcp002.script;INVESTIMENTO_BRADESCO.script;Layout_ERP_Posto_Ravanello.script;Linx_AutoSystem.script;Linx_Softpharma_fcpa200.script;Notas_Corretagem_XP_PDF.script;Prosyst.script;readExtratoUnicredDefault.script;Santander_RET.script;Sicoob_Comprovantes_PDF.script;Sindisoft_Relatorio_Movimentacao_Caixa.script;SISJURI_BCS_FINANCEIRO.script;Sisplan_Sistema_Planejamento.script;Systextil.script");
-	String [] listaEmptyArray = listaEmpty.toString().split(";");
-
-       /* readerRoteiro.openFile();
-	while(readerRoteiro.hasNextLine()) {
-		// Le a proxima linha do arquivo
-		linha = readerRoteiro.nextLine();
-		if (linha.contains("Planilhas_Padroes")) {
-			logger.logInfo("PEPE " + linha);
-			listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
-			break;
-		}
-	}*/
-	
-	try {
-		readerRoteiro.openFile();
-		while(readerRoteiro.hasNextLine()) {
-			// Le a proxima linha do arquivo
-			linha = readerRoteiro.nextLine();
-			if (linha.contains("Planilhas_Padroes")) {
-				logger.logInfo("PEPE " + linha);
-				listaPadroes = cutString(linha, ", ", ");").replaceAll("\"", "");
-				break;
-			}
-		}
-	
-		if (!listaPadroes.equals("")) {
-			// String [] padroes = listaPadroes.toString().replaceAll(" ", "").split(";");
-			String rn = "\r\n";
-			
-			
-			for(int kk = 0; kk < listaEmptyArray.length;  kk++){
-				
-				if (listaEmptyArray[kk].contains("ExtratosOFX")) continue;
-				if (listaPadroesLidos.contains(listaEmptyArray[kk])) continue;
-				listaPadroesLidos += ";"+listaEmptyArray[kk];
-				
-				File toRead = new File(".");			
-				if (listaPadroes.contains(cutString(listaEmptyArray[kk], 0, "."))) {
-					try {
-						toRead = new File(String.format(
-							"c:/inout/scriptlib/io_contabil/oicOnDemand/%s",
-							listaEmptyArray[kk].trim()
-						));
-					} catch (Exception e) {
-						logger.logInfo("Primeiro problema OicOnDemand " + e.getMessage());
-						continue;
-					}
-				}
-				else {
-					try {
-						toRead = new File(String.format(
-							"c:/inout/scriptlib/io_contabil/oicOnDemand/empty/%s",
-							listaEmptyArray[kk].trim()
-						));
-					} catch (Exception e) {
-						logger.logInfo("Segundo problema OicOnDemand " + e.getMessage());
-						continue;
-					}
-				}
-				
-				try {
-					FileReader reader = new FileReader(toRead);		
-
-					reader.openFile();
-					sb.append(rn);
-					sb.append(reader.readAll());
-					/*while (reader.hasNextLine()) {
-						String line = reader.nextLine();
-						sb.append(line);
-					}*/
-					sb.append(rn);
-					
-					
-				} catch (Exception to) {
-					//logger.logError("Erro lendo arquivo padrao -> "+padroes[kk]);
-					logger.logError("Erro -> "+to.getMessage());
-				}
-			}
-		}
-    } catch (Exception e) {
-		logger.logError("Deu ruim aqui " + e.getMessage());
-	}
-	logger.logInfo("Retornou");
-	return sb;
 }
 
 
@@ -4090,7 +4030,7 @@ public void  atualizaArquivoRoteiro(String contabilidade, String empresa, InoutL
 								config.setPassword("ottimizza@123HU4ssqt1HCiLyCzj6QStgteM2");
 								config.setTraceMessage(false);
 								connection = Connector.newConnection(config);  
-								// logger.logInfo("API SALES SHR: atualizaArquivoRoteiro workflow4 4");
+								logger.logInfo("API SALES SHR: atualizaArquivoRoteiro workflow4 4");
 							}	
                              
 
@@ -4356,6 +4296,204 @@ public JSONArray buscaHistoricos(String cnpjContabilidade, String cnpjEmpresa, S
     }
     return null;
 }
+
+
+public JSONObject criaHistoricoSfPorRegra(JSONObject historico, JSONArray regras, InoutLogger logger) throws Exception {
+    try{
+
+        String idExternoHistorico = historico.optString("id");
+        String historicoCompleto = historico.optString("historico");
+        String[] historicoArray = historicoCompleto.split("\\$");
+        String codigoHistorico = historicoArray[0].replace("CodigoHistorico:", "").trim();
+
+        int condicao01 = regras.optJSONObject(0).optInt("condicao");
+        String campoRegra01 = trataCampoRegra(regras.optJSONObject(0).optString("campo"), condicao01);
+        String valor01 = regras.optJSONObject(0).optString("valor");
+        String campoRegra02 = " ";
+        String valor02 = " ";
+        int condicao02 = 1;
+        String campoRegra03 = " ";
+        String valor03 = " ";
+        int condicao03 = 1;
+        String campoRegra04 = " ";
+        String valor04 = " ";
+        int condicao04 = 1;
+        String campoRegra05 = " ";
+        String valor05 = " ";
+        int condicao05 = 1;
+        String sequenciaRegras = "110";
+        String texto01 = "";
+        String campoHistorico01 = "";
+        String texto02 = "";
+        String campoHistorico02 = "";
+        String texto03 = "";
+        String campoHistorico03 = "";
+        String texto04 = "";
+        String campoHistorico04 = "";
+        String texto05 = "";
+        String campoHistorico05 = "";
+
+
+        if(regras.length() > 1) {
+            condicao02 = regras.optJSONObject(1).optInt("condicao");
+            campoRegra02 = trataCampoRegra(regras.optJSONObject(1).optString("campo"), condicao02);
+            valor02 = regras.optJSONObject(1).optString("valor");
+            sequenciaRegras = "200";
+        }
+        if(regras.length() > 2) {
+            condicao03 = regras.optJSONObject(2).optInt("condicao");
+            campoRegra03 = trataCampoRegra(regras.optJSONObject(2).optString("campo"), condicao03);
+            valor03 = regras.optJSONObject(2).optString("valor");
+            sequenciaRegras = "300";
+        }
+        if(regras.length() > 3 ) {
+            condicao04 = regras.optJSONObject(3).optInt("condicao");
+            campoRegra04 = trataCampoRegra(regras.optJSONObject(3).optString("campo"), condicao04);
+            valor04 = regras.optJSONObject(3).optString("valor");
+            sequenciaRegras = "400";
+        }
+        if(regras.length() > 4) {
+            condicao05 = regras.optJSONObject(4).optInt("condicao");
+            campoRegra05 = trataCampoRegra(regras.optJSONObject(4).optString("campo"), condicao05);
+            valor05 = regras.optJSONObject(4).optString("valor");
+            sequenciaRegras = "500";
+        }
+
+        if(historicoArray.length > 1)
+            texto01 = historicoArray[1].trim();
+        if(historicoArray.length > 2) {
+            campoHistorico01 = historicoArray[2].substring(historicoArray[2].indexOf("{")+1,historicoArray[2].indexOf("}"));
+            texto02 = historicoArray[2].substring(historicoArray[2].indexOf("}")+1);
+        }
+        if(historicoArray.length > 3) {
+            campoHistorico02 = historicoArray[3].substring(historicoArray[3].indexOf("{")+1,historicoArray[3].indexOf("}"));
+            texto03 = historicoArray[3].substring(historicoArray[3].indexOf("}")+1);
+        }
+        if(historicoArray.length > 4) {
+            campoHistorico03 = historicoArray[4].substring(historicoArray[4].indexOf("{")+1,historicoArray[4].indexOf("}"));
+            texto04 = historicoArray[4].substring(historicoArray[4].indexOf("}")+1);
+        }
+        if(historicoArray.length > 5) {
+            campoHistorico04 = historicoArray[5].substring(historicoArray[5].indexOf("{")+1,historicoArray[5].indexOf("}"));
+            texto05 = historicoArray[5].substring(historicoArray[5].indexOf("}")+1);
+        }
+        if(historicoArray.length > 6) 
+            campoHistorico05 = historicoArray[6].substring(historicoArray[6].indexOf("{")+1,historicoArray[6].indexOf("}"));
+
+        JSONObject historicoSf = new JSONObject();
+        historicoSf.put("RecordTypeId","0121500000100GB");
+        historicoSf.put("ID_Externo__c", idExternoHistorico.replaceAll("\\.00", ""));
+        historicoSf.put("Codigo_Historico__c", codigoHistorico);
+        historicoSf.put("Se_Campo__c", campoRegra01);
+        historicoSf.put("O_texto_01__c", valor01);
+        historicoSf.put("E_02__c", campoRegra02);
+        historicoSf.put("O_texto_02__c", valor02);
+        historicoSf.put("E_03__c", campoRegra03);
+        historicoSf.put("O_texto_03__c", valor03);
+        historicoSf.put("E_04__c", campoRegra04);
+        historicoSf.put("O_texto_04__c", valor04);
+        historicoSf.put("E_05__c", campoRegra05);
+        historicoSf.put("O_texto_05__c", valor05);
+        historicoSf.put("Texto_01__c", texto01);
+        historicoSf.put("Campo_01__c", trataCampoHistorico(campoHistorico01));
+        historicoSf.put("Texto_02__c", texto02);
+        historicoSf.put("Campo_02__c", trataCampoHistorico(campoHistorico02));
+        historicoSf.put("Texto_03__c", texto03);
+        historicoSf.put("Campo_03__c", trataCampoHistorico(campoHistorico03));
+        historicoSf.put("Texto_04__c", texto04);
+        historicoSf.put("Campo_04__c", trataCampoHistorico(campoHistorico04));
+        historicoSf.put("Texto_05__c", texto05);
+        historicoSf.put("Campo_05__c", trataCampoHistorico(campoHistorico05));
+        historicoSf.put("Sequencia_das_Regras__c", sequenciaRegras);
+        return historicoSf;
+    }
+    catch(Exception ex) {
+        logger.logInfo("ERROR CRIACAO HISTORICO SALESFORCE POR REGRA -> "+ex.getMessage());
+        return null;
+    }
+}
+
+public JSONObject criaHistoricoSf(JSONObject historico, InoutLogger logger) throws Exception {
+    try{
+        String idExternoHistorico = historico.optString("id");
+        String contaMovimentoHistorico = historico.optString("contaMovimento");
+        String historicoCompleto = historico.optString("historico");
+		boolean historicoPadrao = false;
+		if(historico.has("historicoPadrao") && historico.optString("historicoPadrao").toUpperCase().equals("TRUE")) {
+			historicoPadrao = true;
+		}
+
+        String codigoHistorico = "";
+        String texto01 = "";
+        String campoHistorico01 = "";
+        String texto02 = "";
+        String campoHistorico02 = "";
+        String texto03 = "";
+        String campoHistorico03 = "";
+        String texto04 = "";
+        String campoHistorico04 = "";
+        String texto05 = "";
+        String campoHistorico05 = "";
+
+        String[] historicoArray = historicoCompleto.split("\\$");
+        codigoHistorico = historicoArray[0].replace("CodigoHistorico:", "").trim();
+        if(historicoArray.length > 1)
+            texto01 = historicoArray[1].trim();
+        if(historicoArray.length > 2) {
+            campoHistorico01 = historicoArray[2].substring(historicoArray[2].indexOf("{")+1,historicoArray[2].indexOf("}"));
+            texto02 = historicoArray[2].substring(historicoArray[2].indexOf("}")+1);
+        }
+        if(historicoArray.length > 3) {
+            campoHistorico02 = historicoArray[3].substring(historicoArray[3].indexOf("{")+1,historicoArray[3].indexOf("}"));
+            texto03 = historicoArray[3].substring(historicoArray[3].indexOf("}")+1);
+        }
+        if(historicoArray.length > 4) {
+            campoHistorico03 = historicoArray[4].substring(historicoArray[4].indexOf("{")+1,historicoArray[4].indexOf("}"));
+            texto04 = historicoArray[4].substring(historicoArray[4].indexOf("}")+1);
+        }
+        if(historicoArray.length > 5) {
+            campoHistorico04 = historicoArray[5].substring(historicoArray[5].indexOf("{")+1,historicoArray[5].indexOf("}"));
+            texto05 = historicoArray[5].substring(historicoArray[5].indexOf("}")+1);
+        }
+        if(historicoArray.length > 6) 
+            campoHistorico05 = historicoArray[6].substring(historicoArray[6].indexOf("{")+1,historicoArray[6].indexOf("}"));
+
+        JSONObject historicoSf = new JSONObject();
+        historicoSf.put("RecordTypeId","0121500000100GB");
+		historicoSf.put("Sequencia_das_Regras__c", "500");
+        historicoSf.put("ID_Externo__c", idExternoHistorico.replaceAll("\\.00", ""));
+        historicoSf.put("Codigo_Historico__c", codigoHistorico);
+        historicoSf.put("Se_Campo__c", "Conta Normal - Movimento - igual a ");
+        historicoSf.put("O_texto_01__c", contaMovimentoHistorico);
+        historicoSf.put("Texto_01__c", texto01);
+        historicoSf.put("Campo_01__c", trataCampoHistorico(campoHistorico01));
+        historicoSf.put("Texto_02__c", texto02);
+        historicoSf.put("Campo_02__c", trataCampoHistorico(campoHistorico02));
+        historicoSf.put("Texto_03__c", texto03);
+        historicoSf.put("Campo_03__c", trataCampoHistorico(campoHistorico03));
+        historicoSf.put("Texto_04__c", texto04);
+        historicoSf.put("Campo_04__c", trataCampoHistorico(campoHistorico04));
+        historicoSf.put("Texto_05__c", texto05);
+        historicoSf.put("Campo_05__c", trataCampoHistorico(campoHistorico05));
+		
+		// VALIDANDO SE E UM HISTORICO PADRAO
+		if(historicoPadrao == true) {
+			if(idExternoHistorico.contains("903117"))
+				logger.logInfo("Historico -> "+historico);
+			historicoSf.put("Sequencia_das_Regras__c", "100");
+			historicoSf.put("Se_Campo__c", "Fornecedor/Cliente n" + (char)227 + "o cont" + (char)233 + "m");
+			historicoSf.put("O_texto_01__c", "HISTORICOPADRAO");
+		}
+		
+        return historicoSf;
+    }
+    catch(Exception ex) {
+        logger.logInfo("ERROR CRIACAO HISTORICO SALESFORCE -> "+ex.getMessage());
+        return null;
+    }
+}
+
+
 
 //-------------------------------------------------------------------------------------
 // Manda informacoes para o servidor status
@@ -4645,7 +4783,7 @@ public String apagaArquivoConversor(String diretoriArquivos, String protocolo_id
 	
 	File [] files = file2.listFiles();
 	
-	// logger.logInfo("AAC " + protocolo_id + " | " + nomeArquivo);
+	//logger.logInfo("AAC " + protocolo_id + " | " + nomeArquivo);
 	
 	if (FileUtil.dirHasFiles(diretorio)) {
 		for (File fl: files) {

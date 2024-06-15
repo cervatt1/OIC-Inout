@@ -1,12 +1,5 @@
 public class DatabasePostgreSQL {
 
-	String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
 	// private static final String MEUCAIXA_LISTNER_HOST		= "ec2-34-195-140-228.compute-1.amazonaws.com";
 	// private static final String MEUCAIXA_LISTNER_DATABASE	= "ddgnvnt3maerkp";
 	// private static final String MEUCAIXA_LISTNER_USER		= "ufuo0fpg0kb5de";
@@ -17,6 +10,12 @@ public class DatabasePostgreSQL {
 	private static final String MEUCAIXA_LISTNER_DATABASE	= "ddgnvnt3maerkp";
 	private static final String MEUCAIXA_LISTNER_USER		= "suporte_oic";
 	private static final String MEUCAIXA_LISTNER_PASSWD		= "p8213f3e9092814efd2975ad854bae1589a3674607281e68679fb627ecbcae042";
+	
+	
+	private static final String FILA_WORKERS_HOST		= "ec2-100-27-73-125.compute-1.amazonaws.com";
+	private static final String FILA_WORKERS_DATABASE	= "da46s1mi5dpi25";
+	private static final String FILA_WORKERS_USER		= "uam6495i69kkqt";
+	private static final String FILA_WORKERS_PASSWD		= "p69a20d01650b808caee3340b498ce5f144f017befa24de25c65bcd0292fda4e9";
 
 
 	// banco producao de parcerios. desativado para podermos usar o banco espelho
@@ -48,6 +47,12 @@ public class DatabasePostgreSQL {
 	private static final String APLICACAO_INTEGRADOR_FOLLOWER_PASSWD		= "pdfed6f8f8e1f1d852b5afbfac42845239c2ed2183a2ef5620fc396201c72488e";
 	
 	
+	//private static final String APLICACAO_OAUTH_FOLLOWER_HOST		= "ec2-54-237-40-156.compute-1.amazonaws.com";
+	//private static final String APLICACAO_OAUTH_FOLLOWER_DATABASE	= "d40ba337mcfmt6";
+	//private static final String APLICACAO_OAUTH_FOLLOWER_USER		= "oauthsuporte";
+	//private static final String APLICACAO_OAUTH_FOLLOWER_PASSWD		= "pd87f1e6c1a877e94bee1cd8b2c543e435c4a156aeb28bff3d8ee156d93f84ca6";
+	
+	
 	private static final String APLICACAO_OAUTH_FOLLOWER_HOST		= "ec2-3-229-61-4.compute-1.amazonaws.com";
 	private static final String APLICACAO_OAUTH_FOLLOWER_DATABASE	= "dqdcrle7h2keq";
 	private static final String APLICACAO_OAUTH_FOLLOWER_USER		= "oauthsuporte";
@@ -69,6 +74,19 @@ public class DatabasePostgreSQL {
 	}
 	
 	public static DBPostgreSQL connectDatabase(String param, InoutLogger logger) throws SQLException, Exception {
+		
+		if (param.equalsIgnoreCase("fila-workers")) {
+			DBPostgreSQL dbIO = new DBPostgreSQL(FILA_WORKERS_HOST, 
+												"5432",
+												FILA_WORKERS_DATABASE,
+												FILA_WORKERS_USER,
+												FILA_WORKERS_PASSWD);
+
+			if (dbIO == null || !dbIO.connectionIsValid()) {
+				throw new SQLException("EndpointB: Nao foi possivel conectar no banco da aplicacao: "+param);
+			}
+			return dbIO;
+		}
 
 		if (param.equalsIgnoreCase("api-listener-meucaixa")) {
 			DBPostgreSQL dbIO = new DBPostgreSQL(MEUCAIXA_LISTNER_HOST, 
@@ -195,10 +213,14 @@ public class DatabasePostgreSQL {
 
 		String sql = "SELECT pr.id, pr.partner, pr.info_reprocess as infos "
 				   + "FROM partners_reprocess pr "
-				   //+ "WHERE pr.read = false and pr.info_reprocess::text like '%07310888000108%' and pr.info_reprocess::text like '%77812196000143%'";
-				   + "WHERE pr.read = false and pr.info_reprocess::text like '%"+servDinamic+".ottimizza%'";
+				   + "WHERE pr.read = false and pr.info_reprocess::text like '%s1.ottimizza%'";
+				   /* backup: + "WHERE pr.read = false and pr.info_reprocess::text NOT like '%02218532000125%' and pr.info_reprocess::text NOT like '%77812196000143%' and  pr.info_reprocess::text NOT like '%07310888000108%' and pr.info_reprocess::text NOT like '%10276526000152%' and pr.info_reprocess::text NOT like '%23092757000158%' and pr.info_reprocess::text NOT like '%26532252000155%'  and pr.info_reprocess::text NOT like '%04727173000167%' and pr.info_reprocess::text NOT like '%04689159823%' and pr.info_reprocess::text NOT like '%18733337000173%' and pr.info_reprocess::text NOT like '%92860246000151%' and pr.info_reprocess::text NOT like '%15415383000136%' and pr.info_reprocess::text NOT like '%32019529000143%' and pr.info_reprocess::text NOT like '%73574899000120%'";*/
+				   
+
+
 
 	 			
+ 		
 		try {
 			JSONArray retorno = db.sql(sql)
 								.setFields("id, partner, infos")
@@ -315,7 +337,7 @@ public class DatabasePostgreSQL {
 		String sql = "SELECT id, objeto_arquivo_processado AS lancamentos  "
 						+"FROM arquivos_processados  "
 						// +"WHERE integrado_oic = false;";
-						+"WHERE integrado_oic = false and objeto_arquivo_processado ->> 'servidorPublicacao' = 'https://"+servDinamic+".ottimizza.com.br:55325'";			
+						+"WHERE integrado_oic = false and objeto_arquivo_processado ->> 'servidorPublicacao' = 'https://s1.ottimizza.com.br:55325'";			
 						
 		
 		try {
@@ -339,7 +361,8 @@ public class DatabasePostgreSQL {
 		String sql = "SELECT id, exportado,  info_roteiros "
 						+"FROM atualiza_roteiros  "
 						//+"WHERE exportado = false  ";	    04689159823  		
-						+"WHERE exportado = false  and info_roteiros::text like '%"+servDinamic+".ottimizza%'";		
+						//+"WHERE exportado = false  and info_roteiros::text NOT like '%10276526000152%'  and info_roteiros::text NOT like '%23092757000158%'  and info_roteiros::text NOT like '%26532252000155%'  and info_roteiros::text NOT like '%04727173000167%' and info_roteiros::text NOT like '%04689159823%' and info_roteiros::text NOT like '%18733337000173%' and info_roteiros::text NOT like '%92860246000151%' and info_roteiros::text NOT like '%15415383000136%' ";		
+						+"WHERE exportado = false  and info_roteiros::text like '%s1.ottimizza%' ";		
 
 						
 						
@@ -363,7 +386,9 @@ public class DatabasePostgreSQL {
 		String sql = "SELECT id, exportado,  info_roteiros "
 						+"FROM atualiza_roteiros  "
 						//"WHERE exportado = false and info_roteiros::text like '%" + lisraRoteiros + "%';" ;			
-						+"WHERE exportado = false and info_roteiros::text like '%"+servDinamic+".ottimizza%' and info_roteiros::text like '%" + lisraRoteiros + "%';" ;			
+						//+"WHERE exportado = false and info_roteiros::text not like '%10276526000152%' and info_roteiros::text not like '%23092757000158%' and info_roteiros::text not like '%26532252000155%' and info_roteiros::text not like '%04727173000167%' and info_roteiros::text not like '%04689159823%' and info_roteiros::text not like '%18733337000173%' and info_roteiros::text not like '%92860246000151%' and info_roteiros::text not like '%15415383000136%' and info_roteiros::text like '%" + lisraRoteiros + "%';" ;			
+						//+"WHERE exportado = false and info_roteiros::text  like '%s1.ottimizza%'  and info_roteiros::text like '%" + lisraRoteiros + "%';" ;
+						+"WHERE exportado = false and (info_roteiros::text like '%s1.ottimizza%' or info_roteiros::text not like '%\"servidor\":%') and info_roteiros::text like '%" + lisraRoteiros + "%';" ;
 
 
 
@@ -376,10 +401,12 @@ public class DatabasePostgreSQL {
 								  .debug(logger)
 								  .query();
 
+			// logger.logInfo("RECORDS BUSCA ROTEIROS == "+records.toString());
+			
 			return records;
 
 		} catch (Exception e) {
-			logger.logDebug("ERROR buscaRoteiros: "+e.getMessage());
+			logger.logInfo("ERROR buscaRoteiros: "+e.getMessage());
 		}
 		return null;
 	}

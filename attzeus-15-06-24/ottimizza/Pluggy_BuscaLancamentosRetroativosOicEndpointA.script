@@ -15,14 +15,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
     DataBase dbIOContOtt = null;
 	
-    String servDinamic = "";
-	try{
-		servDinamic = buscaServidor(logger).toLowerCase();
-		if(servDinamic.equals("")) servDinamic = "s1";
-	}catch(Exception e){
-		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
-	}
-
     // gera seguranca nas conexoes com Heroku
     // Create a trust manager that does not validate certificate chains
     javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[] {
@@ -109,11 +101,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
     propsOtt.load("contabil/Ottimizza/contabil.properties");
 
-    // criaa hash mapp dos id lode de erro
-    StringBuilder deu_erro = new StringBuilder();
-    StringBuilder deu_ok = new StringBuilder();
 
-	postStatus(servDinamic.toUpperCase(), "Ottimizza", "Pluggy_Retroativo", "Nada Pendente", "Sem Arquivo Para Processar", "Roda do S1", logger);
+	postStatus("S11", "Ottimizza", "Pluggy_Retroativo", "Nada Pendente", "Sem Arquivo Para Processar", "Roda do S1", logger);
 
     try {
         propsCont.load("/contabil/Ottimizza/routes.properties");
@@ -342,20 +331,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
                     }
                 }
 				
-				// TRATA ERRO PROCESSAMENTO 
+				// 
 				if (errorAccount != 2) {
-                    /**
-                     *  Tratativa que gera mensagem para todos os arquivos processados descontinuada 15/06/2024
-                     * 
-                     *  LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
-				     *  atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId("ott_oud_id"+lote), apiWeb, logger);
-                     * 
-                     */
-                    deu_erro.append("ott_oud_id"+lote).append(";");
-				}else{
-                    deu_ok.append("ott_oud_id"+lote).append(";");
-                }
-
+					LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
+					atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId("ott_oud_id"+lote), apiWeb, logger);
+				}
             }
             catch(Exception ex) {
                 logger.logInfo("ERROR GET TRANSACTIONS -> "+ex.getMessage());
@@ -397,18 +377,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 	}
     if (dbPartner	 != null) dbPartner.closeConnection();
     // if (dbFila != null) dbFila.closeConnection();
-
-    if(!deu_erro.toString().equals("")){ 
-        for(String process : deu_erro.toString().split(";")){
-            logger.logInfo("LOGDEAVALIACAO: " + process);
-            // se nao conter em deu_ok 
-            if(!deu_ok.toString().contains(process)){
-                logger.logInfo("DENTRO_IF: " + process);
-                LancamentosApi apiWeb = new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);
-                atualizaProtocolo("", "PROBLEMALINK", "", getProtocoloId(process), apiWeb, logger);
-            }
-        }
-    }
 
     return new JSONArray();
 }

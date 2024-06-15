@@ -1,0 +1,326 @@
+public JSONArray run(InoutLogger logger) throws Exception {
+
+    JSONArray records = new JSONArray();
+    
+    /*
+
+    try {
+
+        ////////////////////////////////////////////////////////////////////
+        // Obtem conexao no Salesforce /////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+
+        ConnectorConfig config = new ConnectorConfig();
+        config.setUsername("adm@ottimizza.com.br");
+        config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
+        config.setTraceMessage(true);
+        PartnerConnection connection = Connector.newConnection(config);
+
+        ////////////////////////////////////////////////////////////////////
+        // Obtem Contabilidades ////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////
+
+
+        HashMap mapaVariavel		= new HashMap();
+        StringBuilder txtdupli     = new StringBuilder();    
+        StringBuilder porempresa     = new StringBuilder();    
+
+
+        double porcComissaoContab  = 0;
+        double porcComissaoEmpresa = 0;
+        double porcComissaoCanal   = 0;
+        double comissaoFinal       = 0;
+        double valor_OZC           = 0;
+        Date virouCliente = new Date();
+        Date dataPerdido = new Date();
+        
+
+         String sql2 = "SELECT Id, Nome_Resumido__c, Data_Perdido__c, Valor_Maior_Fatura__c, Virou_cliente_em__c  FROM Contabilidade__c  WHERE Status_Processo_Comercial__c = '5. PERDIDO / SEM INTERESSE'";
+
+
+        QueryResult qres2 = connection.query(sql2);
+
+        if (qres2 != null) {
+
+            for (int a=0; a<qres2.getSize(); a++) {
+                SObject sobj2 = qres2.getRecords()[a];
+                JSONObject rec2 = new JSONObject(); 
+
+                String nomeResumido = "";
+                Object campoOb = sobj2.getField("Nome_Resumido__c");
+                if (campoOb != null) nomeResumido = sobj2.getField("Nome_Resumido__c").toString();
+
+                String idContabilidade = "";
+                try {
+                    campoOb = sobj2.getField("Id");
+                    if (campoOb != null) idContabilidade = sobj2.getField("Id").toString();
+                    campoOb = sobj2.getField("id");
+                    if (idContabilidade.equals("") && campoOb != null) idContabilidade = sobj2.getField("id").toString();
+                } catch (Exception e) {
+                    continue;
+
+                }
+                
+                String virouClienteString = "";
+                try {
+                    campoOb = sobj2.getField("Virou_cliente_em__c");
+                    if (campoOb != null) virouClienteString = sobj2.getField("Virou_cliente_em__c").toString();
+                    if (!virouClienteString.equals(""))  {
+                        virouClienteString = virouClienteString.substring(0, 10);
+                        virouCliente = DateUtil.stringToDate(virouClienteString, "yyyy-MM-dd");
+
+                    }
+
+                } catch (Exception e) {
+
+                } 
+                
+                String dataPerdidoString = "";
+                try {
+                    campoOb = sobj2.getField("Data_Perdido__c");
+                    if (campoOb != null) dataPerdidoString = sobj2.getField("Data_Perdido__c").toString();
+                    if (!dataPerdidoString.equals(""))  {
+                        dataPerdidoString = dataPerdidoString.substring(0, 10);
+                        dataPerdido = DateUtil.stringToDate(dataPerdidoString, "yyyy-MM-dd");
+
+                    }
+
+                } catch (Exception e) {
+
+                } 
+                
+                
+                double maiorFatura = 0;
+                String maioraFaturaString = "";
+                try {
+                    campoOb = sobj2.getField("Valor_Maior_Fatura__c");
+                    if (campoOb != null) maioraFaturaString = sobj2.getField("Valor_Maior_Fatura__c").toString();
+                    maiorFatura = Double.parseDouble(maioraFaturaString);
+
+                } catch (Exception e) {
+                    maiorFatura = 0;
+
+                } 
+                
+
+                String sql3 = "SELECT Id, Tipo_Produto__c, Quantidade_Total__c FROM Contabilidade_vs_Produtos__c WHERE Contabilidade__c = '" + idContabilidade + "'";
+
+                QueryResult qres3 = connection.query(sql3);
+
+                if (qres3 == null) continue;
+
+                String tipoProduto = "";
+                String produtosContratados = "";
+
+                double quantidadeOic = 0;
+                double quantidadeChamados = 0;
+                double quantidadeEmpresasPadrao = 0;
+                String houveUpgrade = "";
+                
+                double dias30 = 0;
+                double dias60 = 0;
+                double dias90 = 0;
+                double quantidadePerdido = 0;
+                
+
+                for (int b=0; b<qres3.getSize(); b++) {
+                    SObject sobj3 = qres3.getRecords()[b];
+                    JSONObject rec3 = new JSONObject();                
+
+                    campoOb = sobj3.getField("Tipo_Produto__c");
+                    if (campoOb != null) tipoProduto = sobj3.getField("Tipo_Produto__c").toString();
+
+                    String idProdutoContabilidade = "";
+                    try {
+                        campoOb = sobj3.getField("Id");
+                        if (campoOb != null) idProdutoContabilidade = sobj3.getField("Id").toString();
+                        campoOb = sobj3.getField("id");
+                        if (idProdutoContabilidade.equals("") && campoOb != null) idProdutoContabilidade = sobj3.getField("id").toString();
+                    } catch (Exception e) {
+                        continue;
+
+                    } 
+                    
+					double quantidadeProd = 0;
+                    String quantidadeProdString = "";
+                    
+                    try {
+                        campoOb = sobj3.getField("Quantidade_Total__c");
+                        if (campoOb != null) quantidadeProdString = sobj3.getField("Quantidade_Total__c").toString();
+                        quantidadeProd = Double.parseDouble(quantidadeProdString);
+
+                    } catch (Exception e) {
+                        quantidadeProd = 0;
+
+                    }  
+
+
+                    if (tipoProduto.contains("OIC_Pacote") && !produtosContratados.contains("OIC")) produtosContratados = produtosContratados + "," + "OIC";
+                    if (tipoProduto.contains("OIC_Avulso") && !produtosContratados.contains("OIC")) produtosContratados = produtosContratados + "," + "OIC";
+                    if (tipoProduto.contains("Licenca_Ilimitada") && !produtosContratados.contains("OICP")) produtosContratados = produtosContratados + "," + "OICP";
+                    if (tipoProduto.contains("OMC_Pacote") && !produtosContratados.contains("OICP")) produtosContratados = produtosContratados + "," + "OICP";
+                    if (tipoProduto.contains("Bussola") && !produtosContratados.contains("OBC")) produtosContratados = produtosContratados + "," + "OBC";
+
+
+                    String sql4 = "SELECT Quantidade__c FROM Itens_PRodutos__c WHERE Quantidade__c > 0 and Valor__c > 0 and  Produto_da_Contabilidade__c = '" + idProdutoContabilidade + "'";
+
+                    QueryResult qres4 = connection.query(sql4);
+
+                    if (qres4 != null) {
+
+                        String quantidadeString = "";
+                        for (int c=0; c<qres4.getSize(); c++) {
+                            SObject sobj4 = qres4.getRecords()[c];
+                            JSONObject rec4 = new JSONObject();    
+
+                            try {
+                                campoOb = sobj4.getField("Quantidade__c");
+                                if (campoOb != null) quantidadeString = sobj4.getField("Quantidade__c").toString();
+
+                            } catch (Exception e) {
+
+                            } 
+
+                            String primeiraVendaString = "";
+                            try {
+                                campoOb = sobj4.getField("Primeira_Venda__c");
+                                if (campoOb != null) primeiraVendaString = sobj4.getField("Primeira_Venda__c").toString();
+
+                            } catch (Exception e) {
+                                continue;
+
+                            }
+                            
+                            if (primeiraVendaString.toUpperCase().contains("FALSE")) houveUpgrade = "UPGRADE";
+
+                            if (tipoProduto.contains("OIC")) quantidadeOic = quantidadeOic + Double.parseDouble(quantidadeString);
+
+                        } 
+
+                    } 
+
+                } 
+                
+ 
+                String sql5 = "SELECT Id FROM suporte__c WHERE Contabilidade__c = '" + idContabilidade + "'";
+
+                QueryResult qres5 = connection.query(sql5);
+
+                if (qres5 != null && qres5.getSize() > 0)  quantidadeChamados = qres5.getSize();
+                
+                
+                String sql6 = "SELECT id FROM Empresa__c WHERE Matriz__c = true and (Tipo_Produto__c = 'Licenca_Ilimitada' or Tipo_Produto__c = 'OMC_Pacote') and Contabilidade__c = '" + idContabilidade + "'";
+
+                QueryResult qres6 = connection.query(sql6);
+
+                if (qres6 != null && qres6.getSize() > 0)  quantidadeEmpresasPadrao = qres6.getSize();
+                
+                
+                String sql8 = "SELECT Valor_NF__c FROM Duplicata__c WHERE Contabilidade_Produto__c = '" + idContabilidade + "' ORDER BY Emissao__c DESC";
+
+                QueryResult qres8 = connection.query(sql8);
+
+                if (qres8 != null && qres8.getSize() > 0) {
+                    String valorNfString = "";
+                    SObject sobj8 = qres8.getRecords()[0];
+                    try {
+                        campoOb = sobj8.getField("Valor_NF__c");
+                        if (campoOb != null) valorNfString = sobj8.getField("Valor_NF__c").toString();
+                        Double valorNf = Double.parseDouble(valorNfString);
+                        
+                        if (valorNf < maiorFatura) houveUpgrade = ";DownGrade";
+                        if (houveUpgrade.startsWith(";")) houveUpgrade = "Downgrade";
+                        
+
+                    } catch (Exception e) {
+
+                    } 
+                    
+                } 
+                
+                String sql9 = "SELECT Dias_desde_Assinatura__c, Liberou_Perdido__c FROM Empresa__c WHERE Matriz__c = true and Dias_desde_Assinatura__c > 0 and Contabilidade__c = '" + idContabilidade + "'";
+
+                QueryResult qres9 = connection.query(sql9);
+
+                if (qres9 != null && qres9.getSize() > 0){
+
+                    for (int d=0; d<qres9.getSize(); d++) {
+                        SObject sobj9 = qres9.getRecords()[d];
+                        
+                        String diasAssinatura = "";
+                        try {
+                            campoOb = sobj9.getField("Dias_desde_Assinatura__c");
+                            if (campoOb != null) diasAssinatura = sobj9.getField("Dias_desde_Assinatura__c").toString();
+                            if (!diasAssinatura.equals(""))  {
+                                
+                                double diasDouble = Double.parseDouble(diasAssinatura);
+                                if (diasDouble < 30) dias30++;
+                                else if (diasDouble < 60) dias60++;
+                                else if (diasDouble < 90) dias90++;
+                                
+                            }
+
+                        } catch (Exception e) {
+
+                        }  
+                    }
+                }
+                
+                String sql10 = "SELECT Usando_quando_cancelou__c, Liberou_Perdido__c FROM Empresa__c WHERE Matriz__c = true and Usando_quando_cancelou__c > 0 and Contabilidade__c = '" + idContabilidade + "'";
+
+                QueryResult qres10 = connection.query(sql10);
+
+                double usandoQuandoCancelou = 0;
+                if (qres10 != null && qres10.getSize() > 0)  usandoQuandoCancelou = qres10.getSize();
+
+
+                String integradasDias = "Ate 30 dias = " + String.format("%.0f", dias30) + ", Ate 60 dias = " + String.format("%.0f", dias30) + ", ate 60 dias = " + String.format("%.0f", dias90);
+                
+ 
+
+                if (produtosContratados.startsWith(",")) produtosContratados = produtosContratados.substring(1);
+
+                JSONObject js = new JSONObject();
+
+                js.put("idContabilidade", idContabilidade);
+                js.put("nomeResumido", nomeResumido);
+                js.put("produtosContratados", produtosContratados);
+                js.put("houveUpgrade", houveUpgrade);
+                js.put("integradasDias", integradasDias);
+                js.put("usandoQuandoCancelou", usandoQuandoCancelou);
+                
+
+                if (quantidadeOic < 6) js.put("IntegracoesContratadas", "Ate 5");
+                else if (quantidadeOic < 11) js.put("IntegracoesContratadas", "Ate 10");
+                else if (quantidadeOic < 21) js.put("IntegracoesContratadas", "Ate 20");
+                else js.put("IntegracoesContratadas", "Mais que 20");
+                
+                if (quantidadeChamados < 1) js.put("quantidadeChamados", "Nenhum");
+                else if (quantidadeChamados < 6) js.put("quantidadeChamados", "Ate 5");
+                else if (quantidadeChamados < 11) js.put("quantidadeChamados", "Ate 10");
+                else if (quantidadeChamados < 16) js.put("quantidadeChamados", "Ate 15");
+                else js.put("quantidadeChamados", "Mais que 15");
+                
+                if (quantidadeEmpresasPadrao < 1) js.put("quantidadeEmpresasPadrao", "Nenhuma");
+                else if (quantidadeEmpresasPadrao < 11) js.put("quantidadeEmpresasPadrao", "Ate 10");
+                else if (quantidadeEmpresasPadrao < 21) js.put("quantidadeEmpresasPadrao", "Ate 20");
+                else if (quantidadeEmpresasPadrao < 51) js.put("quantidadeEmpresasPadrao", "Ate 50");
+                else js.put("quantidadeEmpresasPadrao", "Mais que 50"); 
+
+                if (!produtosContratados.equals("")) records.put(js);
+                 
+
+
+            }
+        }
+   
+
+    } catch (Exception e) {
+        logger.logError(e);
+    }
+    
+    */
+
+    return records;
+}
+ 
