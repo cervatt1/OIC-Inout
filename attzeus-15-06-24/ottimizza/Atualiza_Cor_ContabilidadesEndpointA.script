@@ -524,12 +524,21 @@ public String doLogin(String username, String password, String server, InoutLogg
 
 public String geraServicoAvulso(String oauthToken, String cnpjContabilidade, String produtoIdPai, String oauthTokenTareffa, InoutLogger logger) {
 
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
     try {
 
         JSONObject tareffaBody = new JSONObject();
         tareffaBody.put("Authorization", oauthToken);
         tareffaBody.put("cnpjEmpresa", cnpjContabilidade);
-        tareffaBody.put("observacao", "Criado por S1.ottimizza.Atualiza_Cor_Contabilidade");
+        tareffaBody.put("observacao", "Criado por "+servDinamic+".ottimizza.Atualiza_Cor_Contabilidade");
         tareffaBody.put("complemento", "");
 
         String urlTareffaAvulso = "https://api-beta-parceiros.herokuapp.com/api/v1/questor/servico/avulso";

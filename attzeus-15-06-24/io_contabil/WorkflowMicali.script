@@ -31,6 +31,14 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 	//config.setUsername("adm@ottimizza.com.br");
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
 
 	double tempoInicial = System.currentTimeMillis();
 	boolean rodouRota = false;
@@ -77,7 +85,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 		
 		int idFila = 0;
 		// logger.logInfo("Acima do postStatus");
-		postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 		JSONObject objetoFila = buscaDiretorioArquivoProcessado(dbIOContOtt, logger);
         if (objetoFila.has("DIRETORIO")) {
@@ -316,7 +324,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA pagar = " + empresa + " | " + fl.getName());
                             
-                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -793,7 +801,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -969,7 +977,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                             
                                 logger.logInfo("LENDO EMPRESA receber = " + empresa);
                             
-                                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa.toUpperCase(), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -1415,7 +1423,7 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
                                                                         //estah jogando direto para o enviados. Obs: eh um arquivo .omc
                                                                         
                                                                         FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-                                                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+                                                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
                                                                         jBucket.put("linkArquivo", nomeArquivo64);
                                                                         try {
                                                                             FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");

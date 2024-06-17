@@ -2818,6 +2818,15 @@ public JSONArray runEndpointAWorkflow(InoutLogger logger) throws Exception {
 	
 	logger.logInfo("API SALES SHR: runEndpointAWorkflow RegrasWorkflowT 1");
 	
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
     try {
 		String contabilidade = getNomeContabilidade();
         String dirName = RouteEngine.INOUT_HOME + "/contabil/" + getNomeContabilidade() + "/";
@@ -2832,11 +2841,12 @@ public JSONArray runEndpointAWorkflow(InoutLogger logger) throws Exception {
         String extensaoSuportada = ".csv.xlsx.txt.ofx.dat.pdf.prn.ofc.omc";
         String sendToName       = getNomeContabilidade() + " -- OTTIMIZZA Contabil";
         double sizeLimit = 3.2;               //tamanho maximo processavel                        //-
-/*
+        /*
 		if (sizeLimit < 15 && getNomeContabilidade().toUpperCase().contains("IGNIS")) sizeLimit = 15;
 		if (sizeLimit < 50 && getNomeContabilidade().toUpperCase().contains("TECOLMG")) sizeLimit = 50;
 		if (sizeLimit < 5 && getNomeContabilidade().toUpperCase().contains("ESCOLBE")) sizeLimit = 5;
-*/
+        */
+
         sizeLimit = sizeLimit * (Math.pow(1024,2)); //MiB                                       //-
 
         String extensaoArquivo  = "";
@@ -2876,7 +2886,7 @@ public JSONArray runEndpointAWorkflow(InoutLogger logger) throws Exception {
 		FileWriter writerLog = new FileWriter(fileLog);
 		writerLog.writeNewFile(conteudo.toString());
 		
-		postStatus("S1", contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus(servDinamic.toUpperCase(), contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 		
 
@@ -3117,7 +3127,7 @@ public JSONArray runEndpointAWorkflow(InoutLogger logger) throws Exception {
 
                             if (FileUtil.dirHasFiles(diretorio)) {
 							
-								postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+								postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
                                 for (File fl: files) {
 								
@@ -3414,7 +3424,7 @@ public JSONArray runEndpointAWorkflow(InoutLogger logger) throws Exception {
 
                             if (FileUtil.dirHasFiles(diretorio)) {
 							
-								postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+								postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
                                 for (File fl: files) {
 								

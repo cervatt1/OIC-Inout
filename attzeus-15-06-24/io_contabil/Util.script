@@ -2511,17 +2511,22 @@ public double capturaValor(String vdAux) throws Exception{
     throw new Exception("Valor invalido: " + vdAux);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+public String buscaServidor(InoutLogger logger){
+	String conteudo = "";
+	try{
+		FileReader readerServidor = new FileReader("f:/ottimizza/servidor.txt");
+		try {
+			readerServidor.openFile();
+			conteudo = readerServidor.readAll();
+		} catch (IOException ioe) {
+			logger.logError(ioe);
+			return "";
+		} finally {
+			readerServidor.closeFile();
+		}
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR SERVIDOR = "+e.getMessage());
+		return "";
+	}
+	return conteudo.replace("\r", "").replace("\n", "");
+}

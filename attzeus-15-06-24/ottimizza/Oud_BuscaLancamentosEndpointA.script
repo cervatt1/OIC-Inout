@@ -31,7 +31,17 @@ public JSONArray run(InoutLogger logger) throws Exception {
     JSONArray records = new JSONArray();
     
     String protocoloAnterior = "";
-	/*DBPostgreSQL dbFila = null;
+	
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
+    /*DBPostgreSQL dbFila = null;
 	try {
 		dbFila = postgre.connectDatabase("fila-workers", logger);
 	} catch (Exception e) {
@@ -39,7 +49,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 		return new JSONArray();
 	}*/
     
-    postStatus("S11", "Ottimizza", "OUD_Busca", "Nada Pendente", "OUD_BuscaLancamentos", "OUD_BuscaLancamentos");
+    postStatus(servDinamic.toUpperCase(), "Ottimizza", "OUD_Busca", "Nada Pendente", "OUD_BuscaLancamentos", "OUD_BuscaLancamentos");
 	
     try {
 
@@ -75,7 +85,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
             for (int tt=0; tt<lancamentos.length(); tt++) {
                 
-                postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+                postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 				
                 try {
                     JSONObject lancamentoObj = new JSONObject(lancamentos.optJSONObject(tt).optString("lancamentos").replaceAll("\\\\",""));

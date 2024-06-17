@@ -11,7 +11,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
      String dirName = "/inout/logs/workflow";
 
-
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
  
     try {
 
@@ -85,7 +92,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
                                 fila.put("Contabilidade com Problema", memFile.getStringField(0));
                                 records.put(fila);
                                 
-                                String subject = memFile.getStringField(0) + " - ROBO Integracao OTTIMIZZA S1 Parado. :#13122021 " ;
+                                String subject = memFile.getStringField(0) + " - ROBO Integracao OTTIMIZZA "+servDinamic+" Parado. :#13122021 " ;
                                 String sendToName = "suporte@ottimizza.com.br";
                                 StringBuilder msg = new StringBuilder();
                                 
@@ -95,7 +102,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
                                 .append("</head>\n")
                                 .append("<body lang=\"en-US\" dir=\"ltr\">\n")
                                 .append("<p><font style=\"font-size: 10pt\">\n")
-                                .append("<br/><br/>Atencao. PROBLEMAS NO S1. WORKFLOW PARADO OU LENTO.  Avaliar contabilidade/emnpresa : <b>").append(memFile.getStringField(0))
+                                .append("<br/><br/>Atencao. PROBLEMAS NO "+servDinamic+". WORKFLOW PARADO OU LENTO.  Avaliar contabilidade/emnpresa : <b>").append(memFile.getStringField(0))
                                 .append("</b>")
                                 .append("</b>")
                                 .append("<br/>Enviado automaticamente pela rota ottimizza_monitor_rotas_funcionando") 

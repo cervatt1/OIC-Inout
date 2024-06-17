@@ -87,6 +87,15 @@ public JSONArray run(InoutLogger logger) throws Exception {
     String dia				= cutString(hoje, 0, "/");
     double saldo			= 0;
 
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
     try { 
         end			= getCampoDate(getPreviousDay(hoje, -1, false),"dd/MM/yyyy","yyyy-MM-dd");
         start       = DateUtil.dateToString(subDaysToDate(new Date(), 90), "yyyy-MM-dd");
@@ -102,7 +111,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
     propsOtt.load("contabil/Ottimizza/contabil.properties");
 
 
-	postStatus("S11", "Ottimizza", "Pluggy_Retroativo", "Nada Pendente", "Sem Arquivo Para Processar", "Roda do S1", logger);
+	postStatus(servDinamic.toUpperCase(), "Ottimizza", "Pluggy_Retroativo", "Nada Pendente", "Sem Arquivo Para Processar", "Roda do "+servDinamic, logger);
 
     try {
         propsCont.load("/contabil/Ottimizza/routes.properties");

@@ -9,6 +9,14 @@ public JSONArray run(InoutLogger logger) throws Exception {
     
     HashMap mapaLote			= new HashMap();
     
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
 
 
     try {
@@ -190,7 +198,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
                                         FileUtil.copyFolder(arquivoOrigem, arquivoDeploy);
 
 
-                                        nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteName + nomeArquivo64).getBytes());
+                                        nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteName + nomeArquivo64).getBytes());
                                         jBucket.put("linkArquivo", nomeArquivo64);
 
 

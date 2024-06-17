@@ -11,7 +11,16 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
     HashMap mapaLote			= new HashMap();
 
-    postStatus("S1", "Ottimizza", "Atualizaotwpadrao", "Atualizaotwpadrao", "PAGAR", "Ottimizza");
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
+    postStatus(servDinamic.toUpperCase(), "Ottimizza", "Atualizaotwpadrao", "Atualizaotwpadrao", "PAGAR", "Ottimizza");
 	
     // Definido com o Xavier que o processo abaixo ira rodar a cada 60min.
     if(dataAtual.equals("00")){

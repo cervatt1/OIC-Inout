@@ -1,5 +1,7 @@
 public class DatabasePostgreSQL {
 
+	
+
 	// private static final String MEUCAIXA_LISTNER_HOST		= "ec2-34-195-140-228.compute-1.amazonaws.com";
 	// private static final String MEUCAIXA_LISTNER_DATABASE	= "ddgnvnt3maerkp";
 	// private static final String MEUCAIXA_LISTNER_USER		= "ufuo0fpg0kb5de";
@@ -211,9 +213,18 @@ public class DatabasePostgreSQL {
 	
 	public JSONArray buscaInfoToReprocess(DBPostgreSQL db, InoutLogger logger) throws SQLException {
 
+		String servDinamic = "";
+		try{
+			servDinamic = buscaServidor(logger).toLowerCase();
+			if(servDinamic.equals("")) servDinamic = "zeus";
+		}catch(Exception e){
+			logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+			servDinamic = "zeus";
+		}
+
 		String sql = "SELECT pr.id, pr.partner, pr.info_reprocess as infos "
 				   + "FROM partners_reprocess pr "
-				   + "WHERE pr.read = false and pr.info_reprocess::text like '%s1.ottimizza%'";
+				   + "WHERE pr.read = false and pr.info_reprocess::text like '%"+servDinamic+".ottimizza%'";
 				   /* backup: + "WHERE pr.read = false and pr.info_reprocess::text NOT like '%02218532000125%' and pr.info_reprocess::text NOT like '%77812196000143%' and  pr.info_reprocess::text NOT like '%07310888000108%' and pr.info_reprocess::text NOT like '%10276526000152%' and pr.info_reprocess::text NOT like '%23092757000158%' and pr.info_reprocess::text NOT like '%26532252000155%'  and pr.info_reprocess::text NOT like '%04727173000167%' and pr.info_reprocess::text NOT like '%04689159823%' and pr.info_reprocess::text NOT like '%18733337000173%' and pr.info_reprocess::text NOT like '%92860246000151%' and pr.info_reprocess::text NOT like '%15415383000136%' and pr.info_reprocess::text NOT like '%32019529000143%' and pr.info_reprocess::text NOT like '%73574899000120%'";*/
 				   
 
@@ -334,10 +345,19 @@ public class DatabasePostgreSQL {
 	}
 	
 	public JSONArray buscaLancamentosOicProcessado(DBPostgreSQL db, String cnpjEmpresa, InoutLogger logger) throws SQLException {
+		
+		String servDinamic = "";
+		try{
+			servDinamic = buscaServidor(logger).toLowerCase();
+			if(servDinamic.equals("")) servDinamic = "zeus";
+		}catch(Exception e){
+			logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+			servDinamic = "zeus";
+		}
 		String sql = "SELECT id, objeto_arquivo_processado AS lancamentos  "
 						+"FROM arquivos_processados  "
 						// +"WHERE integrado_oic = false;";
-						+"WHERE integrado_oic = false and objeto_arquivo_processado ->> 'servidorPublicacao' = 'https://s1.ottimizza.com.br:55325'";			
+						+"WHERE integrado_oic = false and objeto_arquivo_processado ->> 'servidorPublicacao' = 'https://"+servDinamic+".ottimizza.com.br:55325'";			
 						
 		
 		try {
@@ -356,13 +376,22 @@ public class DatabasePostgreSQL {
 	 
 	
 	public JSONArray buscaRoteiros(DBPostgreSQL db, InoutLogger logger) throws SQLException {
+
+		String servDinamic = "";
+		try{
+			servDinamic = buscaServidor(logger).toLowerCase();
+			if(servDinamic.equals("")) servDinamic = "zeus";
+		}catch(Exception e){
+			logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+			servDinamic = "zeus";
+		}
 		
 		// INSERIDO PARA NAO LER CNPJ DA MONDO E DEIXAR PARA ATUALIZAR ESTES ROTEIROS NO S11
 		String sql = "SELECT id, exportado,  info_roteiros "
 						+"FROM atualiza_roteiros  "
 						//+"WHERE exportado = false  ";	    04689159823  		
 						//+"WHERE exportado = false  and info_roteiros::text NOT like '%10276526000152%'  and info_roteiros::text NOT like '%23092757000158%'  and info_roteiros::text NOT like '%26532252000155%'  and info_roteiros::text NOT like '%04727173000167%' and info_roteiros::text NOT like '%04689159823%' and info_roteiros::text NOT like '%18733337000173%' and info_roteiros::text NOT like '%92860246000151%' and info_roteiros::text NOT like '%15415383000136%' ";		
-						+"WHERE exportado = false  and info_roteiros::text like '%s1.ottimizza%' ";		
+						+"WHERE exportado = false  and info_roteiros::text like '%"+servDinamic+".ottimizza%' ";		
 
 						
 						
@@ -382,13 +411,21 @@ public class DatabasePostgreSQL {
 	}
 	public JSONArray buscaRoteiros(DBPostgreSQL db, String lisraRoteiros, InoutLogger logger) throws SQLException {
 		
+		String servDinamic = "";
+		try{
+			servDinamic = buscaServidor(logger).toLowerCase();
+			if(servDinamic.equals("")) servDinamic = "zeus";
+		}catch(Exception e){
+			logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+			servDinamic = "zeus";
+		}
 		// INSERIDO PARA NAO LER CNPJ DA MONDO E DEIXAR PARA ATUALIZAR ESTES ROTEIROS NO S11
 		String sql = "SELECT id, exportado,  info_roteiros "
 						+"FROM atualiza_roteiros  "
 						//"WHERE exportado = false and info_roteiros::text like '%" + lisraRoteiros + "%';" ;			
 						//+"WHERE exportado = false and info_roteiros::text not like '%10276526000152%' and info_roteiros::text not like '%23092757000158%' and info_roteiros::text not like '%26532252000155%' and info_roteiros::text not like '%04727173000167%' and info_roteiros::text not like '%04689159823%' and info_roteiros::text not like '%18733337000173%' and info_roteiros::text not like '%92860246000151%' and info_roteiros::text not like '%15415383000136%' and info_roteiros::text like '%" + lisraRoteiros + "%';" ;			
 						//+"WHERE exportado = false and info_roteiros::text  like '%s1.ottimizza%'  and info_roteiros::text like '%" + lisraRoteiros + "%';" ;
-						+"WHERE exportado = false and (info_roteiros::text like '%s1.ottimizza%' or info_roteiros::text not like '%\"servidor\":%') and info_roteiros::text like '%" + lisraRoteiros + "%';" ;
+						+"WHERE exportado = false and (info_roteiros::text like '%"+servDinamic+".ottimizza%' or info_roteiros::text not like '%\"servidor\":%') and info_roteiros::text like '%" + lisraRoteiros + "%';" ;
 
 
 

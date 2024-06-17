@@ -31,6 +31,15 @@ JSONArray runWorkflowEndpointA(InoutLogger logger) throws Exception {
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
 
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+    
 	double tempoInicial = System.currentTimeMillis();
 	boolean rodouRota = false;
 

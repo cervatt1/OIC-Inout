@@ -38,6 +38,15 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 	//config.setPassword("oic@3333222YXZRHYLH8cxrchPu0rjyGH1j8");
 	//config.setTraceMessage(true);
 	
+    String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
+
     try {
 		String contabilidade = getNomeContabilidadeWorkflow();
         String dirName = RouteEngine.INOUT_HOME + "/contabil/" + getNomeContabilidadeWorkflow() + "/";
@@ -92,7 +101,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 		FileWriter writerLog = new FileWriter(fileLog);
 		writerLog.writeNewFile(conteudo.toString());
 		
-		postStatus("S1", contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+		postStatus(servDinamic.toUpperCase(), contabilidade, "Ocioso", "Nada Pendente", "Sem Arquivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
   
  
         // verifica se a empresa existe no diretorio /inout/contabil/contabilidade
@@ -479,7 +488,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
                         if (FileUtil.dirHasFiles(diretorio)) {
 
  							
-							postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+							postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 							for (File fl: files) {
 								
@@ -830,7 +839,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																		&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																		File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																		FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																		nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																		nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																		jBucket.put("linkArquivo", nomeArquivo64);
 																		try {
 																			FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -881,7 +890,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 													}
 													
  
-/*
+		/*
 													if (antesRodar == depoisRodar) {
 														String planilhaErro = dirName + nome + "/DePara" + "/empresa_PAGAR.err";
 														FileWriter writerErro = new FileWriter(planilhaErro);
@@ -1038,7 +1047,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 
                             if (FileUtil.dirHasFiles(diretorio)) {
 							
-								postStatus("S1", contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+								postStatus(servDinamic.toUpperCase(), contabilidade, "Processando", nome.substring(0,nome.indexOf("_#")), "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
                                 for (File fl: files) {
 									
@@ -1371,7 +1380,7 @@ public JSONArray runWorkflowEspecificoEndpointA(InoutLogger logger) throws Excep
 																			&& !fileDePara.getName().toUpperCase().contains("RESUMO_LOGS_IMPORTACAO")) || fornecedorUnico.contains("EXIBE_RESUMO"))) {
 																			File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																			FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
-																			nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+																			nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																			jBucket.put("linkArquivo", nomeArquivo64);
 																			try {
 																				FileUtil.moveToDir("c:/inout/contabil/"+getNomeContabilidadeWorkflow()+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -1592,6 +1601,14 @@ private String getNomeContabilidadeWorkflow() throws Exception {
  JSONArray runWorkflowEndpointA(String iReadIt, InoutLogger logger) throws Exception {
 
 	//logger.logDebug("### Workflow padrao > "+iReadIt);
+	String servDinamic = "";
+	try{
+		servDinamic = buscaServidor(logger).toLowerCase();
+		if(servDinamic.equals("")) servDinamic = "zeus";
+	}catch(Exception e){
+		logger.logInfo("ERRO AO BUSCAR - "+e.getMessage());
+        servDinamic = "zeus";
+	}
 
     JSONArray records    = new JSONArray();
 
@@ -1616,7 +1633,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
  
 	
 	//logger.logInfo("INICIANDO WORKFLOW");
-	postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+	postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), "Ocioso", "Nada Pendente", "Sem Arqivo Para Processar", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
     
     try {
         // tenta carregar propriedades de rotas.
@@ -2097,7 +2114,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 											
 												logger.logDebug("LENDO EMPRESA pagar = " + empresa);
 											
-												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "PAGAR", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
 
 
                                                 if(fl.length() < sizeLimit) {                    // processar apenas arquivos MENORES que o limite
@@ -2560,7 +2577,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 																						//estah jogando direto para o enviados. Obs: eh um arquivo .omc
 																						
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
@@ -2774,7 +2791,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
                                             for (File fl: files) {
 												
- 												postStatus("S1", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
+ 												postStatus(servDinamic.toUpperCase(), INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")), contabilidade, empresa, "RECEBER", INOUT_ROUTE_ID.substring(0, INOUT_ROUTE_ID.indexOf(".")));
                                                 
 												String rodaConversor = props.get(nome.substring(0,nome.indexOf("_#")).toUpperCase() + "_EQUIPE_FECHAMENTO");
 												
@@ -3142,7 +3159,7 @@ private String getNomeContabilidadeWorkflow() throws Exception {
 
 																						File arquivoDeployId  = new File(dirRouteNameId + nomeArquivo64);
 																						FileUtil.copyFolder(arquivoOrigemId, arquivoDeployId);
- 																						nomeArquivo64 = "https://s1.ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
+ 																						nomeArquivo64 = "https://"+servDinamic+".ottimizza.com.br:55325/storage/"  + Base64.getEncoder().encodeToString((dirRouteNameId + nomeArquivo64).getBytes());
 																						jBucket.put("linkArquivo", nomeArquivo64);
 																						try {
 																							FileUtil.moveToDir("c:/inout/contabil/"+contabilidade+"/arquivos/" + fileDePara.getName(), "c:/inout/contabil/"+contabilidade+"/arquivos/enviados");
