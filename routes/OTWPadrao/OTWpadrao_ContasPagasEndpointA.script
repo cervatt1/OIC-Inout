@@ -10239,6 +10239,8 @@ public boolean readExtratoVotorantim2PDF(MemoryFile memFile, String nomePortador
 
 
 public boolean readExtratoAsaasPDF(MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) throws Exception {
+	logger.logInfo("ENTROU ASAS");
+	
 	JSONObject extratoEmpresa = new JSONObject();
 
     // Inicializacao de Variaveis
@@ -10298,25 +10300,33 @@ public boolean readExtratoAsaasPDF(MemoryFile memFile, String nomePortador, JSON
 			nomePortador = cutString(memFile.getStringFieldRemoveEspCharsUpper(inomePortador), "CONTA:").trim();
 		}
 		
+		logger.logInfo("LINHA ASAAS = "+line);
+		
 		try {
 			try {
 				Date dt = memFile.getDateField(idataMovimento, "dd/MM/yyyy");
 				dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
 				dataLote = DateUtil.dateToString(dt, "yyyy-MM");
 			} catch (Exception dt1) {
+				logger.logInfo("CATCH1");
 				try {
 					Date dt = memFile.getDateField(idataMovimento);
 					dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
 					dataLote = DateUtil.dateToString(dt, "yyyy-MM");
 				} catch (Exception dt2) {
+					logger.logInfo("CATCH2");
 					try {
 						String dataString = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).replaceAll("\"","");
 						Date dt  = DateUtil.stringToDate(dataString, "dd/MM/yyyy");
 						dataMovimento = DateUtil.dateToString(dt, "dd/MM/yyyy");
 						dataLote = DateUtil.dateToString(dt, "yyyy-MM");
-					} catch (Exception dt2) { }
+					} catch (Exception dt2) {
+						logger.logInfo("CATCH3");
+					}
 				}
 			}
+			
+			logger.logInfo("DT = "+dataMovimento);
 
 			if (dataMovimento.equals("")) continue;
 			if (memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).equals("")) continue;
@@ -10329,6 +10339,18 @@ public boolean readExtratoAsaasPDF(MemoryFile memFile, String nomePortador, JSON
 			try{valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));}
 			catch (Exception vlrd) { valorDocumento = 0; }
 			
+			logger.logInfo("VALOR = "+valorDocumento + " | DC = "+debitoCredito);
+			
+			if(valorDocumento == 0) {
+				try{
+					valorDocumento = Double.parseDouble(memFile.getStringFieldRemoveEspCharsUpper(ivalorDocumento).trim()
+													.replaceAll("R$", "").replaceAll("\\.", "").replaceAll(",", ""))/100;
+				}catch(Exception e){
+					valorDocumento = 0;
+					logger.logInfo("ERRO AO PEGAR VDOC: " + e.getMessage());
+				}
+			}
+			logger.logInfo("2 VALOR = "+valorDocumento + " | DC = "+debitoCredito);
 			
 			if (valorDocumento == 0) continue;
 			
@@ -16313,7 +16335,7 @@ public HashMap readFaturaCartaoCredito_Itau_Excel(MemoryFile memFile, JSONObject
         line = StringUtil.removeSpecialCharsToUC(line);
 		memFile.setFieldSeparator("\\|");
 		cont++;
-
+		
 		if(	line.toUpperCase().contains("TOTAL DE LAN") && line.toUpperCase().contains("AMENTOS") &&  
 			(line.toUpperCase().contains("NACIONAIS") || line.toUpperCase().contains("INTERNACIONAIS"))) continue;
 

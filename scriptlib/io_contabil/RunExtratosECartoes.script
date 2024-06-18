@@ -47,6 +47,8 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
+			logger.logInfo("METHODS = "+methodName);
+			
 			if (methodName.contains(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
 				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
@@ -58,7 +60,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			}
 		}
 	} catch (Exception e2) {
-		//logger.logInfoError("Error trying to invoke method 'Extrato/Cartao Tipo01 boolean'.", e2);
+		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo01 boolean'." + e2);
 	}
 	return response;
 }
@@ -93,7 +95,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
 				
@@ -101,7 +103,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			}
 		}
 	} catch (Exception e2) {
-		//logger.logInfoError("Error trying to invoke method 'Extrato/Cartao Tipo02 boolean'.", e2);
+		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo02 boolean'." + e2);
 	}
 	return response;
 }
@@ -132,7 +134,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
 				
@@ -140,7 +142,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			}
 		}
 	} catch (Exception e2) {
-		//logger.logInfoError("Error trying to invoke method 'Extrato/Cartao Tipo03 boolean'.", e2);
+		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo03 boolean'." + e2);
 	}
 	return response;
 }
@@ -228,7 +230,7 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			}
 		}
 	} catch (Exception e2) {
-		//logger.logInfoError("Error trying to invoke method 'Extrato/Cartao Tipo04 HashMap'.", e2);
+		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo04 HashMap'." + e2);
 	}
 	return mapaVariavel;
 }
@@ -290,6 +292,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 	String arquivoCompleto   = "";
 	String cabecalhoPlanilha = "";
 	String complemento09     = "";
+	boolean hasNewChave      = false;
 	
 	String retornoValidacao  =  "";
 	// String retornoValidacao =  "";
@@ -309,6 +312,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 	if (variaveis.has("complemento02"))  complemento02  = variaveis.optString("complemento02");
 	if (variaveis.has("complemento09"))  complemento09  = variaveis.optString("complemento09");
 	if (variaveis.has("nomePortador2"))  nomePortador2  = variaveis.optString("nomePortador2");
+	if (variaveis.has("hasNewChave"))    hasNewChave    = variaveis.optBoolean("hasNewChave");
 	nomePortador2 = nomePortador2.trim();
 	if (variaveis.has("tipoLancamento")) tipoLancamento = variaveis.optString("tipoLancamento");
 	
@@ -332,7 +336,7 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 		nomeArquivoAuxiliar = cutString(nomeArquivoAuxiliar.toUpperCase(), "_");
 	}
 	
-  	logger.logInfo("CP -> "+nomeArquivo/*+" | "+cabecalhoPlanilha + " | " + tipoPlanilha*/ + " | " + extensao);
+  	// //logger.logInfoDebug("CP -> "+cabecalhoPlanilha + " | " + tipoPlanilha + " | " + extensao);
 	if(nomeArquivo.toUpperCase().contains("ANCORA") || nomeArquivo.toUpperCase().contains(".PDF")){
 		
 		retornoValidacao = validacaoPDF(anoData, complemento01, complemento02, line, dbIOCont, variaveis, roteiroCRM, arquivoCompleto, cabecalhoPlanilha, tipoLancamento, nomeEmpresa, codEmpresa, nomeArquivo, nomeArquivoAuxiliar, memFile, mapaVariavel, nomePortador, nomePortador2, tipoPlanilha, logger);
@@ -390,13 +394,15 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			if(cabecalhoPlanilha.contains("DESCRI") && cabecalhoPlanilha.contains("HIST") && extensao.contains("CSV")){
 				jDados.put("TIPOLAYOUTEXCEL", "002");
 			}
-
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",   tipoPlanilha);
 			jDados.put("LINE",   		 line);
+			
 			
 			//logger.logInfoDebug("EXTRATO-INTER");
 			
@@ -449,6 +455,9 @@ public String verificaExtratos(JSONObject variaveis, HashMap mapaVariavel, Memor
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",   tipoPlanilha);
 			jDados.put("LINE",   		 line);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoInter2PDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -564,7 +573,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-HSBC");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			readExtratoECartao("readExtratoHSBCPDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
@@ -580,7 +591,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOPLANILHA", "EXTRATO-STARBANK");
+			jDados.put("TIPOPLANILHA", "EXTRATO-BSCASH");
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			readExtratoECartao("readExtratoBSCashPDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -605,8 +616,10 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 	}
 	
-	// EXTRATO - PDF - Pin Bank
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinBank_PDF")) {
+	// EXTRATO - PDF - Pin Bank - FirstCapital - ZipBank
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinBank_PDF") ||
+		roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ZipBank_PDF") ||
+		roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_FirstCapital_PDF") ) {
 		if (arquivoCompleto.contains("REFERENCIA") &&
 			arquivoCompleto.contains("ACESSOACONTA.COM.BR") &&
 			arquivoCompleto.contains("EXTRATO CONTA DE PAGAMENTO/LANCAMENTOS") /*&&
@@ -615,7 +628,12 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOPLANILHA", "EXTRATO-FIRST-CAPITAL");
+			String nomeTipoPlanilha = "";
+			if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_PinBank_PDF")) nomeTipoPlanilha = "PinBank";
+			if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ZipBank_PDF")) nomeTipoPlanilha = "ZipBank";
+			if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_FirstCapital_PDF")) nomeTipoPlanilha = "FirstCapital";
+
+			jDados.put("TIPOPLANILHA", "EXTRATO-"+nomeTipoPlanilha);
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			readExtratoECartao("readExtratoPinBankPDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -645,7 +663,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				// //logger.logInfoDebug("PORT -> " + nomePortador);
 			}
 			
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -688,7 +708,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			
 			tipoPlanilha = "EXTRATO-STONE";
 			
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -780,7 +802,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -820,7 +844,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(2);
 
 				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -834,7 +860,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				nomePortador = cutString(nomePortador,nomePortador.lastIndexOf("|"), ",").trim();
 
 				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -874,7 +902,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				// //logger.logInfoInfo("Entrou BS2 - 3");
 			}			
 			
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -912,7 +942,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			//logger.logInfoDebug("AMAZONIA PDF2");
@@ -970,7 +1002,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			//#2312-024394 - Envio de nome da contabilidade e empresa para validacao do envio do campo DOCUMENTO
 			jDados.put("NOMECONTABILIDADE", roteiroCRM.optString("contabilidade").toUpperCase());
 			jDados.put("NOMEEMPRESA", nomeEmpresa.toUpperCase());
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			//Comentado parte da validação abaixo por conta de instabilidades no chamado #2401-026567
 			if((arquivoCompleto.contains("BRADESCO INTERNET BANKING") /*|| (cabecalhoPlanilha.contains("EXTRATO MENSAL / POR PERIODO") */&& !arquivoCompleto.contains("BRADESCO CELULAR")) || arquivoCompleto.contains("DEMONSTRATIVO DE INVESTIMENTOS")){
@@ -998,7 +1032,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -1015,7 +1051,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		
 		tipoPlanilha = "EXTRATO-INVESTIMENTO-BRADESCO-PDF";
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -1093,7 +1131,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", 	 codEmpresa);
 		jDados.put("NOMEARQUIVO", 	 nomeArquivo);
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("TIPOEXTRATO", tipo);
 		// //logger.logInfoInfo("NOME PORTADOR E ANO ITAU CONSOLIDADO -> "+ nomePortador +" | "+ anoDataExtrato);
 
@@ -1123,7 +1163,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("TIPOPLANILHA", "EXTRATO-BANCODAYCOVAL-PDF");
 		readExtratoECartao("readExtratoBancoDaycovalPDF", memFile, "PDF-BANCODAYCOVAL", jDados, dbIOCont, logger);
 		variaveis.put("tipoRetorno", "break");
@@ -1146,7 +1188,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA", "EXTRATO-BANCOPAULISTA-PDF");
 			
 			readExtratoECartao("readExtratoBancoPaulistaPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1210,7 +1254,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA", "EXTRATO-BB");
 			// //logger.logInfoInfo("NOME PORTADOR BB MOBILE -> "+ nomePortador2);
 			
@@ -1247,7 +1293,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA", "EXTRATO-BB");
 			
 			// //logger.logInfoInfo("NOME PORTADOR BB EXTRATO -> "+ nomePortador2);
@@ -1264,7 +1312,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA", "EXTRATO-BB");
 
 			readExtratoECartao("readExtratoBancoDoBrasil3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1284,7 +1334,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			tipoPlanilha = "EXTRATO-SISBB";
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -1367,7 +1419,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("NOMEPORTADOR", nomePortador);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				// //logger.logInfoInfo("NOME PORTADOR UNICRED -> "+ nomePortador);
 				//if(arquivoCompleto.contains("SISTEMA DE AUTOMACAO UNICRED") || cabecalhoPlanilha.contains("UNICRED VALOR CAPITAL") || cabecalhoPlanilha.contains("UNICRED VALE") || cabecalhoPlanilha.contains("UNICRED PREMIUM")){
@@ -1422,7 +1476,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINHA", line);
 			
 			readExtratoECartao("readExtratoUnicred2PDF", memFile, jDados, dbIOCont, logger);
@@ -1443,7 +1499,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			
@@ -1513,7 +1571,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
 			jDados.put("TIPOEXTRATO", "001");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA",   "EXTRATO-BRB");
 
 			// //logger.logInfoInfo("NOME PORTADOR BRB -> "+ nomePortador2);
@@ -1536,7 +1596,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
 			jDados.put("TIPOEXTRATO", "002");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOPLANILHA",   "EXTRATO-BRB");
 			
 			// //logger.logInfoInfo("LOG NOME PORTADOR - " + nomePortador2);
@@ -1563,7 +1625,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ABC");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoABCPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1583,7 +1647,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ABC");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoABCPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1616,7 +1682,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			// //logger.logInfoInfo("AGUI " + anoData);
 			
@@ -1656,7 +1724,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BIB");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoBIBPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -1719,7 +1789,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			// //logger.logInfoInfo("NOME PORTADOR DE XP INVENTIMENTOS -> "+ nomePortador);
@@ -1743,7 +1815,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			// //logger.logInfoInfo("NOME PORTADOR DE XP INVENTIMENTOS -> "+ nomePortador);
@@ -1768,7 +1842,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			
@@ -1832,7 +1908,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", 	codEmpresa);
 		jDados.put("NOMEARQUIVO", 	nomeArquivo);
 		jDados.put("LINE", 			line);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 
 		////logger.logInfoInfo("NOME PORTADOR MERCADO PAGO -> "+ nomePortador2);
 
@@ -1861,7 +1939,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("LINE", line);
 					
 				readExtratoECartao("readExtratoContaSimplesPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1875,7 +1955,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("LINE", line);
 					
 				readExtratoECartao("readExtratoContaSimples2PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -1897,7 +1979,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("CABECALHOPLANILHA", cabecalhoPlanilha);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			readExtratoECartao("readExtratoCoraPDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -1915,7 +1999,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			readExtratoECartao("readExtratoBtgPDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -1927,7 +2013,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			arquivoCompleto.contains("SALDO DE FECHAMENTO EM")){
 				
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -1946,7 +2034,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			arquivoCompleto.contains("LEITUR")){
 				
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -1971,7 +2061,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ASAAS");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			readExtratoECartao("readExtratoAsaasPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
@@ -2011,7 +2103,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA",  	codEmpresa);
 		jDados.put("NOMEARQUIVO", 	nomeArquivo);
 		jDados.put("TIPOPLANILHA", 	"EXTRATO-NUBANK");
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("LINHA", line);
 		
 		readExtratoECartao("readExtratoNubankPDF", memFile, "NUBANK-PDF", jDados, dbIOCont, logger);
@@ -2030,7 +2124,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SISPRIME-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoSisprimePDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2051,7 +2147,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-PAYBROKERS-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoPaybrokersPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2228,7 +2326,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("TIPOPLANILHA", "EXTRATO-SANTANDER");
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		//logger.logInfoInfo("NOME PORTADOR SANTANDER -> "+ nomePortador2);
 		readExtratoECartao("readExtratSantanderPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 		variaveis.put("tipoRetorno",   "break");
@@ -2266,7 +2366,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-UBP-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoUBPPDF", memFile, "", jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2319,7 +2421,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SICREDI");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoSicrediPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			
@@ -2333,8 +2437,6 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	if ((roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_CEF_PDF") || roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Caixa_PDF")) && (nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA"))) {
 		String tipoPadrao = "";
 		// //logger.logInfoDebug("Line -> "+line);
-
-
 
 		if ((nomeArquivo.toUpperCase().contains("PDF") || nomeArquivo.toUpperCase().contains("ANCORA")) && (nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {
 		// if ((nomeArquivo.toUpperCase().contains("CAIXA") || nomeArquivo.toUpperCase().contains("CEF")) && nomePortador2.equals("")) {
@@ -2429,7 +2531,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 
 					jDados.put("CODEMPRESA", codEmpresa);
 					jDados.put("NOMEARQUIVO", nomeArquivo);
-					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					if(variaveis.has("hasNewChave")){
+						if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					}
 					jDados.put("TIPOPLANILHA", "EXTRATO-CEF04");
 
 					//#2311-021318 - Leal
@@ -2451,7 +2555,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 
 					jDados.put("CODEMPRESA", codEmpresa);
 					jDados.put("NOMEARQUIVO", nomeArquivo);
-					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					if(variaveis.has("hasNewChave")){
+						if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					}
 
 					readExtratoECartao("readExtratoCefPDF6", memFile, nomePortador, jDados, dbIOCont, logger);
 					variaveis.put("tipoRetorno", "break");
@@ -2474,6 +2580,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOPLANILHA", "EXTRATO-CEF");
 			jDados.put("TIPOPADRAO", tipoPadrao);
 			jDados.put("LINHA", line);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			// //logger.logInfoDebug("NP FINAL -> "+nomePortador2);
 			if(tipoPadrao.equals("")){
@@ -2495,7 +2604,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoCefPDF7", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2503,7 +2614,6 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		}
 
 	}
-
 	
 	////// EXTRATO - VALECARD //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Cartao_ValeCard_PDF")) {
@@ -2553,7 +2663,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("LINE", line);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		readExtratoECartao("readExtratoMovilepayPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 		variaveis.put("tipoRetorno", "break");
 		return variaveis.toString();
@@ -2598,7 +2710,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("TIPOPLANILHA", "EXTRATO-VIACREDI");
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		
 		// //logger.logInfoInfo("NOME PORTADOR VIACREDI -> "+ nomePortador2); 
 
@@ -2734,7 +2848,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-BRADESCO-3-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoBradesco3PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -2866,7 +2982,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("NOMEPORTADOR", nomePortador2);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			// //logger.logInfoInfo("AGUI " + anoData);
 			
@@ -2950,7 +3068,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("AUXDATA", auxData);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPOEXTRATO" , tipoExtrato);
 			jDados.put("LINE", line);
 			// //logger.logInfoInfo("NOME PORTADOR E AUXDATA DE SAFRA -> "+ nomePortador +" | "+ auxData);
@@ -3005,7 +3125,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoUniprime2PDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3036,7 +3158,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoUniprimePDF", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3071,7 +3195,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOEXTRATO", "001");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 
 			readExtratoECartao("readExtratoTribancoPDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -3095,7 +3221,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOEXTRATO", tipoExtrato);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 
 			readExtratoECartao("readExtratoTribancoPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -3125,7 +3253,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("LINE", line);
 			
 			readExtratoECartao("readExtratoTribanco2PDF", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -3142,7 +3272,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("LINE", line);
 				readExtratoECartao("readExtratoTribanco3PDF", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -3165,7 +3297,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoVotorantimPDF", memFile, "BANCO VOTORANTIM", jDados, dbIOCont, logger);
 			variaveis.put("nomePortador2",  "BANCO VOTORANTIM");
@@ -3182,7 +3316,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA:", "INFORMACOES");
 
@@ -3206,7 +3342,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("LINE", line);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		
 		// //logger.logInfoInfo("NOME PORTADOR VOTORANTIM -> "+ nomePortador);
 
@@ -3229,7 +3367,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("LINE", line);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			if(line.contains("C/C:")){
 				nomePortador = memFile.getStringFieldRemoveEspCharsUpper(7).replaceAll(";", "") +" "+ memFile.getStringFieldRemoveEspCharsUpper(8).replaceAll(";", "");
@@ -3336,11 +3476,10 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				(cabecalhoPlanilha.contains("SISTEMA DE COOPERATIVAS DE CREDITO DO BRASIL") || cabecalhoPlanilha.contains("SISTEMA DE COOPERATIVAS DE CRADITO DO BRASIL") || cabecalhoPlanilha.contains("SERVICOS FINANCEIROS DO SICOOB") ||
 				cabecalhoPlanilha.contains("SISTEMA|DE|COOPERATIVAS|DE|CREDITO|DO|BRASIL") || cabecalhoPlanilha.contains("SERVICOS|FINANCEIROS|DO|SICOOB")))
 				//Padrao 4 - 2311-021100
-				|| (cabecalhoPlanilha.contains("BANCO:") && cabecalhoPlanilha.contains("PERIODO DE") && cabecalhoPlanilha.contains("SALDO") && cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS") )
-				
+				|| (cabecalhoPlanilha.contains("BANCO:") && cabecalhoPlanilha.contains("PERIODO DE") && cabecalhoPlanilha.contains("SALDO") && cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS") 
 				|| (arquivoCompleto.contains("SALDO EM CONTA CORRENTE(+):") && 
 					arquivoCompleto.contains("SALDO EM CONTA INVESTIMENTO(+):") &&
-					arquivoCompleto.contains("08007250996"))) {
+					arquivoCompleto.contains("08007250996")))) {
 			
 			// //logger.logInfoInfo("Entra na validacao do Sicoob Pdf");
 			JSONObject jDados = new JSONObject();
@@ -3366,7 +3505,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SICOOB");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			if(cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS")){ //2311-021100
 				readExtratoECartao("readExtratoSicoob2PDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			} else{
@@ -3379,7 +3520,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		if(arquivoCompleto.contains("COMPROVANTE DEPAGAMENTO DE BOLETO") && arquivoCompleto.contains("PLATAFORMA DE SERVICOS FINANCEIROS DO SICOOB - SISBR")){
 			//#2402-030379
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -3404,7 +3547,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			tipoPlanilha = "EXTRATO-SISBB";
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -3438,7 +3583,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-C6BANK");
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
  
 				readExtratoECartao("readExtratoC6BankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "continue");
@@ -3452,7 +3599,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-C6BANK");
 				jDados.put("TIPO", "002");
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoC6BankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "continue");
@@ -3493,7 +3642,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-PAGBANK-PDF");
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 			
 				readExtratoECartao("readExtratoPagbankPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -3514,7 +3665,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				// //logger.logInfoDebug("PORT -> " + nomePortador);
 			// }
 			
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -3612,10 +3765,15 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		logger.logInfo("Antees readFranc");
 		if(variaveis.has("read") && variaveis.optString("read").equals("readExtratoItauPdfFrancesinha5")){
 			logger.logInfo("entrouread");
+			
+			if(line.contains("AGENCIA/CONTA")){
+				nomePortador = cutString(line, "CONTA", "|");
+				logger.logInfo("port: " + nomePortador);
+			}
 
 			JSONObject jDados = new JSONObject();
 
-			// jDados.put("PORTADOR", nomePortador);
+			jDados.put("NOMEPORTADOR", nomePortador);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "ITAU-FRANCESINHA05");
@@ -3711,7 +3869,6 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
-		
 	}
 	
 	////// EXTRATO - BANCO TRANSFEERA PDF //////////////////////////////////////////////////////////////////
@@ -3721,7 +3878,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			nomePortador = cutString(cutString(cabecalhoPlanilha, "CNPJ:", "DATA"),"CNPJ:", " ");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -3755,7 +3914,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-CREDISIS");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoCredisisPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3804,7 +3965,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TP-ITAU", "002");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoItauPdf2", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3829,7 +3992,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				// jDados.put("TESTE", nomePortador2);
 				readExtratoECartao("readExtratoItauPdf2", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -3867,7 +4032,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("nomePortador2", nomePortador2);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			//logger.logInfoInfo("Itau1");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -3905,7 +4072,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TIPO", "001");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			// jDados.put("TESTE", nomePortador2);
 			//logger.logInfoInfo("Itau2");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -3922,7 +4091,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("TIPO", "002");
 			
 			if (cabecalhoPlanilha.contains("SALDO DISPONIVEL EM CONTA")) {
@@ -3963,7 +4134,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("ANODATA", anoData);
 
 			readExtratoECartao("readExtratoItauPdf3", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -3984,9 +4157,29 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-ITAU");
 			jDados.put("TIPO", "999");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			//logger.logInfoInfo("Itau4");
 			readExtratoECartao("readExtratoItauPdfInterno", memFile, nomePortador2, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+		
+		//2405-040311
+		if(cabecalhoPlanilha.contains("SALDO EM CONTA") && cabecalhoPlanilha.contains("LIMITE DA CONTA UTILIZADO") &&
+		cabecalhoPlanilha.contains("LIMITE DA CONTA TOTAL") && cabecalhoPlanilha.contains("PERIODO DE VISUALIZA") && arquivoCompleto.contains("ITAU.COM.BR") ){
+
+			nomePortador2 = "ITAU-PDF - " + cutString(cabecalhoPlanilha, "AGENCIA:", "CONTA:").trim() + " " + cutString(cabecalhoPlanilha, "CONTA:", "SALDO").trim();
+
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
+
+			readExtratoECartao("readExtratoItauPdf4", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
@@ -3998,7 +4191,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA:", "EXTRATO");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4015,7 +4210,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA: ", "FILTROS DO");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4115,7 +4312,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOEXTRATO", complemento02);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4145,7 +4344,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo);
 		jDados.put("ANODATA", anoData);
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("LINE", line);
 
 		readExtratoECartao("readExtratoOmieCashPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -4162,7 +4363,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 
 			readExtratoECartao("readExtratoTargetPDF", memFile, "", jDados, dbIOCont, logger);
@@ -4227,6 +4430,27 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
 
 			mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_BradescoPDF", memFile, jDados, mapaVariavel, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+	
+	////// FATURA CARTAO CREDITO INTER PDF //////////////////////////////////////////////////////////////////
+	if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_Inter_PDF")){
+		if(arquivoCompleto.contains("ATENDIMENTO INTER") && arquivoCompleto.contains("3003 4070") &&
+			arquivoCompleto.contains("DESPESAS DA FATURA") && arquivoCompleto.contains("PAGAMENTO PARCIAL")){
+
+			logger.logInfo("ENTROU IF FATURA INTER");	
+			JSONObject jDados = new JSONObject();
+
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "FATURACARTAOCREDITOINTER");
+			jDados.put("NOMEEMPRESA", nomeEmpresa);
+			jDados.put("NOMEPORTADOR", nomePortador);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+
+			mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_InterPDF", memFile, jDados, mapaVariavel, logger);
 			variaveis.put("tipoRetorno",   "break");
 			return variaveis.toString();
 		}
@@ -4326,7 +4550,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4335,7 +4561,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
-				
+		
 		if ((arquivoCompleto.contains("0800 761 6196") || arquivoCompleto.contains("08007616196") || 
 			 arquivoCompleto.contains("0800761 6196") || arquivoCompleto.contains("0800 7616196")) &&
 			arquivoCompleto.contains("SALDO TOTAL EM") &&
@@ -4347,9 +4573,11 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("PADRAO", "002");
 			jDados.put("TIPOPLANILHA", "EXTRATO-SULCREDI");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			readExtratoECartao("readExtratoSulcrediPDF", memFile, nomePortador, jDados, dbIOCont, logger);
-			variaveis.put("tipoRetorno",   "break");
+			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
 	}
@@ -4455,7 +4683,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
 			jDados.put("TIPOPLANILHA", "EXTRATO-SQUID-PDF");
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoSquidPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -4469,7 +4699,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		logger.logInfo("ENTROU VALORIBANK");
 
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4488,7 +4720,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			// //logger.logInfoInfo("Entra na validacao do Ailos Civia PDF");
 		
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA", nomeEmpresa);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -4512,7 +4746,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			nomePortador2 = cutString(line, "CONTA/DV:", "  ");
 
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEPORTADOR", nomePortador2);
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4534,7 +4770,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			// //logger.logInfoInfo("Entra na validacao do Sicoob Conta Capital PDF");
 		
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA", nomeEmpresa);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -4560,7 +4798,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			
 		
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA", nomeEmpresa);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -4580,7 +4820,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 		// //logger.logInfoInfo("Entra na validacao do Poupe Credi PDF");
 		
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA", nomeEmpresa);
 		jDados.put("CODEMPRESA", codEmpresa);
 		jDados.put("NOMEARQUIVO", nomeArquivo.toUpperCase());
@@ -4597,7 +4839,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			////logger.logInfoInfo("Entra na validacao do BMG Pdf");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4612,7 +4856,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 				
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4636,7 +4882,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			tipoPlanilha = "EXTRATO-PAGPIXBANK";
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4655,7 +4903,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			// //logger.logInfoInfo("Entra na validacao do Infinite Pay PDF");
 		
 			JSONObject jDados = new JSONObject();
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA", nomeEmpresa);
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo.toUpperCase());
@@ -4707,7 +4957,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4728,7 +4980,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 		
 		// //logger.logInfoInfo("ENTROU NEXT PDF");
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4745,7 +4999,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 		&& arquivoCompleto.contains("EXTRATO PARA SIMPLES CONFERENCIA")){
 
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4813,7 +5069,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 		arquivoCompleto.contains("COOPERATIVA DE CREDITO CREHNOR") ) {
 
 		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		jDados.put("CODEMPRESA",     codEmpresa);
 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4839,7 +5097,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 				
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4861,7 +5121,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			tipoPlanilha = "EXTRATO-PINKPAY";
 			JSONObject jDados = new JSONObject();
 
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -4903,7 +5165,9 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			JSONObject jDados = new JSONObject();
 
 			jDados.put("CODEMPRESA", codEmpresa);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -4952,7 +5216,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoHSBCExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -4970,7 +5236,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
                 jDados.put("NOMEARQUIVO", nomeArquivo);
                 jDados.put("TIPOPLANILHA", tipoPlanilha);
                 jDados.put("NOMEEMPRESA", nomeEmpresa);
-                jDados.put("TIPOLANCAMENTO", tipoLancamento);//MemoryFile memFile, JSONObject jDados, DataBase dbIOCont, InoutLogger logger
+                if(variaveis.has("hasNewChave")){
+			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		}
 
                 readExtratoECartao("readExtratoOteroBankExcel", memFile, nomePortador2, jDados, dbIOCont, logger);//nick
                 variaveis.put("tipoRetorno",   "break");
@@ -4985,7 +5253,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				////logger.logInfoInfo("caiu no extrato cora");
 			
 				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5011,7 +5281,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBTGExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5031,7 +5303,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBMGExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5043,7 +5317,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Efi_Excel")){
 			if(nomeArquivo.toUpperCase().contains("GERENCIANET")){
 				JSONObject jDados = new JSONObject();
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5118,7 +5394,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoGrafenoExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -5141,7 +5419,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoHDTExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5166,7 +5446,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO04", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -5218,7 +5500,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO01", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5234,7 +5518,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO02", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();			
@@ -5254,7 +5540,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("ANOAUX", pegaAnoAux);
 				readExtratoECartao("readExtratoItauDefault", memFile, anoData, "TIPO03", nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -5271,7 +5559,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				JSONObject jDados = new JSONObject();
 
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5295,7 +5585,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				JSONObject jDados = new JSONObject();
 
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5319,7 +5611,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("LINE", line);
 				
 				readExtratoECartao("readExtratoMercadoPagoExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -5479,7 +5773,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				JSONObject jDados = new JSONObject();
 
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5503,7 +5799,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				JSONObject jDados = new JSONObject();
 
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5535,7 +5833,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				JSONObject jDados = new JSONObject();
 
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -5633,7 +5933,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoBancoNordesteExcel", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5652,7 +5954,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoBMPMoneyPlusExcel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5688,7 +5992,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				tipoPlanilha = "EXTRATO-BRADESCO-TXT";			
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				//logger.logInfoInfo("Vai ate o read do Bradesco txt");
 				readExtratoECartao("readExtratoBradescoTxt", memFile, nomePortador, jDados, dbIOCont, logger);
@@ -5711,7 +6017,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoBBMTxt", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5748,7 +6056,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoAmazoniaTxt", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5778,7 +6088,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoCresolExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5806,7 +6118,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				if(nomePortador2.equals("BANESTES")){
 					nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(1);
 					// //logger.logInfoDebug("AGENCIA -> "+nomePortador2);
@@ -5864,7 +6178,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEPORTADOR", nomePortador2);
 				jDados.put("CABECALHOPLANILHA", cabecalhoPlanilha);
 				
@@ -5914,7 +6230,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBancoBrasilExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5947,7 +6265,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoSquidExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5964,7 +6284,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoSicoobTxt", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -5983,7 +6305,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -6003,7 +6327,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -6027,7 +6353,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoFibraExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6053,7 +6381,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoIndustrialExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6071,7 +6401,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				tipoPlanilha = "EXTRATOSTONE";
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -6105,7 +6437,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				tipoPlanilha = "EXTRATOSTONE";
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -6133,7 +6467,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoPaulistaExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6161,7 +6497,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoVotorantimExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6183,7 +6521,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoVotorantim2Excel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6278,7 +6618,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoBANRISULDefault", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -6298,7 +6640,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			jDados.put("TIPO", "002");
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 
 			readExtratoECartao("readExtratoBANRISULDefault", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
@@ -6319,7 +6663,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("TIPOPLANILHA", tipoPlanilha);
 				
 				readExtratoECartao("readFrancesinhaBanrisulTXT", memFile, jDados, mapaVariavel, logger);
@@ -6376,7 +6722,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 	
 	    		JSONObject jDados = new JSONObject();
 
-		 		jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		 		if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 		 		jDados.put("NOMEEMPRESA",    nomeEmpresa);
 		 		jDados.put("CODEMPRESA",     codEmpresa);
 		 		jDados.put("NOMEARQUIVO",    nomeArquivo);
@@ -6564,7 +6912,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoBancoDoBrasilDoc2", memFile, "BANCO DO BRASIL", jDados, dbIOCont, logger);
 				// readExtratoECartao("readExtratoBancoDoBrasilDoc", memFile, "BANCO DO BRASIL", jDados, dbIOCont, logger);
@@ -6610,7 +6960,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				mapaVariavel = readExtratoECartao("readExtratoGetNetRefatorado", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno", "break");
@@ -6630,7 +6982,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				// //logger.logInfoDebug("AGUIIIIIIIIIIIIIIII");
 				readExtratoECartao("readExtratoJunoDefault", memFile, jDados, dbIOCont, logger);
@@ -6688,7 +7042,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEPORTADOR", nomePortador);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoUnicredDefault", memFile, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6702,7 +7058,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			jDados.put("NOMEARQUIVO", nomeArquivo);
-			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
 			
 			readExtratoECartao("readExtratoUNICREDTxt", memFile, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno",   "break");
@@ -6813,7 +7171,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoSicrediDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6836,7 +7196,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -6860,7 +7222,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readSantanderRET", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6880,7 +7244,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoCEFHtml", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -6915,7 +7281,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBradescoDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6935,7 +7303,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readCartaoRedecardNovoPadrao", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6952,7 +7322,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readCartaoRedecard", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -6973,7 +7345,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("NOMEEMPRESA", nomeEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readCartaoRedecardDefault", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7156,7 +7530,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 					jDados.put("NOMEARQUIVO", nomeArquivo);
 					jDados.put("LINE", line);
 					jDados.put("TIPOLAYOUT", "002");
-					jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					if(variaveis.has("hasNewChave")){
+						if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+					}
 					
 					readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 					variaveis.put("tipoRetorno",   "break");
@@ -7240,7 +7616,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
 				jDados.put("LINE", line);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				
 				readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7259,7 +7637,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("LINE", line);
 				
 				readExtratoECartao("readExtratoSantanderDefault", memFile, nomePortador2, jDados, dbIOCont, logger);
@@ -7476,7 +7856,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoCEFDefaultNovo", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7509,7 +7891,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoCEFExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7528,7 +7912,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBaneseExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7551,7 +7937,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoSicoobDefaultNovo", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7574,7 +7962,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoViacrediExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				
@@ -7600,7 +7990,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				if(line.contains("EXTRATO MENSAL:")) jDados.put("ANO", cutString(line,"EXTRATO MENSAL:").replaceAll("\\|","").trim());
 				if(line.contains("EXTRATO MOVIMENTACAO")) jDados.put("ANO", cutString(line, line.lastIndexOf("/")-1).trim());
@@ -7651,7 +8043,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("LINE", line);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoAbcExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7667,7 +8061,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoArbiExcel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -7703,7 +8099,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoBanparaExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7777,7 +8175,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
@@ -7800,7 +8200,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoUniprimeExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7816,7 +8218,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoSisprime", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -7870,7 +8274,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoTribancoExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7922,7 +8328,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("LINE", line);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoSofisaExcel", memFile, nomePortador2, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -7957,7 +8365,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("TIPOPLANILHA",    tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoIFood", memFile, jDados, mapaVariavel, logger);
 				
 				variaveis.put("tipoRetorno", "break");
@@ -7992,7 +8402,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 
 				readExtratoECartao("readExtratoC6Excel", memFile, "", jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
@@ -8020,7 +8432,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoPagseguroExcel", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -8127,7 +8541,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA",     codEmpresa);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
@@ -8186,7 +8602,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoMagaLU", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -8208,7 +8626,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoNetshoes", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -8234,7 +8654,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("TIPOPLANILHA",   tipoPlanilha);
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				readExtratoECartao("readExtratoPagarME", memFile, jDados, mapaVariavel, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
@@ -8262,7 +8684,9 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				
 				if(cabecalhoPlanilha.contains("CONTA: ")) nomePortador = cutString(cabecalhoPlanilha, "CONTA: ", "|");
 				
-				jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
 				jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				jDados.put("CODEMPRESA",     codEmpresa);
 				jDados.put("NOMEARQUIVO",    nomeArquivo);
