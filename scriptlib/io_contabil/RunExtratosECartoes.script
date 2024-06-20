@@ -259,7 +259,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
@@ -1288,6 +1288,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			}else{
 				nomePortador2 = "BANCO DO BRASIL - " + cutString(cabecalhoPlanilhaAux, "CONTA CORRENTE", "PERIODO");				
 			}
+			
+			logger.logInfo("BB RUN");
 			
 			
 			JSONObject jDados = new JSONObject();
@@ -4380,7 +4382,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			arquivoCompleto.contains("COMPROVANTE") && arquivoCompleto.contains("LINHA DIGITAVEL") && 
 			memFile.getFieldsSize() == 1){
 
-			tipoPlanilha = "SICOOB COMPROVANTES";
+			tipoPlanilha = "MOVIMENTO_COMPROVANTESICOOB";
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
 			jDados.put("CODEMPRESA", codEmpresa);
@@ -4633,9 +4635,17 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	//////UNICREDI FRANCESINHA PDF ///////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhaUnicredi_PDF")) {
 		if(cabecalhoPlanilha.contains("RELATORIO DE TITULOS") && cabecalhoPlanilha.contains("CARTORIO") && cabecalhoPlanilha.contains("NO DOCUMENTO") &&
-			cabecalhoPlanilha.contains("BENEFICIARIO:") && cabecalhoPlanilha.contains("TIPO INCLUSAO") && cabecalhoPlanilha.contains("BANCO/AGENCIA/CONTA")){
+			cabecalhoPlanilha.contains("BENEFICIARIO:") && cabecalhoPlanilha.contains("NOME PAGADOR") && cabecalhoPlanilha.contains("BANCO/AGENCIA/CONTA")){
 
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA:", "QUEBRA:");
+
+			String tipo = "";
+
+			if(cabecalhoPlanilha.contains("NO DOCUMENTO NOSSO NUMERO")){
+				tipo = "002";
+			} else if(cabecalhoPlanilha.contains("TIPO INCLUSAO")){
+				tipo = "001";
+			}
 
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOLANCAMENTO", tipoLancamento);
@@ -4644,6 +4654,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			jDados.put("CODEMPRESA",     codEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",   "UNICREDI-FRANCESINHA");
+			jDados.put("TIPO",  tipo);
 			jDados.put("LINHA",   line);
 
 			mapaVariavel = readExtratoECartao("readFrancesinhaUnicrediPDF", memFile, jDados, mapaVariavel, logger);
