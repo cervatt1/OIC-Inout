@@ -280,8 +280,8 @@ public class TemplateUtils {
             arquivoCompleto.contains("GERAR EM ARQUIVO") && arquivoCompleto.contains("SIGLAS E ABREVIACOES")){
 			return true; //CEF MODELO 07
 		}
-		if (((arquivoCompleto.contains("NU PAGAMENTOS S.A.") && arquivoCompleto.contains("NU FINANCEIRA S.A.")) &&
-			arquivoCompleto.contains("0800 887 0463")) || (arquivoCompleto.contains("NU FINANCEIRA") || arquivoCompleto.contains("18.236.120/0001-58"))) {
+		if ((arquivoCompleto.contains("NU PAGAMENTOS S.A.") || arquivoCompleto.contains("OUVIDORIA: SE VOCE NAO FICOU SATISFEITO COM A SOLUCAO DO NOSSO TIME DE ATENDIMENTO LIGUE PARA 0800 887 0463 EM DIAS UTEIS, DAS 09H AS 18H")) ||
+				(arquivoCompleto.contains("NU FINANCEIRA") && arquivoCompleto.contains("18.236.120/0001-58"))) {
 			return true; //NUBANK
 		}
 		if ((arquivoCompleto.contains("EXTRATO DE: AGENCIA:") || arquivoCompleto.contains("EXTRATO DE: AG:")) && arquivoCompleto.contains("DEMONSTRATIVO")) {
@@ -372,11 +372,10 @@ public class TemplateUtils {
         }
 		
 		if (arquivoCompleto.contains("CORRENTE") && arquivoCompleto.contains("WWW.ITAU.COM.BR") &&
-			arquivoCompleto.contains("LANCAMENTO") && !arquivoCompleto.contains("MENSAL") && !arquivoCompleto.contains("SALDO RESUMIDO")
-			/*&& arquivoCompleto.contains("POSICAO DA") &&
-			arquivoCompleto.contains("CONTA:)"*/) {
-			return true; //ITAUPADRAO3 TIPOEXTRATO4
-		}
+        arquivoCompleto.contains("LANCAMENTO") && !arquivoCompleto.contains("MENSAL") &&
+        !arquivoCompleto.contains("SALDO RESUMIDO") && !arquivoCompleto.contains("LIMITE DA CONTA UTILIZADO")) {
+            return true; //ITAUPADRAO3 TIPOEXTRATO4
+        }
 		if(arquivoCompleto.contains("DATA") && arquivoCompleto.contains("AG/ORIGEM") &&
 			/* && arquivoCompleto.contains("LIMITE DA CONTA CONTRATADO")*/ //2311-022345 comentado
 			(arquivoCompleto.contains("0800 728") && arquivoCompleto.contains("0728"))){
@@ -612,6 +611,15 @@ public class TemplateUtils {
 		Ajuste feito de 40 char para 150 char para tratar o chamado 2405-038508 e futuros casos parecidos.
 		*/
 		if (arquivoCompleto.length() < 150) {
+			return true;
+		}
+		
+		/* gui - 05/06/2024 - Chamado: 2405-040560
+		Adicionando validação para solucionar a conversão errada do CONVERSOR ANTIGO do padrão 01 do UNICRED PDF
+		obs: caso quando o csv do ANTIGO ja vem direto na metade dos lançamentos (nao possuindo cabeçalho inicial).
+		É crucial que esta validção seja a ultima de todas.
+		*/
+		if(arquivoCompleto.split("\\|")[0].trim().matches("\\[\\d{2}/\\d{2}/\\d{4}")){
 			return true;
 		}
         

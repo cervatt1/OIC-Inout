@@ -7883,7 +7883,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			
 			if(cabecalhoPlanilha.toUpperCase().contains("EXTRATO") && nomeArquivo.toUpperCase().contains(".XLSX") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && line.contains("|") && !nomeArquivo.toUpperCase().contains(".PDF")){
 				nomePortador2 = "CEF EXCEL "+memFile.getStringFieldRemoveEspCharsUpper(1);
-				
+				logger.logInfo("ENTRAAQUIIIIIIII");
 				variaveis.put("nomePortador2",   nomePortador2);
 				variaveis.put("tipoRetorno",   "continue");
 				return variaveis.toString();
