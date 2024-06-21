@@ -12893,8 +12893,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
             consolidaClass = contLinhaTexto;
 
 			classificacao = dataMovimento + "0" + consolidaClass;
-			if( ((dataMovimento.equals("") || !(dataMovimento.length() == 10)) && 
-				dataMovimento.matches("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$")) || valorDocumento == 0) continue;
+			if(dataMovimento.equals("") || valorDocumento == 0) continue;
 
             lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
 
@@ -26694,6 +26693,7 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 
 
 		if (memFile.getStringFieldRemoveEspCharsUpper(0).contains("PERIODO:")) continue;
+		if (line.contains("EXTRATO CONTA CORRENTE") && line.contains(":")) continue;
 		if (line.toUpperCase().contains("PLATAFORMA DE SERVICOS FINANCEIROS")) continue;
 		if (line.toUpperCase().contains("SALDO ANTERIOR")) continue;
 		if (line.toUpperCase().startsWith("PREVISAO ")) continue;
@@ -26724,7 +26724,8 @@ public boolean readExtratoSicoobPDF(MemoryFile memFile, String nomePortador, JSO
 		if (line.toUpperCase().startsWith("MENSAGENS") || line.toUpperCase().contains("MENSAGENS"))naoLeMais = true;	
 		if (memFile.getFieldsSize() > 1) naoLeMais = false;
 		// 2310-019753 descomentado if abaixo
-		if (line.contains("DOC.:")) continue; 
+		// gui -> 13/06/2024 - comentado por conta do chamado 2406-041544
+		//if (line.contains("DOC.:")) continue;  
 		if (naoLeMais == true) continue;
 		//}
 		
