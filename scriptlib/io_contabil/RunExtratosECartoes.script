@@ -47,7 +47,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			logger.logInfo("METHODS = "+methodName);
+			//logger.logInfo("METHODS = "+methodName);
 			
 			if (methodName.contains(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
@@ -259,7 +259,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			String methodName = method.getName();
 			
 			if (methodName.contains(tipoARodar)) {
-				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
@@ -4610,6 +4610,28 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
+	////// FATURA CARTAO CREDITO SANTANDER PDF //////////////////////////////////////////////////////////////////
+	if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_Santander_PDF")){
+		if(cabecalhoPlanilha.replaceAll("  ", " ").contains("EMPRESA FATURA ATUAL") && cabecalhoPlanilha.contains("NUMERO DO CARTAO") &&
+			arquivoCompleto.contains("RESUMO DA FATURA") && cabecalhoPlanilha.replaceAll("  ", " ").contains("CARTOES C. CREDITO") &&
+			arquivoCompleto.contains("SANTANDER EMPRESARIAL")){
+
+			nomePortador = "FATURA CARTAO DE CREDITO SANTANDER";
+
+			JSONObject jDados = new JSONObject();
+
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("TIPOPLANILHA", "FATURACARTAOCREDITOSANTANDER");
+			jDados.put("NOMEEMPRESA", nomeEmpresa);
+			jDados.put("NOMEPORTADOR", nomePortador);
+			jDados.put("TIPOLANCAMENTO", tipoLancamento);
+
+			mapaVariavel = readExtratoECartao("readFaturaCartaoCredito_SantanderPDF", memFile, jDados, mapaVariavel, logger);
+			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
 	
 	////// FATURA CARTAO CREDITO BANCO DO BRASIL PDF //////////////////////////////////////////////////////////////////
 	if(roteiroCRM.optString("Planilhas_Padroes").contains("FaturaCartaoCredito_BB_PDF")){
@@ -7883,7 +7905,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 			
 			if(cabecalhoPlanilha.toUpperCase().contains("EXTRATO") && nomeArquivo.toUpperCase().contains(".XLSX") && memFile.getStringFieldRemoveEspCharsUpper(0).contains("CONTA:") && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("") && line.contains("|") && !nomeArquivo.toUpperCase().contains(".PDF")){
 				nomePortador2 = "CEF EXCEL "+memFile.getStringFieldRemoveEspCharsUpper(1);
-				logger.logInfo("ENTRAAQUIIIIIIII");
+				
 				variaveis.put("nomePortador2",   nomePortador2);
 				variaveis.put("tipoRetorno",   "continue");
 				return variaveis.toString();
