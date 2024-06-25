@@ -5636,6 +5636,12 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 		
 		////// EXTRATO - MERCADO PAGO EXCEL //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_MercadoPago_Excel")) {
+			logger.logInfo( "APLICADO: "+
+				cabecalhoPlanilha.contains("DETALHE DOS MOVIMENTOS") +"&&"+ 
+				cabecalhoPlanilha.contains("SALDO INICIAL:") +"&&"+
+			cabecalhoPlanilha.contains("SALDO FINAL:") +"&&"+ 
+			cabecalhoPlanilha.contains("PERIODO:"));
+
 			if (cabecalhoPlanilha.contains("DETALHE DOS MOVIMENTOS") && cabecalhoPlanilha.contains("SALDO INICIAL:") &&
 			cabecalhoPlanilha.contains("SALDO FINAL:") && cabecalhoPlanilha.contains("PERIODO:")) {
 				
