@@ -974,7 +974,16 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		
 		if (arquivoCompleto.contains("EXTRATO DE: AG:")){
 			// //logger.logInfoInfo("ENTROU EXTRATO DE AG");
-			if(arquivoCompleto.contains("CC:") && arquivoCompleto.contains("ENTRE")) nomePortador2 = cutString(arquivoCompleto, "CC:", "ENTRE").replace("|", "");
+			if(arquivoCompleto.contains("CC:") && arquivoCompleto.contains("ENTRE")){
+				nomePortador2 = cutString(arquivoCompleto, "CC:", "ENTRE").replace("|", "");
+
+				//gui - 21/06/204 - 2406-041563 - Adicionada para a captura correta do portador, em alguns casos nao há a palavra "ENTRE" logo após o CC: para capturar o portador,
+				// neste caso o portador fica com length 7327 estourando a chave no banco.
+				if(!nomePortador2.matches("^\\d{7}-\\d{1}$") && nomePortador2.length() > 15 && arquivoCompleto.contains("DATA")){
+					nomePortador2 = cutString(arquivoCompleto, "CC:", "DATA");
+					logger.logInfo("np2consertado: " + nomePortador2);
+				}
+			} 
 			if(!arquivoCompleto.contains("CC:") && arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("ENTRE")) nomePortador2 = cutString(arquivoCompleto, "CONTA:", "ENTRE").replaceAll("\\|", "");
 			if(nomePortador2.equals("") && line.contains("CC:")) nomePortador2 = cutString(line, "CC:").replaceAll(";", "");
 			if(cabecalhoPlanilha.contains("EXTRATO MENSAL / POR PERIODO") && cabecalhoPlanilha.contains("CP: ") && cabecalhoPlanilha.contains("FOLHA")){
@@ -2010,7 +2019,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
-		if( nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.contains("CONTA CORRENTE E APLICACOES REMUNERA+") &&
+		if( nomeArquivo.toUpperCase().contains("ANCORA") && arquivoCompleto.contains("CONTA CORRENTE E APLICACOES REMUNERA+") || arquivoCompleto.contains("01. CONTA CORRENTE") &&
 			arquivoCompleto.contains("SALDO DE ABERTURA EM") &&
 			arquivoCompleto.contains("SALDO DE FECHAMENTO EM")){
 				
@@ -5636,12 +5645,6 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 		
 		////// EXTRATO - MERCADO PAGO EXCEL //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_MercadoPago_Excel")) {
-			logger.logInfo( "APLICADO: "+
-				cabecalhoPlanilha.contains("DETALHE DOS MOVIMENTOS") +"&&"+ 
-				cabecalhoPlanilha.contains("SALDO INICIAL:") +"&&"+
-			cabecalhoPlanilha.contains("SALDO FINAL:") +"&&"+ 
-			cabecalhoPlanilha.contains("PERIODO:"));
-
 			if (cabecalhoPlanilha.contains("DETALHE DOS MOVIMENTOS") && cabecalhoPlanilha.contains("SALDO INICIAL:") &&
 			cabecalhoPlanilha.contains("SALDO FINAL:") && cabecalhoPlanilha.contains("PERIODO:")) {
 				
@@ -5779,6 +5782,8 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 
 				// logger.logInfo("DATA NO COMPLEMENTO 01 -> RUN " + complemento01);
 				// logger.logInfo("NOME PORTADOR RUN -> " + nomePortador2);
+				
+				if(complemento01.equals("")) complemento01 = cutString(memFile.getLines().toString().toUpperCase(), "FECHADA||"," ");
 
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
@@ -8251,8 +8256,10 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 		
 		////// EXTRATO - SISPRIME //////////////////////////////////////////////////////////////////
 		if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Sisprime_Excel")) {
-			if (line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && line.contains("SISPRIME") &&
+			if (((line.contains("EXTRATO") && line.contains("CONTA CORRENTE") && line.contains("SISPRIME")) || 
+			(memFile.getLines().toString().toUpperCase().contains("EXTRATO CONTA CORRENTE - SISPRIME"))) &&
 			(nomeArquivo.toUpperCase().contains(".XLSX") || nomeArquivo.toUpperCase().contains(".CSV"))) {
+				
 				tipoPlanilha = "EXTRATO-SISPRIME";
 				JSONObject jDados = new JSONObject();
 				jDados.put("CODEMPRESA", codEmpresa);
@@ -8260,7 +8267,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 				if(variaveis.has("hasNewChave")){
 					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				}
-				readExtratoECartao("readExtratoSisprime", memFile, nomePortador, jDados, dbIOCont, logger);
+				readExtratoECartao("readExtratoSisprimeXLSX", memFile, nomePortador, jDados, dbIOCont, logger);
 				variaveis.put("tipoRetorno",   "break");
 				return variaveis.toString();
 			}
