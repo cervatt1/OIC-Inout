@@ -1331,7 +1331,7 @@ public String getCampoDate(String dataString, String patternIn, String patternOu
 	/**
 	 * captura em casos de data serial considerando situacoes com minutos 
 	 */
-	if((dataString.matches("^\\d{5}.*") && dataString.contains(".") && dataString.contains(",")) || dataString.length() == 5){
+	if(dataString.matches("^\\d{5}[.,].*") || dataString.length() == 5){
 		String dataStringSerial = dataString;
 		if(dataStringSerial.contains(",")) dataStringSerial = cutString(dataString, 0, ",");
 		if(dataStringSerial.contains(".")) dataStringSerial = cutString(dataString, 0, ".");

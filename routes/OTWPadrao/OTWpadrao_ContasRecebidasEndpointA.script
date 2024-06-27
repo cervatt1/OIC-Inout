@@ -11697,6 +11697,7 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
     String key               = "";
     String lote              = "";
 	String nomeOrigemAux     = "";
+	String lineAux		     = "";
     
     boolean naoLeMais = false;
 
@@ -11759,13 +11760,15 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
 
             catch(Exception e){dataMovimento = "";}
             
-
-            String lineAux = memFile.getStringFieldRemoveEspCharsUpper(0).substring(0,2);
-            
+			try{
+            	lineAux = memFile.getStringFieldRemoveEspCharsUpper(0).substring(0,2);
+			}catch(Exception e){
+				logger.logInfo("ERRO SUBSTRING: " + e.getMessage());
+			}
             //logger.logInfo("LOG LINE AUX - " + lineAux);
 
 
-            if(lineAux.matches("\\d{2}") && memFile.getFieldsSize() == 1){
+            if(lineAux.matches("\\d{2}") && (memFile.getFieldsSize() == 1 || line.contains("TOTAL DE REGISTROS DO GRUPO"))){
                 
                 complemento03Ant = memFile.getStringFieldRemoveEspCharsUpper(icomplemento03);
                 //logger.logInfo("ENTROU LINE AUX - " + complemento03 + " " + lineAux);
@@ -11805,7 +11808,10 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
             if (!complemento03.contains("LIQUIDA")) continue;
 
             try{valorDocumento = memFile.getDoubleField(ivalorDocumento);}
-            catch (Exception vlrd) { valorDocumento = 0; }
+            catch (Exception vlrd) { 
+            	logger.logInfo("ERRO VDOC: " + vlrd.getMessage());
+				valorDocumento = 0; 
+			}
 
             try{valorJuros = memFile.getDoubleField(ivalorJuros);}
             catch (Exception vlrd) { valorJuros = 0; }
