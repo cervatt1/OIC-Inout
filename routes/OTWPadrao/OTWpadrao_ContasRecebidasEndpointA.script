@@ -11683,6 +11683,8 @@ public HashMap readFrancesinhaSicoobPDF(MemoryFile memFile, JSONObject jDados, H
     String cpfCnpj           = "";
     String historico         = "";
     String debitoCreditoAux  = "";
+    boolean hasNewChave = false; 
+    if(jDados.has("HASNEWCHAVE"))  hasNewChave  = jDados.optBoolean("HASNEWCHAVE"); 
     String tipoLancamento    = "";
     String tipoPlanilha      = "";
 

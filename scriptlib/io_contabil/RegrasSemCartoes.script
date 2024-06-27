@@ -4031,10 +4031,31 @@ public JSONArray getExtratosEmpresa(String codEmpresa, DataBase dbIOCont, InoutL
         return null;
     }
 	
-	//logger.logInfo("LEUEXT " + codEmpresa + " | " + extratoEmpresa.toString());
+	logger.logInfo("LEUEXT " + codEmpresa + " | " + extratoEmpresa.toString());
 
     return extratoEmpresa;
 }
+/*
+public JSONArray getExtratosEmpresaProtocolo(String codEmpresa, String protocolo, DataBase dbIOCont, InoutLogger logger) throws Exception {
+	protocolo = cutString(protocolo.toUpperCase(), "_ID", "_");
+    JSONArray extratoEmpresa = new JSONArray();
+
+    try {
+        extratoEmpresa = dbIOCont.sql("SELECT CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO FROM IO_EXTRATO WHERE DATAMOVIMENTO <> '' AND CODEMPRESA = ? AND NOMEARQUIVO LIKE ?")
+        .fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
+        .param(codEmpresa)
+        .param("%"+protocolo+"%")
+        .query();
+    } catch(Exception e) {
+		logger.logInfo("NAO ENCONTROU IO_EXTRATOS");
+        logger.logInfo("Error: " + e.getMessage());
+        return null;
+    }
+	
+	//logger.logInfo("LEUEXT " + codEmpresa + " | " + extratoEmpresa.toString());
+
+    return extratoEmpresa;
+}*/
 
 
 
@@ -4051,6 +4072,7 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
     String nomeArquivo       = "";
     String chaveExtrato      = "";
     String nomeEmpresa       = "";
+	String tipoLancamento    = "";
 
     String documento         = "";
     String nomeOrigem        = "";
@@ -4083,9 +4105,13 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 
 	boolean leDocumento = false;
 	boolean leDocumentoFitId = false;
+	boolean hasNewExtrato  = false;
+	
     if(jDados.has("CODEMPRESA"))   codEmpresa   = jDados.optString("CODEMPRESA").trim();
     if(jDados.has("NOMEARQUIVO"))  nomeArquivo  = jDados.optString("NOMEARQUIVO").trim();
 	if(jDados.has("NOMEEMPRESA"))  nomeEmpresa  = jDados.optString("NOMEEMPRESA").trim();
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
+	if(jDados.has("HASNEWEXTRATO")) hasNewExtrato = true;
     if(jDados.has("CHECKNUM"))     leDocumento = true;
     if(jDados.has("FITID"))     leDocumentoFitId = true;
 
@@ -4098,9 +4124,9 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 			// logger.logInfo("LINHA 2 | = "+line);
 			line = stringNormalizer(line, true);
 			// logger.logDebug("Line -> "+line);
-
-            if(line.length() > 150) return readOFXOneLine(line, jDados, dbIOCont, logger);
-
+			
+			if(line.length() > 150) return readOFXOneLine(line, jDados, dbIOCont, logger);
+			
             // Limpa todas as variaveis
             if (line.contains("<STMTTRN>")) {
                 complemento02   = "";
@@ -4119,6 +4145,7 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
                 nomeOrigem      = "";
                 documento       = "";
                 historico       = "";
+				auxDebitoCredito = "";
 
                 valorDocumento  = 0;
                 valorJuros      = 0;
@@ -4258,8 +4285,13 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 			nomeOrigem = nomeOrigem.trim().replace("  ", " ");
 
             // Gerar Chave Extrato;
-            chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
-			logger.logDebug("DATA E VALOR EXTRATO " + valorDocumento + " | " + dataMovimento + " | " + chaveExtrato);
+			String tLanc = "";
+			if(hasNewExtrato){
+				if(tipoLancamento.contains("PAGAR")) tLanc = "PAG_";
+				if(tipoLancamento.contains("RECEBER")) tLanc = "REC_";
+			} 
+            chaveExtrato = tLanc+codEmpresa + "-" + dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+			logger.logInfo("DATA E VALOR EXTRATO " + valorDocumento + " | " + dataMovimento + " | " + chaveExtrato);
 
             // Buscar Extrato por Chave na Tabela IO_EXTRATO.
             extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
@@ -4375,7 +4407,7 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
             line = StringUtil.removeSpecialCharsToUC(line);
 			// logger.logInfo("LINHA 2 | = "+line);
 			line = stringNormalizer(line, true);
-            
+
 
             // Limpa todas as variaveis
             if (line.contains("<STMTTRN>")) {
@@ -4433,9 +4465,9 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 				auxDebitoCredito = line.substring(line.indexOf("<TRNTYPE>")+9);
 				auxDebitoCredito = auxDebitoCredito.replaceAll("<TRNTYPE>", "");
 			}
-			
-			
-			
+
+
+
             if (line.contains("<TRNAMT>")) {
                 strValorDocumento = line.substring(line.indexOf("<TRNAMT>")+8);
                 strValorDocumento = strValorDocumento.replaceAll("</TRNAMT>","");
@@ -4448,17 +4480,17 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
                 // if(valorDocumento < 0) debitoCredito = "EXTRATO-DEBITO";
                 // if(valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
 				// if(valorDocumento > 0 && auxDebitoCredito.contains("DEBIT")) debitoCredito = "EXTRATO-DEBITO";
-				
+
 				if(valorDocumento < 0) debitoCredito = "EXTRATO-DEBITO";
                 if(valorDocumento > 0) debitoCredito = "EXTRATO-CREDITO";
 				if(valorDocumento > 0 && auxDebitoCredito.contains("DEBIT") ||
                 valorDocumento > 0 && auxDebitoCredito.contains("PAYMENT")) debitoCredito = "EXTRATO-DEBITO";
-				
+
 
                 valorDocumento = Math.abs(valorDocumento);
             }
 			// logger.logInfo("OTTVD -> " + line + " |VD=" + valorDocumento + " | " + debitoCredito);
-			
+
 			try {
 				if(line.contains("<REFNUM>")){
 					String documentoAux 		= line.substring(line.indexOf("<REFNUM>")+8);
@@ -4466,7 +4498,7 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 					documentoAux      = cutString(documentoAux, 0, 80);
 					if(!documentoAux.trim().equals(""))documento = documentoAux;
 				}
-				
+
 				if(line.contains("<CHECKNUM>")){
 					String documentoAux 		= line.substring(line.indexOf("<CHECKNUM>")+10);
 					documentoAux       = documentoAux.replaceAll("</CHECKNUM>", "");
@@ -4476,9 +4508,9 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 				line = line.replaceAll("REFNUM", "CHECKNUM");
 
 			} catch (Exception xx) {}
-			
-			
-			
+
+
+
 			 if (leDocumento && line.contains("<CHECKNUM>")) {
 				complemento01   = line.substring(line.indexOf("<CHECKNUM>")+10);
                 complemento01   = complemento01.replaceAll("</CHECKNUM>","");
@@ -4492,31 +4524,31 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 				complemento01   = cutString(line, "<FITID>");
                 complemento01   = complemento01.replaceAll("</FITID>","");
 			}			
-			
+
 			 // Retorna Nome Origem
             if (line.contains("<MEMO>")) {
                 nomeOrigem   = nomeOrigem + " " + line.substring(line.indexOf("<MEMO>")+6);
                 nomeOrigem   = nomeOrigem.replaceAll("</MEMO>","");
             }
-			
+
 			// logger.logDebug("OTT -> " + line);
 			if (line.contains("<MEMO>") && line.contains("</MEMO>")) {
 				// gera ofx
 			}			
-			
+
             if(line.contains("<NAME>") && nomeOrigem.trim().equals("")){
 				nomeOrigem = nomeOrigem + " " + cutString(line, "<NAME>", "</NAME>");
 			} 
 			else if (!line.contains("</STMTTRN>")) continue;
-						
+
 			if(valorDocumento == 0){continue;}
-			
+
 			if(codEmpresa.equals("8") && nomeEmpresa.contains("Institutoelo") &&
 			(nomeOrigem.contains("CHEQUE")||nomeOrigem.contains("PAG") && nomeOrigem.contains("BOLETO")))
 				nomeOrigem = nomeOrigem + " " + complemento01;
-            
+
             contLinhaExtrato = StringUtil.leftPad(String.valueOf(contadorDelinhas), 05, "0");
-			
+
 			nomeOrigem = nomeOrigem.trim();
 			nomeOrigem = nomeOrigem.replaceAll("EAMP;","&").replaceAll("\t"," ").replaceAll(";","").replace("'","").replace("!","").replace("\\","").replaceAll("AMP","").trim();
 			nomeOrigem = stringNormalizer(nomeOrigem, true);
@@ -4529,7 +4561,7 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 					else break;
 				}
 			}catch (Exception e) {logger.logInfo("Problema nomeOrigem " + e.getMessage());}
-			
+
 			//#2312-024085 By Leal
 			nomeOrigem = nomeOrigem.trim().replace("  ", " ");
 
@@ -4803,3 +4835,130 @@ class ObjConciliacao {
         valorConciliacao = objConciliacao.valorConciliacao;
     }
 }
+
+class ExtratoModel {
+	
+	private String codEmpresa;
+	private String dataMovimento;
+	private String documento;
+	private String nomePortador;
+	private String nomeOrigem;
+	private String lote;
+	private String complemento02;
+	private String complemento03;
+	private double valorDocumento;
+	private String debitoCredito;
+	private String tipoLancamento;
+	private String chave;
+	
+	public ExtratoModel(ExtratoModel ext) {
+		
+		if(ext.chave == null) this.chave = "";
+		else this.chave = ext.chave;
+		
+		this.codEmpresa = "";
+		this.dataMovimento = "";
+		this.documento = "";
+		this.nomePortador = "";
+		this.nomeOrigem = "";
+		this.lote = "";
+		this.complemento02 = "";
+		this.valorDocumento = 0.0;
+		this.debitoCredito = "";
+	}
+	
+	public ExtratoModel() {
+		super();
+		this.codEmpresa     = "";
+		this.dataMovimento  = "";
+		this.documento      = "";
+		this.nomePortador   = "";
+		this.nomeOrigem     = "";
+		this.lote           = "";
+		this.complemento02  = "";
+		this.complemento03  = "";
+		this.valorDocumento = 0.0;
+		this.debitoCredito  = "";
+		this.tipoLancamento = "";
+		this.chave          = "";
+	}
+	
+	public String getCodEmpresa() {
+		return codEmpresa;
+	}
+	public void setCodEmpresa(String codEmpresa) {
+		this.codEmpresa = codEmpresa;
+	}
+	public String getDataMovimento() {
+		return dataMovimento;
+	}
+	public void setDataMovimento(String dataMovimento) {
+		this.dataMovimento = dataMovimento;
+	}
+	public String getDocumento() {
+		return documento;
+	}
+	public void setDocumento(String documento) {
+		this.documento = documento;
+	}
+	public String getNomePortador() {
+		return nomePortador;
+	}
+	public void setNomePortador(String nomePortador) {
+		this.nomePortador = nomePortador;
+	}
+	public String getNomeOrigem() {
+		return nomeOrigem;
+	}
+	public void setNomeOrigem(String nomeOrigem) {
+		this.nomeOrigem = nomeOrigem;
+	}
+	public String getLote() {
+		return lote;
+	}
+	public void setLote(String lote) {
+		this.lote = lote;
+	}
+	public String getComplemento02() {
+		return complemento02;
+	}
+	public void setComplemento02(String complemento02) {
+		this.complemento02 = complemento02;
+	}
+	public String getComplemento03() {
+		return complemento02;
+	}
+	public void setComplemento03(String complemento03) {
+		this.complemento03 = complemento03;
+	}
+	public double getValorDocumento() {
+		return valorDocumento;
+	}
+	public void setValorDocumento(double valorDocumento) {
+		if(String.format("%.2f", valorDocumento).contains(",")) this.valorDocumento = Double.parseDouble(String.format("%.2f", valorDocumento).replaceAll("\\.", "").replaceAll(",", "."));
+		else this.valorDocumento = Double.parseDouble(String.format("%.2f", valorDocumento));
+	}
+	public String getDebitoCredito() {
+		return debitoCredito;
+	}
+	public void setDebitoCredito(String debitoCredito) {
+		this.debitoCredito = debitoCredito;
+	}
+	public String getTipoLancamento() {
+		return tipoLancamento;
+	}
+	public void setTipoLancamento(String tipoLancamento) {
+		this.tipoLancamento = tipoLancamento;
+	}
+	public String getChave() {
+		return chave;
+	}
+	public void setChave(int contLinha) {
+		this.chave = !tipoLancamento.equals("") 
+                                            ? tipoLancamento.toUpperCase().contains("PAG") 
+                                                ? "PAG_" : tipoLancamento.toUpperCase().contains("REC") 
+                                                    ? "REC_" : "" : "";
+        this.chave += this.codEmpresa + "-" + this.dataMovimento + "-" + this.debitoCredito + "-" + String.format("%.2f", this.valorDocumento) + "-" + this.nomePortador + "-" + StringUtil.leftPad(String.valueOf(contLinha), 05, "0");
+	}
+}
+

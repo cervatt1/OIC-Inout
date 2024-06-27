@@ -47,7 +47,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			//logger.logInfo("METHODS = "+methodName);
+			// logger.logInfo("METHODS = "+methodName);
 			
 			if (methodName.contains(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
@@ -1567,7 +1567,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BRB_PDF")){
 		if (arquivoCompleto.toUpperCase().contains("BRB TELEBANCO") && arquivoCompleto.toUpperCase().contains("SAC BRB") && nomePortador2.equals("") &&
 		//!arquivoCompleto.toUpperCase().contains("NOME DO TITULAR")){
-			arquivoCompleto.toUpperCase().contains("SALDO ATUAL")){ //2307-009209
+			arquivoCompleto.toUpperCase().contains("SALDO ATUAL") || (arquivoCompleto.contains("SALDO DA POUPANCA") && arquivoCompleto.contains("CDB SALARIO") &&
+			arquivoCompleto.contains("FUNDO AUTOMATICO"))){ //2307-009209
 			//"TE:" vem de CONTA CORREN(TE:)
 			nomePortador2 = "BRB " + cutString(arquivoCompleto, "TE:", arquivoCompleto.indexOf("TE:")+18);
 			anoData = cutString(arquivoCompleto, arquivoCompleto.indexOf("DIA")-14, "DIA");
@@ -2067,6 +2068,9 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			(arquivoCompleto.contains("ASAAS  GESTAO  FINANCEIRA") && arquivoCompleto.contains("INSTITUICAO  DE  PAGAMENTO")))) {
 			nomePortador2 = "ASAAS-PDF";
 		}
+		
+		logger.logInfo("ASAAS RUN EXTRATOS = "+nomePortador2);
+		
 		if (memFile.getFieldsSize() > 0 && nomePortador2.contains("ASAAS-PDF")) {
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
@@ -2756,8 +2760,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		
 		if (arquivoCompleto.contains("EMITIDO EM") && arquivoCompleto.contains("MOVIMENTACAO DE COBRANCA COM REGISTRO") && 
 			arquivoCompleto.contains("PERIODO DE") && arquivoCompleto.contains("BENEFICIARIO") && arquivoCompleto.contains("CONVENIO") && 
-			arquivoCompleto.contains("OCORRENCIA") && arquivoCompleto.contains("VLR.BOLETO") && arquivoCompleto.contains("ABATIM.JUROS/MULTA") && 
-			arquivoCompleto.contains("OUT.CRE") && arquivoCompleto.contains("VLR.PAGO")){
+			arquivoCompleto.contains("OCORRENCIA") && arquivoCompleto.contains("VLR.BOLETO") && arquivoCompleto.contains("ABATIM.") && 
+			arquivoCompleto.contains("JUROS/MULTA") && arquivoCompleto.contains("OUT.CRE") && arquivoCompleto.contains("VLR.PAGO")){
 			
 			nomePortador2 = cutString("FRANCESINHAAILOS -" + nomeArquivo.toUpperCase(), 0, 99);
 			

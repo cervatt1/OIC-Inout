@@ -5173,7 +5173,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
   
 			if (ttMov.tipoPlanilha.equals("NAO LER")) continue;
 			
-			logger.logInfo("Test felipe " + ttMov.contaDebito + " | " + ttMov.contaCredito);
+			// logger.logInfo("Test felipe " + ttMov.contaDebito + " | " + ttMov.contaCredito);
 
 
 			if (ttMov.tipoPlanilha.contains("EXTRATO")) {
