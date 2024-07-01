@@ -1,0 +1,433 @@
+public void GeraArquivoProsoft(JSONObject jDadosLote, InoutLogger logger) throws Exception {
+    // Conectar na Base de Dados IO_CONTABIL.
+    DataBase dbIOCont = null;
+
+    String rn = "\r\n";
+
+    String nomeContabilidade = "";
+    String loteMovimento    = "";
+    String codEmpresa       = "";
+    String tipoMovimento    = "";
+    String dataMovimento    = "";
+    String contaDebito      = "";
+    String contaCredito     = "";
+    String valorLiquidacao  = "";
+    String documento        = "";
+    String nomeOrigem       = "";
+    String centroCusto      = "";
+    String valorJuros       = "";
+    String valorMulta       = "";
+    String valorDesconto    = "";
+    String historico        = "";
+    String naturezaContabil = "";
+    String tipoLancamento   = "";
+    String nomeEmpresa      = "";
+    String ERP              = "";
+    String classificacao    = "";
+    Date dtAgora            = new Date();
+
+    StringBuilder txt		= new StringBuilder();
+    StringBuilder ResumoTxt	= new StringBuilder();
+    StringBuilder sForce	= new StringBuilder();
+    int contador			= 0;
+    String arquivoNome		= "";
+	
+	// JSONArray toCloud		= new JSONArray();	//#20210126	
+	// LancamentosApi apiWeb	= new LancamentosApi(USER_OAUTH, PWD_OAUTH, SERVER_OAUTH, logger);	//#20210126 
+	
+    try {
+        nomeContabilidade = jDadosLote.optString("NOMECONTABILIDADE");
+        codEmpresa = jDadosLote.optString("CODEMPRESA");
+        loteMovimento = jDadosLote.optString("LOTE");
+        nomeEmpresa = jDadosLote.optString("NOMEEMPRESA");
+
+        // Carrega as propriedades
+        SysProperties props = SysProperties.getInstance();
+        props.load("contabil/" + nomeContabilidade + "/contabil.properties");
+		
+		JSONObject recAux = new JSONObject();	//#20210126
+		recAux.put("cnpjContabilidade",	props.get("CONTABILIDADE_CNPJ"));
+		recAux.put("cnpjEmpresa",		props.get(nomeEmpresa.toUpperCase()+"_CNPJ_EMPRESA"));
+		recAux.put("erpContabil",		props.get("ERP_CONTABILIDADE"));
+		recAux.put("lote",				loteMovimento);
+		recAux.put("codigoErp",			codEmpresa);
+		
+        ERP = props.get("ERP_CONTABILIDADE");
+        String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
+
+        String emailResponsavel = props.get(nomeEmpresa.toUpperCase() + "_EMAIL_RESPONSAVEL");
+        String emailCanal = props.get("EMAIL_CANAL");
+        // Conectar na Base de Dados IO_CONTABIL.
+        if (dbIOCont == null) {
+            dbIOCont = connectIOContabil(props, logger);
+        }
+
+        ResumoTxt = new StringBuilder();
+        boolean enviaEmailOttimizza = false;
+        if (loteMovimento.toUpperCase().contains("OTTIMIZZA")) enviaEmailOttimizza = true;
+
+        ResumoTxt.append("Data;CONTA DEBITO;DESCRICAO NO PLANO DE CONTAS;CONTA CREDITO;DESCRICAO NO PLANO DE CONTAS;VALOR;CODIGO HISTORICO;HISTORICO;CLIENTE/FORNECEDOR");
+        ResumoTxt.append(rn);
+
+        String classifica = "";
+
+        int contadorItem = 0;
+
+        try {
+            JSONArray records = findMovimentoPorEmpresa_Lote(dbIOCont, codEmpresa, loteMovimento);
+            int totalRegistros = 0;
+
+            for (int t=0; t<records.length(); t++) {
+
+                JSONObject recMov = records.optJSONObject(t);
+				
+				if (!loteMovimento.contains("OTTIMIZZA") || loteMovimento.contains("OTTIMIZZAAUTOMACAO")) {	//#20210126
+					//toCloud.put(createItemsToCloud(recMov, recAux));
+					//toCloud = sendToCloud(toCloud, recAux, t, apiWeb, logger);
+				}
+				
+                tipoMovimento   = recMov.optString("TIPOMOVIMENTO");
+                dataMovimento   = recMov.optString("DATAMOVIMENTO");
+                contaDebito     = recMov.optString("CONTADEBITO");
+                contaCredito    = recMov.optString("CONTACREDITO");
+
+                contaDebito  = contaDebito.replaceAll("\\.","");
+                contaCredito = contaCredito.replaceAll("\\.","");
+
+                String dataMovimentoOriginal = dataMovimento;
+                String contaDebitoOriginal = contaDebito;
+                String contaCreditoOriginal = contaCredito;
+
+                valorLiquidacao = recMov.optString("VALORLIQUIDACAO");
+                documento       = recMov.optString("DOCUMENTO");
+                nomeOrigem      = recMov.optString("NOMEORIGEM");
+                centroCusto     = recMov.optString("CENTROCUSTO");
+                valorJuros      = recMov.optString("VALORJUROS");
+                valorMulta      = recMov.optString("VALORMULTA");
+                valorDesconto   = recMov.optString("VALORDESCONTO");
+                historico       = recMov.optString("HISTORICO");
+                naturezaContabil= recMov.optString("NATUREZACONTABIL");
+                tipoLancamento  = recMov.optString("TIPOLANCAMENTO");
+                classificacao   = recMov.optString("CLASSIFICACAO");
+                String especialOrgano = "";
+                String especialOrganoEspaco = "";
+                String separador = "";
+
+                classificacao   = classificacao.substring(0,16).trim();
+
+                String codigoParticipante = "";
+
+
+                for (int xy=0;xy<20;xy++) {historico       = historico.replaceAll("  "," ");}
+                if (contaDebito.contains("INVERTE") || contaCredito.contains("INVERTE")) {
+                    String contaInvertida   = contaDebito.replaceAll("INVERTE","");
+                    contaDebito             = contaCredito.replaceAll("INVERTE","");
+                    contaCredito            = contaInvertida.replaceAll("INVERTE","");
+                } else {
+				
+					if (historico.contains("INVERTECONTA")) {
+						String contaInvertida = contaDebito;
+						contaDebito = contaCredito;
+						contaCredito = contaInvertida;
+					}
+				}
+				historico = historico.replaceAll("INVERTECONTA","").trim();
+				logger.logInfo("contaDebito:"+contaDebito+" |codigoParticipante = "+ historico.substring(historico.indexOf("Participante:")+13).trim() + " |Historico = "+historico);
+				if (historico.contains("Participante:")) {
+                    codigoParticipante   = historico.substring(historico.indexOf("Participante:")+13).trim();
+                    historico            = historico.substring(0,historico.indexOf("Participante:")).trim();
+                }
+
+
+
+                String codigoFilial = "";
+                if (historico.contains("Filial:")) {
+                    codEmpresa   = historico.substring(historico.indexOf("Filial:")+7).trim();
+                    historico    = historico.substring(0,historico.indexOf("Filial:")).trim();
+                }
+
+                String codigoHistorico = "0";
+                if (historico.contains("CodigoHistorico:")) {
+                    codigoHistorico = historico.substring(historico.indexOf("CodigoHistorico:")+16).trim();
+                    historico       = historico.substring(0,historico.indexOf("CodigoHistorico:")).trim();
+                }
+
+                for(int d = 0; d < 3; d++){
+                    if (historico.endsWith("-") || historico.endsWith("|")) historico = historico.substring(0,historico.length()-1).trim();
+                    if (historico.startsWith("-") || historico.startsWith("|")) historico = historico.substring(1).trim();
+                }
+                historico = historico.replaceAll("_","").replaceAll(",","").replaceAll("\\.","").replaceAll(";","").trim();
+                historico = historico.replaceAll("- -","-").trim();
+
+                if (!ERP.equals("")) dataMovimento = validaDataMovimento(dataMovimento, ERP, nomeContabilidade);
+                dataMovimento = StringUtil.leftPad(dataMovimento, 10, "0");
+                dataMovimento = dataMovimento.replaceAll("[^0-9]*", "").trim();
+
+                double valorDouble = NumberUtil.toDecimal(valorLiquidacao);
+                if (tipoMovimento.equals("CTBJUR")) valorDouble = NumberUtil.toDecimal(valorJuros);
+                if (tipoMovimento.equals("CTBDES")) valorDouble = NumberUtil.toDecimal(valorDesconto);
+                if (tipoMovimento.equals("CTBMUL")) valorDouble = NumberUtil.toDecimal(valorMulta);
+                String valorFinal = "";
+                try{valorFinal = String.format("%.2f", valorDouble);
+                   }catch(Exception c){valorFinal = "";}
+                String valorResumoTxt = valorFinal;
+
+                String codigoParticipanteCP = "";
+                String codigoParticipanteCR = "";
+				
+				// if(nomeOrigem.contains("TELEMED")) logger.logDebug("C DEB. -> "+contaDebito+" | C CRED. -> "+contaCredito+" | COD.PART -> "+codigoParticipanteCP+" | HISTORICO -> "+historico);
+				
+                if (contaDebito.toUpperCase().contains("P")) {
+                    contaDebito = contaDebito.toUpperCase();
+                    String [] contaArray = contaDebito.split("P");
+
+                    if (contaArray.length > 1) {
+                        if (contaArray[1] != null && !contaArray[1].equals("") && contaArray[0] != null && !contaArray[0].equals("")) {
+                            codigoParticipanteCP = contaArray[1];
+                            contaDebito          = contaArray[0];
+                        }
+                    }
+
+                }
+
+
+                if (contaCredito.toUpperCase().contains("P")) {
+                    contaCredito = contaCredito.toUpperCase();
+                    String [] contaArray = contaCredito.split("P");
+                    if (contaArray.length > 1) {
+                        if (contaArray[1] != null && !contaArray[1].equals("") && contaArray[0] != null && !contaArray[0].equals("")) {
+                            codigoParticipanteCR = contaArray[1];
+                            contaCredito         = contaArray[0];
+                        }
+                    }
+
+                }
+				
+				if(contaDebito.toUpperCase().contains("P") && !codigoParticipante.equals("")){
+					codigoParticipanteCP = contaDebito.replaceAll("P","").replaceAll("p","").trim();
+					contaDebito  = codigoParticipante;
+				}
+				if(contaCredito.toUpperCase().contains("P") && !codigoParticipante.equals("")){
+					codigoParticipanteCR = contaCredito.replaceAll("P","").replaceAll("p","").trim();
+					contaCredito  = codigoParticipante;
+				}
+				
+				// if(nomeOrigem.contains(" 2 TELEMED")) logger.logDebug("C DEB. -> "+contaDebito+" | C CRED. -> "+contaCredito+" | COD.PART -> "+codigoParticipanteCP+" | HISTORICO -> "+historico);
+				
+
+                String numLote = "";
+				String centroCustoDebito = "";
+				String centroCustoCredito = "";
+				
+                if (tipoLancamento.equals("PAGAR"))		{
+					numLote = "00002";
+					centroCustoDebito = centroCusto;
+				}
+                if (tipoLancamento.equals("RECEBER"))	{
+					numLote = "00001";
+					centroCustoCredito = centroCusto;
+					
+				}
+
+                if (!classifica.equals(classificacao)) {
+                    contador++;
+                    contadorItem = 0;
+                    if (!classificacao.startsWith("X")){
+                        String quantidadeLancamentos = "";
+						int somaLancamento = 2;
+						if (NumberUtil.toDecimal(valorDesconto) > 0) somaLancamento++;
+						if (NumberUtil.toDecimal(valorMulta) > 0) somaLancamento++;
+						if (NumberUtil.toDecimal(valorJuros) > 0) somaLancamento++;
+						quantidadeLancamentos = StringUtil.leftPad(String.valueOf(somaLancamento), 3, "0");
+ 
+                        txt.append("LC1")
+                        .append(StringUtil.leftPad(String.valueOf(contador),5,"0")) // 5 bytes zeros a esquerda
+                        .append("   ")                                  // 3 bytes
+                        .append("2")                                    // "1" - Simples ou "2" - Detalhado
+                        .append(dataMovimento)                          // DDMMAAAA
+                        .append(StringUtil.rightPad(documento, 10, " "))
+                        .append(numLote)                                // campo 07 5 bytes
+                        .append("                              ")       // campo 08 30 bytes
+                        .append(quantidadeLancamentos)
+                        .append(rn);
+                    }
+                }
+
+                classifica = classificacao;
+                contadorItem++;
+				
+				if (tipoMovimento.contains("CC")) continue;
+
+				if(codigoParticipanteCP.length() < 6 && codigoParticipanteCP.length() > 0) codigoParticipanteCP = StringUtil.leftPad(codigoParticipanteCP, 6, "0");
+				if(codigoParticipanteCR.length() < 6 && codigoParticipanteCR.length() > 0) codigoParticipanteCR = StringUtil.leftPad(codigoParticipanteCR, 6, "0");
+				logger.logInfo("CONTA=> "+contaDebito+" | CLASS = "+classificacao+" | COD PARTI-P=> "+codigoParticipanteCP+" | COD PARTI-R"+codigoParticipanteCR+" | VALOR=> "+ valorFinal);
+                if (classificacao.startsWith("X")){
+                    txt.append("LC1")
+                    .append(StringUtil.leftPad(String.valueOf(contador),5,"0")) // 5 bytes zeros a esquerda
+                    .append("   ")                                  // 3 bytes
+                    .append("1")                                    // "1" - Simples ou "2" - Detalhado
+                    .append(dataMovimento)                          // DDMMAAAA
+                    .append(StringUtil.rightPad(documento, 10, " "))
+                    .append(numLote)                                // campo 07 5 bytes
+                    .append("                              ")       // campo 08 30 bytes
+                    .append("002")                                  // campo 09
+                    .append(StringUtil.rightPad(contaDebito, 5, " "))
+                    .append(StringUtil.rightPad(codigoParticipanteCP, 14, " "))
+                    .append(StringUtil.leftPad(centroCustoDebito, 5, "0"))
+
+                    .append(StringUtil.rightPad(contaCredito, 5, " "))
+                    .append(StringUtil.rightPad(codigoParticipanteCR, 14, " "))
+                    .append(StringUtil.leftPad(centroCustoCredito, 5, "0"))
+
+                    .append(StringUtil.leftPad(valorFinal, 16, " "))
+                    .append(StringUtil.rightPad(historico, 240, " "))
+                    .append(" ")                                    // campo 18
+                    .append(" ")                                    // campo 19
+                    .append("                                                                          ")   // campo 20 - 74 bytes
+                    .append(rn);
+                }
+
+                if (!classificacao.startsWith("X")){
+
+                    String contaFinal = "";
+                    String contaFinalTerceiro = "";
+
+                    if (tipoLancamento.equals("PAGAR")) {
+                        if (tipoMovimento.equals("CTBJUR"))  contaFinal = "D" + StringUtil.rightPad(contaDebito, 5, " ");
+                        if (tipoMovimento.equals("CTBDES"))  contaFinal = "C" + StringUtil.rightPad(contaCredito, 5, " ");
+                        if (tipoMovimento.equals("CTBMUL"))  contaFinal = "D" + StringUtil.rightPad(contaDebito, 5, " ");
+                        if (tipoMovimento.equals("CTBPORT")) contaFinal = "C" + StringUtil.rightPad(contaCredito, 5, " ");
+                        if (tipoMovimento.equals("CTB"))     contaFinal = "D" + StringUtil.rightPad(contaDebito, 5, " ");
+						contaFinalTerceiro = codigoParticipanteCP;
+                    }
+                    if (tipoLancamento.equals("RECEBER")) {
+                        if (tipoMovimento.equals("CTBJUR"))  contaFinal = "C" + StringUtil.rightPad(contaCredito, 5, " ");
+                        if (tipoMovimento.equals("CTBDES"))  contaFinal = "D" + StringUtil.rightPad(contaDebito, 5, " ");
+                        if (tipoMovimento.equals("CTBMUL"))  contaFinal = "C" + StringUtil.rightPad(contaCredito, 5, " ");
+                        if (tipoMovimento.equals("CTBPORT")) contaFinal = "D" + StringUtil.rightPad(contaDebito, 5, " ");
+                        if (tipoMovimento.equals("CTB"))     contaFinal = "C" + StringUtil.rightPad(contaCredito, 5, " ");
+						contaFinalTerceiro = codigoParticipanteCR;
+
+                    }
+
+                    txt.append("LC2")
+                    .append(StringUtil.leftPad(String.valueOf(contador),5,"0")) // 5 bytes zeros a esquerda
+                    .append(StringUtil.leftPad(String.valueOf(contadorItem),3,"0"))
+                    .append(contaFinal)
+                    .append(StringUtil.rightPad(contaFinalTerceiro, 14, " "))      						// campo 08
+                    .append(StringUtil.leftPad(centroCusto, 5, "0"))
+                    .append(StringUtil.leftPad(valorFinal, 16, " "))
+                    .append(StringUtil.rightPad(historico, 240, " "))
+                    .append(rn);
+                }
+
+                if(!tipoMovimento.contains("PORT")) totalRegistros++;
+
+                String descricaoDebito = "";
+                String descricaoCredito = "";
+
+                if (!tipoMovimento.contains("CC")) {
+                    JSONObject descricaoPlano = dbIOCont.sql("SELECT DESCRICAOPLANO FROM IO_PLANOCONTA WHERE CODEMPRESA = ? AND CONTACONTABIL = ?")
+                    .fields("DESCRICAOPLANO")
+                    .param(codEmpresa)
+                    .param(contaDebitoOriginal)
+                    .queryUnique();
+                    if (descricaoPlano != null && descricaoPlano.has("DESCRICAOPLANO")) {
+                        descricaoDebito = descricaoPlano.optString("DESCRICAOPLANO");
+                    }
+
+                    JSONObject descricaoPlano2 = dbIOCont.sql("SELECT DESCRICAOPLANO FROM IO_PLANOCONTA WHERE CODEMPRESA = ? AND CONTACONTABIL = ?")
+                    .fields("DESCRICAOPLANO")
+                    .param(codEmpresa)
+                    .param(contaCreditoOriginal)
+                    .queryUnique();
+                    if (descricaoPlano2 != null && descricaoPlano2.has("DESCRICAOPLANO")) {
+                        descricaoCredito = descricaoPlano2.optString("DESCRICAOPLANO");
+                    }
+
+                    ResumoTxt.append(dataMovimentoOriginal + ";" + contaDebitoOriginal + ";" + descricaoDebito + ";" + contaCreditoOriginal + ";" + descricaoCredito + ";" + valorResumoTxt + ";" + codigoHistorico + ";" + historico + ";" + nomeOrigem);
+                    ResumoTxt.append(rn);
+                }
+
+            } //For arrayMov
+
+			if (!loteMovimento.contains("OTTIMIZZA") || loteMovimento.contains("OTTIMIZZAAUTOMACAO")) {	//#20210126
+				//toCloud = sendToCloud(toCloud, recAux, -1, apiWeb, logger);
+			}
+            
+            // Gravacao do Arquivo TXT
+            if(totalRegistros > 0){
+                //CTBLCTOS + Codigo da empresa (4 bytes) + opcionais (ate 20 bytes) ExtensÃƒÂ£o = "TXT"
+
+
+                //  Busca o mes e ano de procecessamento no nome do lote para exibir o periodo de fechamento do cliente
+                String dataLote = loteMovimento.substring(loteMovimento.lastIndexOf("_" + tipoLancamento)-7,loteMovimento.lastIndexOf("_" + tipoLancamento));
+                dataLote = dataLote.replaceAll("-","").trim();
+
+                /*Calendar c = Calendar.getInstance();
+                String ssMillis = String.valueOf(c.get(Calendar.SECOND))+ String.valueOf(c.get(Calendar.MILLISECOND));
+                arquivoNome = "CTBLCTOS"+StringUtil.leftPad(codEmpresa, 4, "0") + StringUtil.leftPad(ssMillis, 5, "0") +"_"+ dataLote +"_"+ tipoLancamento;
+                */
+                arquivoNome = "CTBLCTOS"+StringUtil.leftPad(codEmpresa, 4, "0") +"_"+ loteMovimento;
+
+                String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + arquivoNome + ".TXT";
+                if(loteMovimento.toUpperCase().contains("OTTIMIZZA") && versaoPlataforma.equals("01_Conecta_Via_Ottimizza_FT") && !nomeEmpresa.toUpperCase().contains("OTTIMIZZAAUTOMACAO")){
+                    filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + arquivoNome + ".TXT";
+                }
+
+
+                FileWriter writer = new FileWriter(filename);
+                writer.writeNewFile(txt.toString());
+
+                String filenameRESUMO = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + "RESUMO_LOTE_" + arquivoNome + ".csv";
+                if(loteMovimento.toUpperCase().contains("OTTIMIZZA") && versaoPlataforma.equals("01_Conecta_Via_Ottimizza_FT") && !nomeEmpresa.toUpperCase().contains("OTTIMIZZAAUTOMACAO")){
+                    filenameRESUMO = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + "RESUMO_LOTE_" + arquivoNome + ".csv";
+                }
+
+                FileWriter writerResumo = new FileWriter(filenameRESUMO);
+                writerResumo.writeNewFile(ResumoTxt.toString());
+                enviaEmailLoteLiberadoComAnexo(codEmpresa, nomeEmpresa, "RESUMO_LOTE_" + arquivoNome, nomeContabilidade, emailResponsavel, filenameRESUMO, logger);
+
+                //*******************************************************
+                //************* ATUALIZA SALESFORCE *********************
+                //*******************************************************
+                if((!loteMovimento.toUpperCase().contains("OTTIMIZZA") &&
+                   !loteMovimento.toUpperCase().contains("ROTEIRO") &&
+                   !loteMovimento.toUpperCase().contains("TESTE")) || loteMovimento.toUpperCase().contains("PLANILHA_PADRAO_OTTIMIZZA")){
+
+                    sForce.append(nomeEmpresa+";"+totalRegistros+";"+loteMovimento+";"+nomeContabilidade);
+                    sForce.append(rn);
+
+                    String fileSforce  = RouteEngine.INOUT_HOME + "/Contabil/SForce/" + loteMovimento + ".txt";
+
+                    FileWriter writerSforce = new FileWriter(fileSforce);
+                    writerSforce.writeNewFile(sForce.toString());
+                }
+            }
+            try {
+                if (dbIOCont == null) {
+                    dbIOCont = connectIOContabil(props, logger);
+                }
+                dbIOCont.delete("IO_MOVIMENTO")
+                .where("LOTE=?")
+                .param(loteMovimento)
+                .execute();
+            } catch (Exception eDel) {
+                logger.logError("EndpointB: ERROR DELETE IO_MOVIMENTO", eDel);
+            }
+
+            txt = new StringBuilder();
+
+        } catch (Exception eMov) {
+            logger.logError("EndpointB: ERROR SELECT IO_MOVIMENTO", eMov);
+        }
+    } catch (Exception e) {
+        logger.logError(e);
+    } finally {
+        if (dbIOCont != null) {
+            try {
+                dbIOCont.closeConnection();
+            } catch (Exception eedbIOCont) {}
+        }
+    }
+}

@@ -1629,6 +1629,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorMulta 	   = getDoubleTXT2020(roteiroCRM.optString("valorMulta").toUpperCase(), line, objetoParametro);
 									valorPagamento = getDoubleTXT2020(roteiroCRM.optString("valorPagamento").toUpperCase(), line, objetoParametro);
 
+									// logger.logInfo("VALOR DO JUROS: " + valorJuros);
+
 									if (tipoLancamento.equals("PAGAR")) 
 										if(roteiroCRM.optString("valorAlternativo").toUpperCase().contains("COLUNA"))
 											debitoCredito = "EXTRATO-DEBITO";
@@ -2551,7 +2553,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 			// if(codEmpresa.contains("20") && contRegra < 4000) logger.logInfo("Lendo " + tipoLancamento);
 			 
 			// if (codEmpresa.contains("277")) 
-			logger.logInfo("TRESDEQUATRO " + ttMov.tipoPlanilha + " | " + ttMov.debitoCredito + " | " +  ttMov.dataMovimento + " | " + ttMov.valorDocumento + " | " + ttMov.valorJuros);
+			// logger.logInfo("TRESDEQUATRO " + ttMov.tipoPlanilha + " | " + ttMov.debitoCredito + " | " +  ttMov.dataMovimento + " | " + ttMov.valorDocumento + " | " + ttMov.valorJuros);
 			
  			if (restoLinha == 0) putStatus(dirName, "03--Etapa 3 de 4 - " + String.valueOf(contRegra) + "--" + tipoLancamento + ".status", jStatus, logger);
 			
@@ -2603,6 +2605,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 			if(ttMov.tipoLancamento.contains("PAGAR")   && ttMov.debitoCredito.contains("EXTRATO-CREDITO")) continue;
 			if(ttMov.tipoLancamento.contains("RECEBER") && ttMov.debitoCredito.contains("EXTRATO-DEBITO")) continue;
+			// logger.logInfo("TRESDEQUATRO " + ttMov.tipoPlanilha + " | " + ttMov.debitoCredito + " | " +  ttMov.dataMovimento + " | " + ttMov.valorDocumento + " | " + ttMov.valorJuros);
 			// logger.logDebug("PORTAS1 " + cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"));
 			// logger.logDebug("PORTAS2 " + ttMov.nomePortador);
 			if (ttMov.nomePortador.toUpperCase().contains("OTT_OUD")/* && ttMov.nomePortador.toUpperCase().contains("CEF")*/) ttMov.nomePortador = cutString(ttMov.nomePortador.toUpperCase(), 0, "OTT_") + " " + cutString(ttMov.nomePortador.toUpperCase(), ttMov.nomePortador.toUpperCase().indexOf(cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_"))+cutString(ttMov.nomePortador.toUpperCase(), "_ID", "_").length()+1);
