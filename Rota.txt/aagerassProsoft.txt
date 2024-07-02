@@ -113,7 +113,11 @@ public void GeraArquivoProsoft(JSONObject jDadosLote, InoutLogger logger) throws
                 String especialOrganoEspaco = "";
                 String separador = "";
 
-                classificacao   = classificacao.substring(0,16).trim();
+                try{
+                    classificacao   = classificacao.substring(0,16).trim();
+                }catch(Exception e){
+                    logger.logError("ERRO AO PEGAR CLASSIFICACAO: " + e.getMessage());
+                }
 
                 String codigoParticipante = "";
 
@@ -131,11 +135,16 @@ public void GeraArquivoProsoft(JSONObject jDadosLote, InoutLogger logger) throws
 						contaCredito = contaInvertida;
 					}
 				}
-				historico = historico.replaceAll("INVERTECONTA","").trim();
-				logger.logInfo("contaDebito:"+contaDebito+" |codigoParticipante = "+ historico.substring(historico.indexOf("Participante:")+13).trim() + " |Historico = "+historico);
-				if (historico.contains("Participante:")) {
-                    codigoParticipante   = historico.substring(historico.indexOf("Participante:")+13).trim();
-                    historico            = historico.substring(0,historico.indexOf("Participante:")).trim();
+
+                try{
+                    historico = historico.replaceAll("INVERTECONTA","").trim();
+                    logger.logInfo("contaDebito:"+contaDebito+" |codigoParticipante = "+ historico.substring(historico.indexOf("Participante:")+13).trim() + " |Historico = "+historico);
+                    if (historico.contains("Participante:")) {
+                        codigoParticipante   = historico.substring(historico.indexOf("Participante:")+13).trim();
+                        historico            = historico.substring(0,historico.indexOf("Participante:")).trim();
+                    }
+                }catch(Exception e){
+                    logger.logError("ERRO AO CAPTURAR CODIGO PARTI")
                 }
 
 

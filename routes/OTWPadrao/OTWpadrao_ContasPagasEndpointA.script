@@ -28117,6 +28117,9 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
     JSONObject extratoEmpresa = new JSONObject();
 	// logger.logInfo("ENTROU ARRRRR BRAD");
 	logger.logInfo("ENTROU BRADESCO");
+	
+	Extrato jdbcExtrato = new Extrato();
+	ExtratoModel extrato = new ExtratoModel();
 
     // Inicializacao de Variaveis
     String codEmpresa        = "";
@@ -28144,6 +28147,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
     String debitoCreditoAux  = "";
 	String nomeContabilidade = "";
 	String nomeEmpresa       = "";
+    String tipoLancamento    = "";
 
     String strValorDocumento = "";
     String contLinhaExtrato  = "";
@@ -28174,6 +28178,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
     if(jDados.has("TIPOEXTRATO"))  tipoExtrato  = jDados.optString("TIPOEXTRATO");
 	if(jDados.has("NOMECONTABILIDADE")) nomeContabilidade = jDados.optString("NOMECONTABILIDADE");
 	if(jDados.has("NOMEEMPRESA")) nomeEmpresa = jDados.optString("NOMEEMPRESA");
+	if(jDados.has("TIPOLANCAMENTO")) tipoLancamento = jDados.optString("TIPOLANCAMENTO");
 	
 	int cont = 0;
 	int contAuxiliar = 0;
@@ -28195,6 +28200,8 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
     while (memFile.hasNextLine()) {
 
         try {
+
+			extrato = new ExtratoModel(extrato);
 			
 			
 
@@ -28253,7 +28260,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 						.fields("HISTORICO")
 						.where("CHAVE = ? ")
 						.param(nomeOrigemAux)
-						.param(chaveExtrato)
+						.param(extrato.getChave())
 						.execute();
 					} catch (Exception sqlUpdateException) {
 					}
@@ -28325,7 +28332,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 					
 					extratoEmpresa = dbIOCont.sql("SELECT CHAVE,HISTORICO,COMPLEMENTO FROM IO_EXTRATO WHERE CHAVE = ?")
 						.fields("CHAVE,HISTORICO,COMPLEMENTO")
-						.param(chaveExtrato)
+						.param(extrato.getChave())
 						.queryUnique();
 						
 					if (extratoEmpresa != null && extratoEmpresa.has("CHAVE")) {
@@ -28336,7 +28343,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 							.where("CHAVE = ? ")
 							.param(extratoEmpresa.optString("HISTORICO")    + " - " + memFile.getStringFieldRemoveEspCharsUpper(0))
 							.param(extratoEmpresa.optString("COMPLEMENTO") + " - " + memFile.getStringFieldRemoveEspCharsUpper(0))
-							.param(chaveExtrato)
+							.param(extrato.getChave())
 							.execute();
 						} catch (Exception sqlUpdateException) {
 							logger.logDebug("Erro no update: " + sqlUpdateException);
@@ -28484,8 +28491,8 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 				// logger.logInfo("dataMOvimento - > " + dataMovimento + " |valorDocumento -> " + valorDocumento);
 
 				cont++;
-				contLinhaExtrato = String.valueOf(cont);
-				contLinhaExtrato = StringUtil.leftPad(contLinhaExtrato, 05, "0");
+				//contLinhaExtrato = String.valueOf(cont);
+				//contLinhaExtrato = StringUtil.leftPad(contLinhaExtrato, 05, "0");
 				// logger.logInfo("NO == "+nomeOrigem+" | LINE == "+line);
 				if (nomeOrigem.startsWith("TRANSF CC PARA") || 
 					nomeOrigem.startsWith("TRANSF.AUT. C/C") || //#2306-006655
@@ -28579,6 +28586,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 					nomeOrigem.startsWith("BANESCARD CREDITO") || //#2306-006148
 					nomeOrigem.startsWith("PIX QR CODE DINAMICO") || //#2401-026567
 					nomeOrigem.startsWith("PIX QR CODE ESTATICO") || //#2401-026567
+					nomeOrigem.startsWith("BAIXA OPERACAO DESCONTO") || //#2405-038124
 					(nomeOrigem.startsWith("ADI") && nomeOrigem.contains("MENTO") && nomeOrigem.contains("OPER D")) || //#2306-006148
 					// nomeOrigem.startsWith("CARGA CRT") || 
 					(nomeOrigem.startsWith("CHEQUE") && !nomeOrigemAnterior.startsWith("TARIFA")) ) nomeOrigemAnterior = nomeOrigem; 
@@ -28595,7 +28603,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 					
 					extratoEmpresa = dbIOCont.sql("SELECT CHAVE,HISTORICO,COMPLEMENTO FROM IO_EXTRATO WHERE CHAVE = ?")
 						.fields("CHAVE,HISTORICO,COMPLEMENTO")
-						.param(chaveExtrato)
+						.param(extrato.getChave())
 						.queryUnique();
 						
 					if (extratoEmpresa != null && extratoEmpresa.has("CHAVE")) {
@@ -28605,7 +28613,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 							.fields("HISTORICO")
 							.where("CHAVE = ? ")
 							.param(extratoEmpresa.optString("HISTORICO").replaceAll("[0-9]", "")    + " - " + memFile.getStringFieldRemoveEspCharsUpper(0))
-							.param(chaveExtrato)
+							.param(extrato.getChave())
 							.execute();
 						} catch (Exception sqlUpdateException) {
 							logger.logDebug("Erro no update: " + sqlUpdateException);
@@ -28627,7 +28635,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 					
 					extratoEmpresa = dbIOCont.sql("SELECT CHAVE,HISTORICO,COMPLEMENTO FROM IO_EXTRATO WHERE CHAVE = ?")
 						.fields("CHAVE,HISTORICO,COMPLEMENTO")
-						.param(chaveExtrato)
+						.param(extrato.getChave())
 						.queryUnique();
 						
 					if (extratoEmpresa != null && extratoEmpresa.has("CHAVE")) {
@@ -28637,7 +28645,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 							.fields("HISTORICO")
 							.where("CHAVE = ? ")
 							.param(extratoEmpresa.optString("HISTORICO").replaceAll("[0-9]", "")    + " " + memFile.getStringFieldRemoveEspCharsUpper(0))
-							.param(chaveExtrato)
+							.param(extrato.getChave())
 							.execute();
 						} catch (Exception sqlUpdateException) {
 							logger.logDebug("Erro no update: " + sqlUpdateException);
@@ -28649,8 +28657,21 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 				
 				// logger.logInfo("LINE EXT BRDSC 2 == "+line+" NP -> "+nomePortador);
 				
-				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
+				//chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
+				extrato.setCodEmpresa(codEmpresa);
+				// logger.logInfo("GET COD EMPRESA = "+extrato.getCodEmpresa());
+				extrato.setDataMovimento(dataMovimento);
+				// logger.logInfo("GET DATA EMPRESA = "+extrato.getDataMovimento());
+				extrato.setNomePortador(nomePortador);
+				// logger.logInfo("GET NP = "+extrato.getNomePortador());
+				extrato.setValorDocumento(valorDocumento);
+				// logger.logInfo("GET VALOR = "+extrato.getValorDocumento());
+				extrato.setDebitoCredito(debitoCredito);
+				// logger.logInfo("GET DC = "+extrato.getDebitoCredito());
+				extrato.setTipoLancamento(tipoLancamento);
+				// logger.logInfo("GET TL = "+extrato.getTipoLancamento());
+				extrato.setChave(cont);
 				
 				// logger.logInfo("DMVV " + nomeOrigem + " | " + nomeOrigemAnterior + " | " + dataMovimento + " | " + valorDocumento + " | " + line);
 				// logger.logInfo("DEE " + dataExtrato);
@@ -28741,11 +28762,21 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 				// logger.logInfo("dataMOvimento - > " + dataMovimento + " |valorDocumento -> " + valorDocumento + " |achouData -> " + achouData + " |no -> " + nomeOrigem);
 			
 				cont++;
-				contLinhaExtrato = String.valueOf(cont);
-				contLinhaExtrato = StringUtil.leftPad(contLinhaExtrato, 05, "0");
-			
-				chaveExtrato = codEmpresa + "-" +  dataMovimento + "-" + debitoCredito + "-" + String.format("%.2f", valorDocumento) + "-" + nomePortador + "-" + contLinhaExtrato;
 				
+				extrato.setCodEmpresa(codEmpresa);
+				// logger.logInfo("GET COD EMPRESA = "+extrato.getCodEmpresa());
+				extrato.setDataMovimento(dataMovimento);
+				// logger.logInfo("GET DATA EMPRESA = "+extrato.getDataMovimento());
+				extrato.setNomePortador(nomePortador);
+				// logger.logInfo("GET NP = "+extrato.getNomePortador());
+				extrato.setValorDocumento(valorDocumento);
+				// logger.logInfo("GET VALOR = "+extrato.getValorDocumento());
+				extrato.setDebitoCredito(debitoCredito);
+				// logger.logInfo("GET DC = "+extrato.getDebitoCredito());
+				extrato.setTipoLancamento(tipoLancamento);
+				// logger.logInfo("GET TL = "+extrato.getTipoLancamento());
+				
+				extrato.setChave(cont);
 			  
 				if (dataMovimento.equals("")) continue;
 				if (valorDocumento == 0) continue;
@@ -28777,7 +28808,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 				// }
 			}
 			
-			
+			if(nomeOrigem.trim().matches("^\\d{7}-\\d{1}$")) continue; // gui -> ignorar lançamento na linha do portador;
 			  // Buscar Extrato por Chave na Tabela IO_EXTRATO.
             
 			
@@ -28793,48 +28824,26 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 			
 			//#2312-024394 - Leal - Validacao feita dentro do read pois era preciso enviar o documento apenas para essa empresa
 			// O documento era enviado atraves do complemento02, com essa alteracao agora e enviado no campo DOCUMENTO do banco
+			
 			if(!nomeContabilidade.toUpperCase().contains("SYSTEMA") && !nomeEmpresa.toUpperCase().contains("CAMFPRESTACAO")){
 				documentoAux = null;
 			}
-
-			extratoEmpresa = dbIOCont.sql("SELECT CHAVE FROM IO_EXTRATO WHERE CHAVE = ?")
-			.fields("CHAVE")
-			.param(chaveExtrato)
-			.queryUnique();
-				
-			if (extratoEmpresa == null || !extratoEmpresa.has("CHAVE")) {
-				try {
-					dbIOCont.insert("IO_EXTRATO")
-					.fields("CHAVE,CODEMPRESA, DATAMOVIMENTO, DOCUMENTO, PORTADOR, HISTORICO, LOTE, COMPLEMENTO, VALORDOCUMENTO, DEBITOCREDITO, EXTRATOLIDO")
-					.param(chaveExtrato)
-					.param(codEmpresa)
-					.param(dataMovimento)
-					.param(documentoAux)
-					.param(nomePortador)
-					.param(nomeOrigem/* + " TESTEJOTA "*/)
-					.param(nomeArquivo.toUpperCase())
-					.param(documento)
-					.param(valorDocumento)
-					.param(debitoCredito)
-					.param(0)
-					.execute();
-				} catch (Exception sqlInsertException) {
-					logger.logError("Error inserting to IO_EXTRATO", sqlInsertException);
-					continue;
-				}
-			} else {
-				try {
-					dbIOCont.update("IO_EXTRATO")
-					.fields("EXTRATOLIDO")
-					.where("CHAVE = ? ")
-					.param(0)
-					.param(chaveExtrato)
-					.execute();
-				} catch (Exception sqlUpdateException) {
-					logger.logError("Error updating IO_EXTRATO", sqlUpdateException);
-					continue;
-				}
+			
+			extrato.setDocumento(documento);
+			// logger.logInfo("GET DOC EMPRESA = "+extrato.getDocumento());
+			extrato.setNomeOrigem(nomeOrigem);
+			// logger.logInfo("GET NOME ORIGEM = "+extrato.getNomeOrigem());
+			extrato.setLote(nomeArquivo.toUpperCase());
+			// logger.logInfo("GET LOTE = "+extrato.getLote());
+			extrato.setComplemento02(complemento02);
+			// logger.logInfo("GET CP02 = "+extrato.getComplemento02());
+			
+			try{
+				jdbcExtrato.insereIOExtrato(extrato, dbIOCont, logger);				
+			}catch(Exception e){
+				logger.logError("Erro extrato abc" + e.getMessage());
 			}
+			
 
 			
         } catch (Exception ex) {
