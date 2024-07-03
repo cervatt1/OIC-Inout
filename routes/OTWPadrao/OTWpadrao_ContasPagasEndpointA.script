@@ -28191,6 +28191,8 @@ public HashMap readNotasCorretagemXP(MemoryFile memFile, JSONObject jDados, Hash
             String line = memFile.nextLine();
             line = StringUtil.removeSpecialCharsToUC(line);
 
+			dataMovimento = getCampoDate(dataMovimento);
+
 			ivalorDocumento	= memFile.getFieldsSize()-2;
 			icomplemento03  = memFile.getFieldsSize()-3;
 			icomplemento04  = memFile.getFieldsSize()-4;
@@ -28238,6 +28240,19 @@ public HashMap readNotasCorretagemXP(MemoryFile memFile, JSONObject jDados, Hash
 			complemento08 = complemento07.contains("COMPRA") ? "PERDA" : "GANHO";
 			
 			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(3).matches("[0-9]+") ? memFile.getStringFieldRemoveEspCharsUpper(4).replaceAll("          ", " ") : memFile.getStringFieldRemoveEspCharsUpper(3).replaceAll("          ", " ");
+			if(nomeOrigem.contains("/")){
+				nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(4).trim();
+				if(nomeOrigem.contains("  ")){
+					boolean limpouu = true;
+					while(limpouu){
+						if(nomeOrigem.contains("  ")){
+							nomeOrigem = nomeOrigem.replaceAll("  ", " ");
+						}else{
+							limpouu = false;
+						}
+					}
+				}
+			}
 
 				try{
 				valorDocumento = memFile.getDoubleField(ivalorDocumento);
