@@ -13317,6 +13317,13 @@ public HashMap readFrancesinhaSicrediPdf(MemoryFile memFile, JSONObject jDados, 
             ttMov2.naturezaContabil  = "C";
             ttMov2.contaDebito       = "";
             ttMov2.contaCredito      = "";
+
+			logger.logInfo(
+				ttMov2.complemento01 + "|" +
+				ttMov2.complemento02 + "|" +
+				ttMov2.complemento03 + "|" +
+				ttMov2.complemento04);
+
             mapaVariavel.put(key,ttMov2);
 
         } catch (Exception ex) {

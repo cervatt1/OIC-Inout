@@ -4967,12 +4967,12 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 	
 	////// NOTAS DE CORRETAGEM XP-INVESTIMENTOS - (NOVO) /////////////////////////////////////
 	if(roteiroCRM.optString("Planilhas_Padroes").contains("Notas_Corretagem_XP_PDF")){	
-		if((cabecalhoPlanilha.contains("NOTA DE CORRETAGEM") || cabecalhoPlanilha.contains("NOTA DE NEGOCIACAO")) && cabecalhoPlanilha.contains("XP INVESTIMENTOS")){
+		if(cabecalhoPlanilha.contains("NOTA DE CORRETAGEM") && cabecalhoPlanilha.contains("XP INVESTIMENTOS")){
 			
 			//logger.logInfoInfo("ENTRA NA VALIDACAO DE NOTAS DE CORRETAGEM");
 	
 			String documento = cutString(cabecalhoPlanilha, "NR. NOTA", "FOLHA");
-			String dataMovimento = cutString(cabecalhoPlanilha, "DATA PREGAO", ";").replaceAll(";","");
+			String dataMovimento = cutString(cabecalhoPlanilha, "DATA PREGAO", " ").replaceAll(";","");
 			String nomePortadorAUX = cutString(line, 0, " ");
 			
 			
