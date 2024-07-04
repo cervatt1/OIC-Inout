@@ -23337,13 +23337,16 @@ public boolean readExtratoBSCashPDF(MemoryFile memFile, JSONObject jDados, DataB
             String line = memFile.nextLine();
             line = StringUtil.removeSpecialCharsToUC(line);
 
-			if(memFile.getFieldsSize() < 6){
+			ivalorDocumento = memFile.getFieldsSize()-2 ;
+			inomeOrigem = memFile.getFieldsSize()-3 ;
+
+			/*if(memFile.getFieldsSize() < 6){
 				inomeOrigem -= 1;
 				ivalorDocumento -=1;
 			}else{
 				inomeOrigem = 3;
 				ivalorDocumento = 4;
-			}
+			}*/
 		
 			try{
 				dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));			
@@ -23415,7 +23418,7 @@ public boolean readExtratoBSCashPDF(MemoryFile memFile, JSONObject jDados, DataB
 			extrato.setTipoLancamento(tipoLancamento);
 			//logger.logInfo("GET TL = "+extrato.getTipoLancamento());
 			extrato.setChave(memFile.getCurrentIndex());//ContLinhaExtrato
-			logger.logInfo("GET CHAVE = "+extrato.getChave());
+			//logger.logInfo("GET CHAVE = "+extrato.getChave());
 			
 			try{
 				jdbcExtrato.insereIOExtrato(extrato, dbIOCont, logger);				
