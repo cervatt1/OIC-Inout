@@ -1122,6 +1122,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO") || (!roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA(") && !roteiroCRM.optString("dataMovimento").toUpperCase().startsWith("COLUNA ("))) {
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
 
+									logger.logInfo("TPLIN: " + tipoPlanilha + " |LINE: " + line);
+
 									// #Fabrica(2019-05-20)
 									if (tipoPlanilha.contains("OTTCARTAO")) {
 										try{
