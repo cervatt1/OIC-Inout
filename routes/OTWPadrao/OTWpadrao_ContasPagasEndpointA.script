@@ -20579,7 +20579,7 @@ public boolean readExtratoInter2PDF(MemoryFile memFile, String nomePortador, JSO
 					colunaData = line.replaceAll("\\|", " ");
 
 				//esta na linha da data quando a coluna da data comeca com um numero e contem 'DE'
-				if (colunaData.matches("^[0-9].*") && colunaData.contains(" DE ")){
+				if (colunaData.matches("^[0-9].*") && colunaData.contains(" DE ") && Arrays.asList(mesesString.split(",")).contains(mesDoLancamento)){
 					diaAuxiliar  = cutString(colunaData, 0, 2);
 					if (Integer.parseInt(diaAuxiliar) < 10)
 						diaAuxiliar = "0"+diaAuxiliar;
