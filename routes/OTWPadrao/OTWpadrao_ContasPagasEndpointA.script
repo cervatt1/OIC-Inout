@@ -1113,13 +1113,16 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									TemplateUtils templateUtil = new TemplateUtils();
 									zerar 			  = !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
  									
+									
+									
 									// #Fabrica(2019-05-20)
 									if (tipoPlanilha.contains("OTTCARTAO")) {
-										//dataMovimento = templateUtil.getDataOttCartao(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), tipoPlanilha, idataMovimento, line, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);logger.logInfo("DT dps -> " + dataMovimento);
+										dataMovimento = templateUtil.getDataOttCartao(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), tipoPlanilha, idataMovimento, line, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
+										// logger.logInfo("DT dps -> " + dataMovimento);
 										dataLote	  = getCampoDate(dataMovimento, "", "yyyy-MM");
 									}
 									
-									if (!tipoPlanilha.contains("OTTCARTAO") && !tipoPlanilha.contains("MOVIMENTO")) {
+									if (!tipoPlanilha.contains("OTTCARTAO")) {
 										// #Fabrica(2019-05-20)
 										try{
 											dataMovimento     = getDate(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger);
@@ -1130,20 +1133,12 @@ public JSONArray run(InoutLogger logger) throws Exception {
 											// dataLote        = "";
 										}
 									}
-
-									if(tipoPlanilha.contains("MOVIMENTO")){
-										if( memFile.getFieldsSize() < 2 &&
-											!getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(0).trim().replaceAll("-","/")).equals("")
-										){
-											dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(0).trim().replaceAll("-","/"));
-											logger.logInfo("DTMOV:"+dataMovimento);
-										}
-									}
 									
-									//if(templateUtil.validaPlanilhaPadrao(tipoLancamento, memFile)) break;
-									 logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
+									 
+									if(templateUtil.validaPlanilhaPadrao(tipoLancamento, memFile)) break;
+									// logger.logDebug("TP -> "+tipoPlanilha+" - Empresa -> "+nomeEmpresa+" - DM -> "+line);
 									
-									
+									 
  								   
 									// leitura de data mantida por seguranca
 									// String dataString = getCampoString(dataMovimento, idataMovimento, line, false, roteiroCRM.optString("dataMovimento").toUpperCase(), memFile, logger).trim();
@@ -1191,7 +1186,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento10	= getCampoString(complemento10,	icomplemento10, line, zerar, roteiroCRM.optString("complemento10").toUpperCase(), memFile, logger);
 									
 									if (!roteiroCRMPrincipal.optString("usarComplementoVencimento").toUpperCase().contains("NAO USAR")) {
-										//complemento09 = templateUtil.validaComplementoVencimento(roteiroCRM, roteiroCRMPrincipal, line, memFile, logger);
+										complemento09 = templateUtil.validaComplementoVencimento(roteiroCRM, roteiroCRMPrincipal, line, memFile, logger);
 									}
 									
 									cpfCnpj			= getCampoString(cpfCnpj,		icpfCnpj, 		line, zerar, roteiroCRM.optString("cpfCnpj").toUpperCase(), memFile, logger);
@@ -1251,10 +1246,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										catch (Exception vlrd) { valorDocumento = 0; }
 									}
 									
-									// if(codEmpresa.contains("191")) logger.logDebug("V = "+valorDocumento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem);
+									 // if(codEmpresa.contains("406")) logger.logInfo("TP = "+tipoPlanilha+" | IV = "+ivalorDocumento+" | V = "+valorDocumento+" | ID = "+idataMovimento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem+" | NP = "+nomePortador);
 									
-									// logger.logDebug("TP -> "+ ivalorDocumento + " | " + idataMovimento + " TREM " + 
-													// tipoPlanilha+" - Empresa -> "+valorDocumento+" - DM -> "+dataMovimento + " | " + memFile.getStringFieldRemoveEspCharsUpper(0));
 									
 									if(logs && cont <= 200){
 										
@@ -1432,6 +1425,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 									valorDocumento = Math.abs(valorDocumento);
 									
+									// if(codEmpresa.equals("611")) logger.logInfo("TP -> " + tipoPlanilha + "\n" + " DT -> " + dataMovimento + " |VD -> " + valorDocumento  + "\n");
+								
 
 									
 									// ---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---~---

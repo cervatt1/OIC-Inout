@@ -764,12 +764,16 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									complemento03	= getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger);
 									complemento04	= getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger);
 									complemento05	= getCampoString("",	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger);
-									if(tipoPlanilha.contains("RECEBIMENTOSCIELO")){
-										String cp06Aux = cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento06), 0, 1);
-										complemento06 = cp06Aux;
-									}else{
-										complemento06	= getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger);										
-									}
+									try{
+                                        if(tipoPlanilha.contains("RECEBIMENTOSCIELO")){
+                                            String cp06Aux = cutString(memFile.getStringFieldRemoveEspCharsUpper(icomplemento06), 0, 1);
+                                            complemento06 = cp06Aux;
+                                        }else{
+                                            complemento06	= getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger);										
+                                        }
+                                    }catch(Exception e){
+                                        logger.logInfo("ERRO AO CUTSTRING: " + e.getMessage());
+                                    }
 									complemento07	= getCampoString(complemento07,	icomplemento07, line, zerar, roteiroCRM.optString("complemento07").toUpperCase(), memFile, logger);
 									complemento08	= getCampoString(complemento08,	icomplemento08, line, zerar, roteiroCRM.optString("complemento08").toUpperCase(), memFile, logger);
 									complemento09	= getCampoString(complemento09,	icomplemento09, line, zerar, roteiroCRM.optString("complemento09").toUpperCase(), memFile, logger);

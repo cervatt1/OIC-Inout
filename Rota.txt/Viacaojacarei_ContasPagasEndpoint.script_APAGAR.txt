@@ -890,6 +890,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									ttMov2.parcelaDoc        = parcelaDoc;
 									ttMov2.abaPlanilha       = String.valueOf(porAba);
 								}
+                                logger.logInfo("ttMov2.centroCusto: " + ttMov2.centroCusto);
 
 								///  -------------------------------------------------------------------------------------------------------
 								///	 QUANDO FOR PLANILHA COM MAIS DE UMA LINHA, JOGAR OS VALORES PARA CIMA (dentro da parte de inclusao)
