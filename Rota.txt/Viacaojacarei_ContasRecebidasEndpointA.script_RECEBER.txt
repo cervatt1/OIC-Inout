@@ -1529,6 +1529,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 									dataMovimento = getDateTXT(roteiroCRM.optString("dataMovimento").toUpperCase(), line, objetoParametro);
 									//if (dataMovimento.equals("")) continue;
+                                    logger.logInfo("DATAMOVIMENTO: " + dataMovimento);
 
 									//quando nao encontra data joga a linha como portador e complemento03
 									try {
@@ -1568,6 +1569,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									valorMulta 	   = getDoubleTXT(roteiroCRM.optString("valorMulta").toUpperCase(), line, objetoParametro);
 									valorPagamento = getDoubleTXT(roteiroCRM.optString("valorPagamento").toUpperCase(), line, objetoParametro);
 
+                                    logger.logInfo("valorDocumento: " + valorDocumento);
+                                    logger.logInfo("=====================================================");
 								}
 
 								if(dataMovimento.length() > 9){
