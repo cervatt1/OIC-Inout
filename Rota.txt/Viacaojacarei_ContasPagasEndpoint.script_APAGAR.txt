@@ -756,6 +756,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									codCcOrigem   = getStringTXT(roteiroCRM.optString("centroCusto").toUpperCase(), line, objetoParametro);
 									nomeOrigem    = getStringTXT(roteiroCRM.optString("fornecedor").toUpperCase(), line, objetoParametro);
 
+                                    logger.logInfo("--------> codCcOrigem: " + codCcOrigem);
 
 									valorDocumento = getDoubleTXT(roteiroCRM.optString("valorDocumento").toUpperCase(), line, objetoParametro);
 									valorJuros	   = getDoubleTXT(roteiroCRM.optString("valorJuros").toUpperCase(), line, objetoParametro);
