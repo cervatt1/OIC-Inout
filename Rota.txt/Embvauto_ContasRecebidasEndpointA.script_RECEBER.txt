@@ -758,8 +758,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									}
 								}*/
 								
-								if (!cabecalhoPlanilha.toString().equals("") && (!roteiroCRM.optString("Planilhas_Padroes").equals("") && apagaArquivo != null  || (mantemArquivo.equals("SIM") && !tipoProduto.equals("OIC_PACOTE")))) {
-								// if (!roteiroCRM.optString("Planilhas_Padroes").equals("") && abaConvertida == 0)  // PROBLEMAS COM PLANILHAS PADROES EM MAIS DE UMA ABA!
+								//if (!cabecalhoPlanilha.toString().equals("") && (!roteiroCRM.optString("Planilhas_Padroes").equals("") && apagaArquivo != null  || (mantemArquivo.equals("SIM") && !tipoProduto.equals("OIC_PACOTE")))) {
+								if (!roteiroCRM.optString("Planilhas_Padroes").equals("") && abaConvertida == 0)  {// PROBLEMAS COM PLANILHAS PADROES EM MAIS DE UMA ABA!
 
 									JSONObject variaveis = new JSONObject();
 									variaveis.put("line", 			line);
@@ -11980,7 +11980,7 @@ public boolean readExtratoItauPdfInterno(MemoryFile memFile, String nomePortador
 			if(tipo.equals("003") || tipo.equals("002") || tipo.equals("001")){
 				if(memFile.getFieldsSize()-1 < ivalorDocumento ) ivalorDocumento -= 1;
 					
-				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO HÃ? UMA LETRA NA COLUNA DO NOME ORIGEM;
+				 // gui - 2404-035591 - AJUSTE PARA VALOR DESLOCADO QUANDO Hï¿½? UMA LETRA NA COLUNA DO NOME ORIGEM;
                 if(memFile.getStringFieldRemoveEspCharsUpper(1).trim().length() == 1){
                     ivalorDocumento += 1;
 				}

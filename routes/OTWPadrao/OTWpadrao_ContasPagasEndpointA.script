@@ -30719,9 +30719,7 @@ public boolean readExtratoCresolPDF(MemoryFile memFile, String nomePortador, JSO
     String codEmpresa        = "";
     String nomeArquivo       = "";
     String chaveExtrato      = "";
-	boolean hasNewChave = false; 
-    if(jDados.has("HASNEWCHAVE"))  hasNewChave  = jDados.optBoolean("HASNEWCHAVE"); 
-    String tipoLancamento    = "";
+	String tipoLancamento    = "";
 
     String documento         = "";
     String nomeOrigem        = "";
@@ -30852,6 +30850,7 @@ public boolean readExtratoCresolPDF(MemoryFile memFile, String nomePortador, JSO
 				try{
 					dataMovimento     = getDate(dataMovimento, idataMovimento, line, false,"", memFile, logger);
 					dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
+					logger.logInfo("DATALOTE: " + dataLote);
 					
 					
 				}catch(Exception e){
@@ -30960,7 +30959,7 @@ public boolean readExtratoCresolPDF(MemoryFile memFile, String nomePortador, JSO
 			
 			}
 			
-			logger.logInfo("DT = "+dataMovimento+" | V = "+valorDocumento+" | NO = "+nomeOrigem+" | TIPO = "+ tipoExtrato+" | DC = "+debitoCredito);
+			// logger.logInfo("DT = "+dataMovimento+" | V = "+valorDocumento+" | NO = "+nomeOrigem+" | TIPO = "+ tipoExtrato+" | DC = "+debitoCredito);
 			
 			
 			if(nomePortador.length() > 100) nomePortador = cutString(nomePortador, 0 , 100);
@@ -30989,7 +30988,7 @@ public boolean readExtratoCresolPDF(MemoryFile memFile, String nomePortador, JSO
 			extrato.setTipoLancamento(tipoLancamento);
 			//logger.logInfo("GET TL = "+extrato.getTipoLancamento());
 			extrato.setChave(memFile.getCurrentIndex());//ContLinhaExtrato
-			logger.logInfo("GET CHAVE = "+extrato.getChave());
+			// logger.logDebug("GET CHAVE = "+extrato.getChave());
 			
 			try{
 				jdbcExtrato.insereIOExtrato(extrato, dbIOCont, logger);				
