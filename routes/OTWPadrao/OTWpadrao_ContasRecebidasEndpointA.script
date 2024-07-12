@@ -23620,7 +23620,6 @@ public boolean readExtratoBSCashPDF(MemoryFile memFile, JSONObject jDados, DataB
             line = StringUtil.removeSpecialCharsToUC(line);
 
 			ivalorDocumento = memFile.getFieldsSize()-2 ;
-			idebitoCredito = ivalorDocumento;
 			inomeOrigem = memFile.getFieldsSize()-3 ;
 
 			/*if(memFile.getFieldsSize() < 6){
