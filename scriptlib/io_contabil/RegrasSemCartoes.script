@@ -4126,6 +4126,7 @@ public boolean readOFXDefault(MemoryFile memFile, JSONObject jDados, DataBase db
 			// logger.logDebug("Line -> "+line);
 			
 			if(!memFile.hasNextLine() && line.contains("<OFX>")) return readOFXOneLine(line, jDados, dbIOCont, logger);
+
 			
             // Limpa todas as variaveis
             if (line.contains("<STMTTRN>")) {
@@ -4394,7 +4395,7 @@ public boolean readOFXOneLine(String line, JSONObject jDados, DataBase dbIOCont,
 
     line = line.replaceAll("<", "\n<");
     String[] ofxInLine = line.split("\n");
-    
+
     for(String line : ofxInLine){
 
         contadorDelinhas++;

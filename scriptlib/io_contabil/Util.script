@@ -2009,7 +2009,7 @@ public String getDate(String campo, int icampo, String line, boolean zerar, Stri
     // inicio padrao do template
     String dataString = getCampoString(campo, icampo, line, false, textoCRM, memFile, logger).trim();
 	
-	if(dataString.matches("^\\d{5}.*")){
+	if(dataString.matches("^\\d{5}[.,].*") || dataString.length() == 5){
         String dataStringSerial = dataString;
         if(dataStringSerial.contains(",")) dataStringSerial = cutString(dataString, 0, ",");
         if(dataStringSerial.contains(".")) dataStringSerial = cutString(dataString, 0, ".");
@@ -2022,6 +2022,11 @@ public String getDate(String campo, int icampo, String line, boolean zerar, Stri
             dataStringSerial = DateUtil.dateToString(calSerial.getTime(), "dd/MM/yyyy");
             if (!dataStringSerial.equals("")) return dataStringSerial;
         }catch (Exception dt2) { }
+    //gui - 01/07/2024 - Tratativa para data no formato yyyyMMdd
+    }else if(dataString.trim().matches("^(\\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])$")){ // data no formato yyyyDDmm
+        logger.logInfo("dtString: " + dataString);
+        dataMovimento = dataString.substring(6,8) + "/" + dataString.substring(4,6) + "/" + dataString.substring(0,4);
+        if(!dataMovimento.equals("")) return dataMovimento;
     }
 	
 	if(dataString.contains("-Q") && dataString.length() == 10){ 
