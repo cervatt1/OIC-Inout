@@ -11885,6 +11885,13 @@ public HashMap readFrancesinha_BBExcel(MemoryFile memFile, JSONObject jDados, Ha
 			logger.logInfo("ERRO: valor liquido " + ex.getMessage());
 		}
 
+		valorJuros = 0;
+		valorDesconto = 0;
+
+		if(valorDocumento>0 && valorPagamento > 0){
+			if(valorPagamento > valorDocumento) valorJuros = DecimalUtil.toDecimal(String.format("%.2f", valorPagamento - valorDocumento));
+			if(valorPagamento < valorDocumento) valorDesconto = DecimalUtil.toDecimal(String.format("%.2f", valorDocumento - valorPagamento));
+		}
 
 			debitoCredito = "EXTRATO-CREDITO";
 
