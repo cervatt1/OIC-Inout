@@ -21661,6 +21661,12 @@ public void GeraArquivoCONSISANET(JSONObject jDadosLote, InoutLogger logger) thr
 				loteIdMovimento = cutString(loteIdMovimento, 0, "_");
 				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}
+            // 2407-044437 - Nao gera por lote
+			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
+				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
+				loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));
+				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
+			}
 			// logger.logInfo("LOTEMOV2 " + loteMovimento);
 			
             if(totalRegistros > 0){				
