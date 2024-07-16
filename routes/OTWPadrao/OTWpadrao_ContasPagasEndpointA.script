@@ -806,11 +806,21 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// }
 									
 									// logger.logInfo("nome do arquivo " + nomeArquivo);
+									String loteMovimento = "Vanessatelesda_247_ww_ott_oud_id1186530_cfceextratocresolottimizza.pdf_2022-08_PAGAR";
+									if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
+
+										String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
+
+										loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));
+
+										loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
+
+									}
+									logger.logInfo("retorna padroes -> " + loteMovimento);
 									
 									retornaPadroes = verificaExtratos(variaveis, mapaVariavel, memFile, roteiroCRM, dbIOCont, logger);
 									
 									
-									// logger.logInfo("retorna padroes -> " + retornaPadroes);
 									
 									
 									// logger.logInfo("CHAMOU O TEMPLATE " + retornaPadroes);

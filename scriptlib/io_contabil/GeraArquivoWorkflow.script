@@ -198,7 +198,7 @@ public JSONArray sendToCloud(JSONArray toCloud, JSONObject recAux, int i, Lancam
 		objCloud.put("arquivos",			toCloud);
 		
 		try {
-			String uriIntegrador = String.format("%s%s",LancamentosApi.SERVER_INTEGRADOR, IMPORTAR_GERA_ARQUIVO);
+			String uriIntegrador = String.format("%s%s",SERVER_INTEGRADOR_DEV, IMPORTAR_GERA_ARQUIVO);
 			String response01	 = apiWeb.genericPost(uriIntegrador, objCloud, logger);
 		} catch (Exception et) { 
 			logger.logDebug("Erro em 'post' pra integrador "+et.getMessage());
@@ -255,7 +255,7 @@ public JSONArray sendToCloudONEFLOW(JSONObject objCloud, String tokenOneFlow, St
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                Implementa o metodo GeraArquivo do EndpointB. (@GeraArquivoPadrao)             //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exception {
+public void GeraArquivoPadrao(JSONArray dataIn, InoutLogger logger) throws Exception {
  
     // Depaula -> Questor
     // Marlian -> DominioPipe
@@ -269,8 +269,8 @@ public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exceptio
     String[] erpQuestorCNPJ = {"Escontec", "Escritoriogomes"};
     String[] erpQuestorFiscal = {""};
 
-    List list = (List) dataIn;
-    FilaInout filaInout = null;
+    // List list = (List) dataIn;
+    // FilaInout filaInout = null;
 
     String  nomeContabilidade = "";
     String  erpContabilidade  = "";
@@ -281,12 +281,15 @@ public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exceptio
 
     try {
         // Percorre a lista de objetos
-        for (int i=0; i < list.size(); i++) {
+        for (int i=0; i < dataIn.length(); i++) {
 
             // Obtem objeto de FilaINout
-            filaInout = (FilaInout) list.get(i);
-            String message = filaInout.getMessage();
-            JSONObject msg = new JSONObject(message);
+            // filaInout = (FilaInout) list.get(i);
+            // String message = filaInout.getMessage();
+            JSONObject msg = (JSONObject) dataIn.get(i);
+			logger.logInfo("GERA ARQUIVO PADRAO = " + i + " | " +msg);
+			
+			if (msg.toString().equals("{}") || msg == null) continue;
 
             nomeContabilidade   = msg.optString("NOMECONTABILIDADE");
             codEmpresa          = msg.optString("CODEMPRESA");
@@ -294,7 +297,6 @@ public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exceptio
             lote                = msg.optString("LOTE");
 			nLote               = i + 1;
 			
-			logger.logInfo("GERA ARQUIVO PADRAO = "+msg);
 
             // Carrega o arquivo '.properties' da contabilidade
             SysProperties properties  = SysProperties.getInstance();
@@ -309,12 +311,11 @@ public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exceptio
 
             if (lcdpr.contains("LCDPR")) lcdpr = "TRUE"; 
 			
-			logger.logInfo("erpContabilidade antes -> " + erpContabilidade);
+			// logger.logInfo("erpContabilidade antes -> " + erpContabilidade);
 			
  			if (erpEmpresa != null && !erpEmpresa.equals("")) erpContabilidade = erpEmpresa;
 			
-			logger.logDebug("nome erpContabilidade -> " + nomeContabilidade);
-			logger.logInfo("erpContabilidade dps -> " + erpContabilidade);
+			// logger.logInfo("erpContabilidade dps -> " + erpContabilidade);
            
 			// Como GeraArquivo.script possui apenas um metodo GeraArquivoSci
             // Ele verifica se nome do metodo contem nome erp,
@@ -691,6 +692,23 @@ public void GeraArquivoPadrao(Object dataIn, InoutLogger logger) throws Exceptio
             }
 
         }
+		// envolve o layout com centro de custo do Alterdata
+		/*if (erpContabilidade.toUpperCase().equals("ALTERDATA")) {
+			// Carrega o arquivo '.properties' da contabilidade
+            SysProperties properties  = SysProperties.getInstance();
+            properties.load(String.format("contabil/%s/contabil.properties", nomeContabilidade));
+			
+			DataBase dbIOCont = null;
+			
+			// Conectar na Base de Dados IO_CONTABIL.
+			if (dbIOCont == null) {
+				dbIOCont = connectIOContabil(properties, logger);
+			}
+			
+			removeTemCentroCusto(dbIOCont, codEmpresa);
+			
+			dbIOCont.closeConnection();
+		}*/
     } catch (Exception eee) {
         logger.logError("Error GeraArquivo ", eee);
     }
@@ -1398,7 +1416,6 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 				if (nomeContabilidade.toUpperCase().contains("PRIMECONTABILIDADENET")) historico = toDisplayCase(historico);
 
 
-
                 contaDebito  = contaDebito.replaceAll("\\.","");
                 contaCredito = contaCredito.replaceAll("\\.",""); 
 				// @sergio 202301-0024357 feito ajuste para trocar a conta anular por vazio 
@@ -1553,6 +1570,8 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 			if (!loteMovimento.contains("OTTIMIZZA") || loteMovimento.contains("OTTIMIZZAAUTOMACAO")) {	//#20210126
 				// //toCloud = sendToCloud(toCloud, recAux, -1, apiWeb, logger);
 			}
+			
+			logger.logInfo("LM " + loteMovimento + " | " + totalRegistros);
 			
             if (totalRegistros > 0) {
 
@@ -3558,7 +3577,7 @@ public void GeraArquivoDominioPipeUnico(JSONObject jDadosLote, InoutLogger logge
                 if (nomeContabilidade.toUpperCase().contains("ELITECONSULTORIA")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("CUNHATAVARES")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("JJCHAVES")) historico = toDisplayCase(historico);
-                
+
 
                 contaDebito  = contaDebito.replaceAll("\\.","");
                 contaCredito = contaCredito.replaceAll("\\.","");
@@ -5250,6 +5269,7 @@ public void GeraArquivoSci(JSONObject jDadosLote, InoutLogger logger) throws Exc
                             txt.append(",");
                             txt.append(valorFinal);
                             txt.append(",");
+                            
                             txt.append(participante);
                             txt.append(",");						
                         }
@@ -5270,14 +5290,14 @@ public void GeraArquivoSci(JSONObject jDadosLote, InoutLogger logger) throws Exc
 							//2405-037574 - Desenvolvido para a contabilidade SORVETESKASCAO por conta deles usarem a conta participante no desconto como conta movimento na mesma linha
                             //inicialmente desenvolvido fixo pelo nome da contabilidade, pórem conforme for solicitado esse mesmo layout de relatorio por outras contabilidades
                             //o melhore seria validar se na linha contem participante e centro de custo.
-							if(nomeContabilidade.toUpperCase().contains("SORVETESKASCAO")){
+                             if(nomeContabilidade.toUpperCase().contains("SORVETESKASCAO")){
                                 for(int i=0;i < 107;i++){
                                     txt.append(",");
                                 }
                             }else{
                                 txt.append(",");
                                 txt.append(",");
-                            }
+                            }					
 							txt.append(participante);					
                         }
                     }
@@ -9579,7 +9599,8 @@ public void GeraArquivoProsoft(JSONObject jDadosLote, InoutLogger logger) throws
 					}
 				}
 				historico = historico.replaceAll("INVERTECONTA","").trim();
-				if (historico.contains("Participante:")) {
+
+                if (historico.contains("Participante:")) {
                     codigoParticipante   = historico.substring(historico.indexOf("Participante:")+13).trim();
                     historico            = historico.substring(0,historico.indexOf("Participante:")).trim();
                 }
@@ -9706,7 +9727,7 @@ public void GeraArquivoProsoft(JSONObject jDadosLote, InoutLogger logger) throws
 
 				if(codigoParticipanteCP.length() < 6 && codigoParticipanteCP.length() > 0) codigoParticipanteCP = StringUtil.leftPad(codigoParticipanteCP, 6, "0");
 				if(codigoParticipanteCR.length() < 6 && codigoParticipanteCR.length() > 0) codigoParticipanteCR = StringUtil.leftPad(codigoParticipanteCR, 6, "0");
-				logger.logInfo("CONTA=> "+contaDebito+" | CLASS = "+classificacao+" | COD PARTI-P=> "+codigoParticipanteCP+" | COD PARTI-R"+codigoParticipanteCR+" | VALOR=> "+ valorFinal);
+				//logger.logDebug("CONTA=> "+contaDebito+" | COD PARTI-P=> "+codigoParticipanteCP+" | COD PARTI-R"+codigoParticipanteCR+" | VALOR=> "+ valorFinal);
                 if (classificacao.startsWith("X")){
                     txt.append("LC1")
                     .append(StringUtil.leftPad(String.valueOf(contador),5,"0")) // 5 bytes zeros a esquerda
@@ -11343,6 +11364,9 @@ public void GeraArquivoAlterdata(JSONObject jDadosLote, InoutLogger logger) thro
 		
         ERP                     = props.get("ERP_CONTABILIDADE");
         String versaoPlataforma = props.get("VERSAO_PLATAFORMA");
+		
+		// String temCentroCusto = properties.get(nomeEmpresa.toUpperCase() +"_EQUIPE_FECHAMENTO");
+		// temCentroCusto = temCentroCusto.contains("CENTROCUSTO_") ? temCentroCusto = cutString(temCentroCusto, "CENTROCUSTO_") : "";
 
         // Conectar na Base de Dados IO_CONTABIL.
         if (dbIOCont == null) {
@@ -11356,6 +11380,10 @@ public void GeraArquivoAlterdata(JSONObject jDadosLote, InoutLogger logger) thro
         String classifica  = " ";
         int totalRegistros = 0;
         ResumoTxt          = new StringBuilder();
+		
+		String temCentroCusto = verificaTemCentroCusto(dbIOCont, codEmpresa);
+		
+		if (!nomeContabilidade.toUpperCase().equals("MAPAHSAOLUIS")) temCentroCusto = "";
 
 
         try {
@@ -11541,16 +11569,24 @@ public void GeraArquivoAlterdata(JSONObject jDadosLote, InoutLogger logger) thro
                 if (valorDouble == 0) {
                     continue;
                 }
-                if (!tipoMovimento.contains("CC")) {
+				
+				if (temCentroCusto.equals("")) {
+				
+					if (!tipoMovimento.contains("CC")) {
 
-                    sContador = StringUtil.leftPad(sContador, 5, "0");
+						sContador = StringUtil.leftPad(sContador, 5, "0");
 
-                    // linha = "\"" + "\",\"" + contaDebito +"\",\""+ contaCredito +"\",\""+ dataMovimento +"\",\""+ valorFinal +"\",\""+ codigoHistorico +"\",\""+ historico.trim() +"\",\"" + centroCustoDebito + "\",\"" + centroCustoCredito + "\",\"" + documento + "\""; 
-					linha = "\"" + "\",\"" + contaDebito +"\",\""+ contaCredito +"\",\""+ dataMovimento +"\",\""+ valorFinal +"\",\""+ codigoHistorico +"\",\""+ historico.trim() +"\",\"" + documento + "\""; 
+						// linha = "\"" + "\",\"" + contaDebito +"\",\""+ contaCredito +"\",\""+ dataMovimento +"\",\""+ valorFinal +"\",\""+ codigoHistorico +"\",\""+ historico.trim() +"\",\"" + centroCustoDebito + "\",\"" + centroCustoCredito + "\",\"" + documento + "\""; 
+						linha = "\"" + "\",\"" + contaDebito +"\",\""+ contaCredito +"\",\""+ dataMovimento +"\",\""+ valorFinal +"\",\""+ codigoHistorico +"\",\""+ historico.trim() +"\",\"" + documento + "\""; 
 
-                    txt.append(linha);
-                    txt.append(rn);
-                }
+						txt.append(linha);
+						txt.append(rn);
+					}
+				} else {
+					linha = "\"" + "\",\"" + contaDebito +"\",\""+ contaCredito +"\",\""+ dataMovimento +"\",\""+ valorFinal +"\",\""+ codigoHistorico +"\",\""+ historico.trim() + "\",\"" + centroCustoDebito + "\",\"" + centroCustoCredito +"\",\"" + documento +  "\"";
+					txt.append(linha);
+					txt.append(rn);
+				}
 
                 if (!tipoMovimento.contains("CC")) {
 
@@ -11588,6 +11624,7 @@ public void GeraArquivoAlterdata(JSONObject jDadosLote, InoutLogger logger) thro
 			if (!loteMovimento.contains("OTTIMIZZA") || loteMovimento.contains("OTTIMIZZAAUTOMACAO")) {	//#20210126
 				//toCloud = sendToCloud(toCloud, recAux, -1, apiWeb, logger);
 			}
+			
             
             if (totalRegistros > 0) {
 
@@ -25589,6 +25626,8 @@ public void GeraArquivoPROSIS(JSONObject jDadosLote, InoutLogger logger) throws 
         }
     }
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Implementa o metodo RUN dos ENDPOINTs B da rota GeraArquivoParaImportacao (@CONTABIT).  //
