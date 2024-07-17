@@ -806,17 +806,6 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// }
 									
 									// logger.logInfo("nome do arquivo " + nomeArquivo);
-									String loteMovimento = "Vanessatelesda_247_ww_ott_oud_id1186530_cfceextratocresolottimizza.pdf_2022-08_PAGAR";
-									if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
-
-										String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
-
-										loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));
-
-										loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
-
-									}
-									logger.logInfo("retorna padroes -> " + loteMovimento);
 									
 									retornaPadroes = verificaExtratos(variaveis, mapaVariavel, memFile, roteiroCRM, dbIOCont, logger);
 									
@@ -16816,6 +16805,195 @@ public boolean readExtratoBancoDoBrasilDoc2(MemoryFile memFile, String nomePorta
     }
   
     return true;
+}
+
+public HashMap readFaturaCartaoCredito_ItauPDF(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
+
+	JSONObject extratoEmpresa = new JSONObject();
+
+	// Inicializacao de Variaveis
+	String codEmpresa        = "";
+	String nomeArquivo       = "";
+	String nomeEmpresa       = "";
+	String chaveExtrato      = "";
+	String dataRunAuxiliar   = "";
+
+	String documento         = "";
+	String nomeOrigem        = "";
+	String nomePortador      = "";
+	String dataMovimento     = "";
+	String dataLote          = "";
+	String complemento01     = "";
+	String complemento02     = "";
+	String complemento03     = "";
+	String complemento04     = "";
+	String debitoCredito     = "";
+	String cpfCnpj           = "";
+	String historico         = "";
+	String debitoCreditoAux  = "";
+	String tipoLancamento    = "";
+	String tipoPlanilha      = "";
+
+	String strValorDocumento = "";
+	String contLinhaExtrato  = "";
+	String contLinhaTexto    = "";
+	String consolidaClass    = "";
+	String classificacao     = "";
+	String chave             = "";
+	String key               = "";
+	String lote              = "";
+	String nomeOrigemAux     = "";
+	String dataAux			 = "";
+
+	double valorDocumento    = 0.0;
+	double valorJuros        = 0.0;
+	double valorDesconto     = 0.0;
+	double valorMulta        = 0.0;
+	double valorPagamento    = 0.0;
+
+	String dataMovimentoAux  = "";
+	String anoData 			 = "";
+	String tipo		         = "";
+
+	boolean naoLeMais = false;
+
+	int ivalorDocumento	= -1;
+	int inomeOrigem     = -1;
+
+	int cont = 0;
+
+	 ttMovimentoPadrao ttMov2 = new ttMovimentoPadrao();
+
+    if(jDados.has("CODEMPRESA"))         codEmpresa  = jDados.optString("CODEMPRESA");
+    if(jDados.has("NOMEARQUIVO"))       nomeArquivo  = jDados.optString("NOMEARQUIVO");
+    if(jDados.has("NOMEEMPRESA"))       nomeEmpresa  = jDados.optString("NOMEEMPRESA");
+    if(jDados.has("TIPOPLANILHA"))     tipoPlanilha  = jDados.optString("TIPOPLANILHA");
+	if(jDados.has("DATA"))          dataRunAuxiliar  = jDados.optString("DATA");
+	if(jDados.has("NOMEPORTADOR"))  nomePortador     = jDados.optString("NOMEPORTADOR");
+	if(jDados.has("TIPOLANCAMENTO"))  tipoLancamento = jDados.optString("TIPOLANCAMENTO");
+   
+    while (memFile.hasNextLine()) {
+        String line = memFile.nextLine();
+        line = StringUtil.removeSpecialCharsToUC(line);
+		memFile.setFieldSeparator(";");
+		
+		cont++;
+
+		try {
+			try{
+				dataMovimento = getCampoDate(dataRunAuxiliar);
+			}catch(Exception e){
+				logger.logInfo("ERRO AO CAPTURAR DATA");
+			}
+
+			if(dataMovimento.equals("")) continue;
+
+			if(memFile.getStringFieldRemoveEspCharsUpper(0).contains(" - FINAL ")){
+				complemento01 = memFile.getStringFieldRemoveEspCharsUpper(0);
+				logger.logInfo("COMPLEMENTO 01 -> " + complemento01);
+			}
+
+			if(line.startsWith("LANCAMENTOS NACIONAIS")){
+
+				ivalorDocumento = 2;
+				inomeOrigem = 1;
+
+				complemento02 = "LANCAMENTOS NACIONAIS";
+
+			}
+
+			if(line.startsWith("LANCAMENTOS INTERNACIONAIS")){
+				ivalorDocumento = 5;
+				inomeOrigem = 1;
+
+				complemento02 = "LANCAMENTOS INTERNACIONAIS";
+			}
+
+			if(line.startsWith("PRODUTOS, SERVICOS E ENCARGOS")){
+				ivalorDocumento = 2;
+				inomeOrigem     = 1;
+
+				complemento02 = "PRODUTOS, SERVICOS E ENCARGOS";
+			}
+
+			try{
+				valorDocumento = Math.abs(memFile.getDoubleField(ivalorDocumento));
+			}catch(Exception e){
+				valorDocumento = 0;
+			}
+
+			if(valorDocumento == 0) continue;
+
+			nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem);
+
+			if(line.contains("VALOR TOTAL FINANCIADO")) continue;
+
+			//logger.logInfo("NOME ORIGEM -> " + nomeOrigem + " | VALOR DOCUMENTO -> " + valorDocumento + " | DATA MOVIMENTO -> " + dataMovimento);
+
+
+
+			// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
+			// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
+			contLinhaTexto = String.valueOf(cont);
+			contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 04, "0");
+			consolidaClass = contLinhaTexto;
+
+			classificacao = dataMovimento + "0" + consolidaClass;
+
+
+			lote = String.format( "%s_%s_%s_%s_%s", nomeEmpresa, codEmpresa, nomeArquivo, dataLote, tipoLancamento );
+			chave = lote + contLinhaTexto;
+			key = chave  + "-CTB";
+
+			ttMov2      = (ttMovimentoPadrao)mapaVariavel.get(key);
+                if (ttMov2 == null) {
+                ttMov2 = new ttMovimentoPadrao();
+			}
+			ttMov2.lote             = lote;
+			ttMov2.documento        = documento;
+			ttMov2.codEmpresa       = codEmpresa;
+			ttMov2.nomeEmpresa      = nomeEmpresa;
+			ttMov2.dataMovimento    = dataMovimento;
+			ttMov2.tipoMovimento    = "CTB";
+			ttMov2.tipoLancamento   = tipoLancamento;
+			ttMov2.historico        = "";
+			ttMov2.valorDocumento   = valorDocumento;
+			ttMov2.valorDesconto    = valorDesconto;
+			ttMov2.valorMulta       = 0;
+			ttMov2.valorJuros       = valorJuros;
+			ttMov2.debitoCredito       = debitoCredito;
+			ttMov2.contaJuros       = "";
+			ttMov2.contaMulta       = "";
+			ttMov2.contaDesconto    = "";
+			ttMov2.nomePortador     = nomePortador;
+			ttMov2.centroCusto      = "";
+			ttMov2.nomeOrigem       = nomeOrigem;
+			ttMov2.cpfCnpj          = cpfCnpj;
+			ttMov2.chave            = chave + "-CTB";
+			ttMov2.classificacao    = classificacao;
+			ttMov2.tipoPlanilha     = tipoPlanilha;
+
+			ttMov2.complemento01    = complemento01;
+			ttMov2.complemento02    = complemento02;
+			ttMov2.complemento03    = complemento03;
+			ttMov2.complemento04    = complemento04;
+			ttMov2.complemento05    = "";
+			ttMov2.complemento06    = "";
+			ttMov2.complemento07    = "";
+			ttMov2.complemento08    = "";
+			ttMov2.complemento09    = "";
+			ttMov2.complemento10    = "";
+			ttMov2.nomeArquivo      = nomeArquivo;
+			ttMov2.naturezaContabil  = "D";
+			ttMov2.contaDebito       = "";
+			ttMov2.contaCredito      = "";
+			mapaVariavel.put(key,ttMov2);
+
+		} catch (Exception ex) {
+		}
+
+	}
+	return mapaVariavel;
 }
 
 public HashMap readFaturaCartaoCredito_Itau_Excel(MemoryFile memFile, JSONObject jDados, HashMap mapaVariavel, InoutLogger logger) throws Exception {
