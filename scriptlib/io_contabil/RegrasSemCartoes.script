@@ -4031,7 +4031,7 @@ public JSONArray getExtratosEmpresa(String codEmpresa, DataBase dbIOCont, InoutL
         return null;
     }
 	
-	logger.logInfo("LEUEXT " + codEmpresa + " | " + extratoEmpresa.toString());
+	// logger.logInfo("LEUEXT " + codEmpresa + " | " + extratoEmpresa.toString());
 
     return extratoEmpresa;
 }
