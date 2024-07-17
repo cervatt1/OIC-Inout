@@ -3835,7 +3835,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	}
 
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhaItau_PDF")) {
-		logger.logInfo("Antees readFranc");
+		//logger.logInfo("Antees readFranc");
 		if(variaveis.has("read") && variaveis.optString("read").equals("readExtratoItauPdfFrancesinha5")){
 			logger.logInfo("entrouread");
 			
