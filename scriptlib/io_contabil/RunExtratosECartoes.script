@@ -482,7 +482,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			String dataStringAux = cutString(cabecalhoPlanilha, "OPERACAO: ", cabecalhoPlanilha.lastIndexOf("/20")+5).trim();
 			String dataMovimento = getCampoDate(dataStringAux);
 
-			tipoPlanilha = "BRADESCO COMPROVANTES";
+			tipoPlanilha = "BRADESCO_COMPROVANTES";
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
 			jDados.put("CODEMPRESA", codEmpresa);
@@ -507,7 +507,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				nomePortador = cutString(nomePortador, "CORRENTE").replaceAll(":", "");
 			}
 
-			tipoPlanilha = "SICREDI COMPROVANTE"; //Dps eh mudado o tipo planilha
+			tipoPlanilha = "SICREDI_COMPROVANTE"; //Dps eh mudado o tipo planilha
 
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
@@ -528,7 +528,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
             if(arquivoCompleto.contains("CODIGO DE BARRAS") && arquivoCompleto.contains("FAVORECIDA") &&
                 arquivoCompleto.contains("CENTRAL DE ATENDIMENTO SANTANDER EMPRESARIAL") && arquivoCompleto.contains("VIA DE COMPROVANTE")){
 
-                tipoPlanilha = "SANTANDER COMPROVANTES";
+                tipoPlanilha = "SANTANDER_COMPROVANTES";
                 JSONObject jDados = new JSONObject();
                 jDados.put("TIPOPLANILHA", tipoPlanilha);
                 jDados.put("CODEMPRESA", codEmpresa);
@@ -536,7 +536,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
                 jDados.put("TIPOLANCAMENTO", tipoLancamento);
                 jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				
-				logger.logInfo("Chega no invoking do Santander comprovante");
+				//logger.logInfo("Chega no invoking do Santander comprovante");
                 mapaVariavel = readExtratoECartao("readSantanderComprovantesPDF", memFile, jDados, mapaVariavel, logger);
                 variaveis.put("tipoRetorno",   "break");
                 return variaveis.toString();
@@ -549,7 +549,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
             if(cabecalhoPlanilha.contains("SISBB") && cabecalhoPlanilha.contains("BANCO DO BRASIL") &&
                 cabecalhoPlanilha.contains("EMISSAO DE COMPROVANTES")){
 
-                tipoPlanilha = "BANCO DO BRASIL COMPROVANTES";
+                tipoPlanilha = "BB_COMPROVANTES";
                 JSONObject jDados = new JSONObject();
                 jDados.put("TIPOPLANILHA", tipoPlanilha);
                 jDados.put("CODEMPRESA", codEmpresa);
@@ -557,7 +557,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
                 jDados.put("TIPOLANCAMENTO", tipoLancamento);
                 jDados.put("NOMEEMPRESA",    nomeEmpresa);
 				
-				logger.logInfo("Chega no invoking do BB comprovante");
+				//logger.logInfo("Chega no invoking do BB comprovante");
                 mapaVariavel = readExtratoECartao("readBBComprovantesPDF", memFile, jDados, mapaVariavel, logger);
                 variaveis.put("tipoRetorno",   "break");
                 return variaveis.toString();
@@ -4490,7 +4490,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
             if(cabecalhoPlanilha.contains("SISBB") && cabecalhoPlanilha.contains("BANCO DO BRASIL") &&
                 cabecalhoPlanilha.contains("EMISSAO DE COMPROVANTES")){
 
-                tipoPlanilha = "BANCO DO BRASIL COMPROVANTES";
+                tipoPlanilha = "BB_COMPROVANTES";
                 JSONObject jDados = new JSONObject();
                 jDados.put("TIPOPLANILHA", tipoPlanilha);
                 jDados.put("CODEMPRESA", codEmpresa);
@@ -5385,7 +5385,7 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 		if(arquivoCompleto.contains("SAC 0800 728 0728") && arquivoCompleto.contains("WWW.ITAU.COM") &&
 			(arquivoCompleto.contains("COMPROVANTE DE PAGAMENTO DE BOLETO") || arquivoCompleto.contains("COMPROVANTE DE TRANSFERENCIA"))){
 
-			tipoPlanilha = "ITAU COMPROVANTES";
+			tipoPlanilha = "ITAU_COMPROVANTES";
 
 			JSONObject jDados = new JSONObject();
 			jDados.put("TIPOPLANILHA", tipoPlanilha);
