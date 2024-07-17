@@ -4627,8 +4627,8 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 
-		if (cabecalhoPlanilha.contains("LANCAMENTOS NACIONAIS") && 
-			cabecalhoPlanilha.contains("LANCAMENTOS INTERNACIONAIS") && 
+		if ((cabecalhoPlanilha.contains("LANCAMENTOS NACIONAIS") || 
+			cabecalhoPlanilha.contains("LANCAMENTOS INTERNACIONAIS")) && 
 			cabecalhoPlanilha.contains("SALDO DA FATURA ANTERIOR")){
 
 			JSONObject jDados = new JSONObject();
