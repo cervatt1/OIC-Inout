@@ -258,6 +258,8 @@ public JSONArray run(InoutLogger logger) throws Exception {
 		int qTotal = (qX*3)+(qY*2);
 		String extensao = "";
 		for(int extArquivo = 0; extArquivo < qTotal; extArquivo++) {
+			logger.logInfo("QUANTIDADE DE ARQUIVOS: " + qTotal);
+			logger.logInfo("ESTAMOS NO ARQUIVO: " + extArquivo);
 			if (extArquivo < qX)									extensao = ".ofx,.OFX,.omc,.OMC,.html,.HTML,.ret,.RET";
 			if (extArquivo >= qX && extArquivo < (2*qX))			extensao = ".pdf,.PDF";
 			if (extArquivo >= (2*qX) && extArquivo < (2*qX+qY))		extensao = ".xlsx,.XLSX";
@@ -678,7 +680,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 						// #DOCUMENTACAO
 						// leitura linha a linha
 						while (memFile.hasNextLine()) {
-							// logger.logDebug("PUTSTATUS WHILE " + nomeArquivo + " | " + cont + " | " + apagaArquivo + " | " + porAba);
+							logger.logInfo("PUTSTATUS WHILE " + nomeArquivo + " | " + cont + " | " + apagaArquivo + " | " + porAba);
 							try {
 								String line = memFile.nextLine();
 								line = StringUtil.removeSpecialCharsToUC(line);
@@ -857,6 +859,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 									// logger.logInfo("LN TEMPLATE = "+line);
 									
 									retornaPadroes = verificaExtratos(variaveis, mapaVariavel, memFile, roteiroCRM, dbIOCont, logger);
+									logger.logInfo("PEGANDO O ARQUIVO: " + nomeArquivo);
 									
 									
 									// logger.logDebug("retorna padroes -> " + retornaPadroes);
