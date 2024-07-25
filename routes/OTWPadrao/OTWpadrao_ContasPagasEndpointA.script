@@ -26315,7 +26315,9 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
     String dataAux			 = "";
     String nomeOrigemAnterior = "";
 
-    String nomeOrigemAuxMF0 = "";
+    String nomeOrigemAux2 = "";
+    String nomeOrigemAux1 = "";
+    String nomeOrigemAux = "";
     String proximaLinha = "";
     String dpsDaProximaLinha = "";
     List arquivoCompleto = memFile.getLines();
@@ -26713,83 +26715,34 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 
             if(naoLeMais == true) continue;
 
-            String nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(0);
+			if((memFile.getFieldsSize() == 1) && 
+				!line.contains("SALDO DO DIA") && 
+				!memFile.getStringFieldRemoveEspCharsUpper(0).trim().matches(".*\\,\\d{2}")){
+				
+				nomeOrigemAux1 = memFile.getStringFieldRemoveEspCharsUpper(0).trim();
+				continue;
+			}
 
-            //Captura de nomeOrigem que quebrou sem o valor
-            if(memFile.getFieldsSize() == 2 && memFile.getStringFieldRemoveEspCharsUpper(0).contains("?") && !line.contains(" DE 20")){
-                nomeOrigemAnterior = memFile.getStringFieldRemoveEspCharsUpper(1);
-            }
+			String linhaAnterior = (String) arquivoCompleto.get(memFile.getCurrentIndex() - 1);
+			String linhaAnterior2 = (String) arquivoCompleto.get(memFile.getCurrentIndex() - 2);
+			String linhaProx = (String) arquivoCompleto.get(memFile.getCurrentIndex() + 1);
+			linhaAnterior = linhaAnterior.toUpperCase();
+			linhaAnterior2 = linhaAnterior2.toUpperCase();
+			linhaProx = linhaProx.toUpperCase();
 
-            //Captura de nomeOrigem que quebrou junto com o valor
-            if(memFile.getFieldsSize() == 2 && memFile.getStringField(1).contains("R$")){
-                nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(0);
-            }
+			if((memFile.getFieldsSize() == 2) && 
+				/*linhaAnterior.contains("SALDO DO DIA") && */
+				!line.matches(".*\\,\\d{2}")){
 
-            // gui -> 02/07/2024 - 	2406-043513
-            try{
-                proximaLinha = (String) arquivoCompleto.get(memFile.getCurrentIndex() + 1);
-                dpsDaProximaLinha = (String) arquivoCompleto.get(memFile.getCurrentIndex() + 2);
-            }catch(Exception e){}
-            
-            if(memFile.getFieldsSize() == 1){
-                if(proximaLinha.split("\\|")[0].trim().equals("?") || proximaLinha.split("\\|")[0].trim().contains("ABOUT:BLANK") &&
-                        (!dpsDaProximaLinha.split("\\|")[0].trim().equals("?") && !dpsDaProximaLinha.split("\\|")[0].trim().equals("R$"))) {
-                    logger.logInfo("lineTrue: " + line);
-                    nomeOrigemAuxMF0 = memFile.getStringFieldRemoveEspCharsUpper(0).trim();
-                    noMF0guardado = true;
-                    continue;
-                }
-            }
+				nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("\"","").replaceAll("\\?","").trim();
+			}
+			if(memFile.getFieldsSize() == 2) logger.logInfo("DE DUAS LINHAWS: " + line);
+			if((memFile.getFieldsSize() == 2) && 
+				memFile.getStringFieldRemoveEspCharsUpper(0).contains("?") && 
+				!memFile.getStringFieldRemoveEspCharsUpper(1).matches("\\d{4},")){
 
-            //Captura de nomeOrigem que vem com valor normalmente
-            if(memFile.getFieldsSize() == 3 && !noMF0guardado){
-                nomeOrigemAnterior = memFile.getStringFieldRemoveEspCharsUpper(1);
-                logger.logInfo("noAnterior1: " + nomeOrigemAnterior);
-                /*if(noMF0guardado){
-                    nomeOrigem = nomeOrigemAux + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
-                    noMF0guardado = false;
-                    logger.logInfo("no: " + nomeOrigem);
-                }*/
-            }
-
-            if(((memFile.getFieldsSize() == 1 && memFile.getStringField(0).contains("R$")) || memFile.getStringField(0).contains("SALDO DO DIA")) && !fieldAux && !primeiroAux){
-                primeiroAux = true;
-            }
-
-            //2401-027236 - Para quando nao aparece ? na primeira coluna e o valor quebra para baixo
-            if(memFile.getFieldsSize() < 3 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("SALDO") &&
-                    !memFile.getStringField(0).contains("R$") && !fieldAux && primeiroAux && !line.contains(" DE 20")){
-                if(memFile.getFieldsSize() ==1) nomeOrigemAnterior = memFile.getStringFieldRemoveEspCharsUpper(0).trim();
-                if(memFile.getFieldsSize() ==2) nomeOrigemAnterior = memFile.getStringFieldRemoveEspCharsUpper(1).trim();
-                logger.logDebug("noAnterior2: " + nomeOrigemAnterior);
-                noConcatenadoPadraoOttimizza = true;
-                primeiroAux = false;
-                continue;
-            }
-
-            if(memFile.getFieldsSize() == 1 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("SALDO") &&
-                    !memFile.getStringField(0).contains("R$") && !fieldAux && !primeiroAux && !noMF0guardado){
-                nomeOrigemAnterior += " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-                nomeOrigemAnterior = nomeOrigemAnterior.trim();
-                noConcatenadoPadraoOttimizza = true;
-                //logger.logInfo("line: " + line);
-                //logger.logInfo("noAnterior3: " + nomeOrigemAnterior);
-            }
-
-            //Update para atualizar o nomeOrigem com a quebra
-            if(memFile.getFieldsSize() == 1 && !memFile.getStringFieldRemoveEspCharsUpper(0).contains("SALDO") &&
-                    !memFile.getStringField(0).contains("R$") && fieldAux == true){
-                //logger.logInfo("inserindo");
-                try {
-                    dbIOCont.update("IO_EXTRATO")
-                            .fields("HISTORICO")
-                            .where("CHAVE = ? ")
-                            .param(StringUtil.removeSpecialCharsToUC(nomeOrigemAnterior + " " + nomeOrigemAux))
-                            .param(extrato.getChave())
-                            .execute();
-                } catch (Exception sqlUpdateException) {
-                }
-            }
+				nomeOrigemAux2 = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("\"","").replaceAll("\\?","").trim();
+			}
 
             //Tratamento de data
             if((memFile.getStringFieldRemoveEspCharsUpper(0).contains("?") || memFile.getStringFieldRemoveEspCharsUpper(0).equals("")) && !memFile.getStringFieldRemoveEspCharsUpper(1).equals("")){
@@ -26852,51 +26805,31 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
                 catch (Exception vlrd) { valorDocumento = 0; }
                 if (valorDocumento == 0) continue;
 
-		nomeOrigem      = "";
-		nomeOrigem		= memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
-		complemento01	= nomePortador;
-
-                //Caso haja quebra do valor, mas sem quebra de nomeOrigem || nao tiver ? na primeira coluna e quebra valor e pode ou nao ter quebra no nomeOrigem
-                if(memFile.getFieldsSize() == 1 && memFile.getStringField(0).contains("R$")){
-                    nomeOrigem = nomeOrigemAnterior;
-                    //logger.logInfo("noaqui1: " + nomeOrigem);
-                }
-
-
-                // gui -> 02/07/2024 - 	2406-043513
-                // caso quando há quebra de nomeOrigem junto do valor com mfFieldsSize() == 2 e == 3, + captura do nomeOrigem em quebra de página
-                if(noMF0guardado && !noConcatenadoPadraoOttimizza){
-                    if(memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("?") && memFile.getStringFieldRemoveEspCharsUpper(2).contains("R$")) {
-                        nomeOrigem = nomeOrigemAuxMF0 + " " + memFile.getStringFieldRemoveEspCharsUpper(1);
-                        //logger.logInfo("nofinal1: " + nomeOrigem);
-                    }else{
-                        if(memFile.getStringFieldRemoveEspCharsUpper(1).contains("R$") && !memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("?")){
-                            nomeOrigem = nomeOrigemAuxMF0 + " " + memFile.getStringFieldRemoveEspCharsUpper(0);
-                            //logger.logInfo("nofinal2: " + nomeOrigem);
-                        }
-                        if(memFile.getStringFieldRemoveEspCharsUpper(0).trim().equals("?") && memFile.getStringFieldRemoveEspCharsUpper(1).contains("R$")){
-                            nomeOrigem = nomeOrigemAuxMF0;
-                            //logger.logInfo("nofinal3: " + nomeOrigem);
-                        }
-                    }
-                    //logger.logInfo("lineFalse: " + line);
-                    //noMF0guardado = false;
-                }
-
-                //Caso haja quebra de valor, junto de quebra de nomeOrigem
-                logger.logInfo("boolean: " + noMF0guardado);
-                if(memFile.getFieldsSize() == 2 && memFile.getStringField(1).contains("R$") && !noMF0guardado){
-                    nomeOrigem = nomeOrigemAnterior + " " + nomeOrigemAux;
-                    logger.logInfo("noaqui2: " + nomeOrigem);
-                }
-
-                // caso haja
-
-
-
-
+				nomeOrigem = "";
+					
+				if(nomeOrigemAux.equals("") && nomeOrigemAux1.equals("")){
+					nomeOrigem = memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+				}
+				if(!nomeOrigemAux.equals("")){
+					nomeOrigem = nomeOrigemAux;
+				}
+				if(!nomeOrigemAux1.equals("") && !linhaAnterior2.contains("ABOUT:BLANK")){
+					nomeOrigem = nomeOrigemAux1 + " " + memFile.getStringFieldRemoveEspCharsUpper(inomeOrigem).replaceAll("\"","").replaceAll("\\?","").trim();
+				}
+				if(!nomeOrigemAux1.equals("") && linhaAnterior2.contains("ABOUT:BLANK")){
+					nomeOrigem = nomeOrigemAux1 + " " + memFile.getStringFieldRemoveEspCharsUpper(0).replaceAll("\"","").replaceAll("\\?","").trim();
+				}
+				if(!nomeOrigemAux2.equals("")){
+					nomeOrigem = nomeOrigemAux2 + " " + nomeOrigemAux1;
+				}
+				complemento01	= nomePortador;
                 complemento02	= nomeOrigem;
                 complemento04	= nomeOrigem;
+
+				nomeOrigemAux	= "";
+				nomeOrigemAux1	= "";
+				nomeOrigemAux2	= "";
+				ivalorDocumento = 2;
 
                 extrato = new ExtratoModel();
 
