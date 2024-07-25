@@ -42,6 +42,9 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 		
 		// Get all Methods from superclass 'SC'.
 		java.lang.reflect.Method[] methods = sc.getDeclaredMethods();
+
+		// Valida de rodou por ".equals(tipoARodar"
+		Boolean invokerContainsBool = true;
 		
 		// ForEach Method from superclass.
 		for (java.lang.reflect.Method method : methods) {
@@ -49,15 +52,35 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			
 			// logger.logInfo("METHODS = "+methodName);
 			
-			if (methodName.contains(tipoARodar)) {
+			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
 				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, nomePortador, jDados, dbIOCont, logger);
 				//logger.logInfoDebug("RESPONSE -> " + response);
+
+				invokerContainsBool = false;
 				
 				break;
 			}
+		}
+
+		if(invokerContainsBool){
+			for (java.lang.reflect.Method method : methods) {
+				String methodName = method.getName();
+				
+				// logger.logInfo("METHODS = "+methodName);
+				
+				if (methodName.contains(tipoARodar)) {
+					logger.logInfo(String.format("Invoking method %s... BY CONTAINS", methodName));
+					//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+					
+					response = (Boolean) method.invoke(scInstance, memFile, nomePortador, jDados, dbIOCont, logger);
+					//logger.logInfoDebug("RESPONSE -> " + response);
+					
+					break;
+				}
+			}	
 		}
 	} catch (Exception e2) {
 		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo01 boolean'." + e2);
@@ -90,16 +113,36 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 		// Get all Methods from superclass 'SC'.
 		java.lang.reflect.Method[] methods = sc.getDeclaredMethods();
 		
+		// Valida de rodou por ".equals(tipoARodar"
+		Boolean invokerContainsBool = true;
+
 		// ForEach Method from superclass.
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			if (methodName.contains(tipoARodar)) {
+			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
 				
+				invokerContainsBool = false;
+
 				break;
+			}
+		}
+
+		if(invokerContainsBool){
+			// ForEach Method from superclass.
+			for (java.lang.reflect.Method method : methods) {
+				String methodName = method.getName();
+				
+				if (methodName.contains(tipoARodar)) {
+					logger.logInfo(String.format("Invoking method %s... BY CONTAINS", methodName));
+					
+					response = (Boolean) method.invoke(scInstance, memFile, jDados, dbIOCont, logger);
+					
+					break;
+				}
 			}
 		}
 	} catch (Exception e2) {
@@ -129,16 +172,35 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 		// Get all Methods from superclass 'SC'.
 		java.lang.reflect.Method[] methods = sc.getDeclaredMethods();
 		
+		// Valida de rodou por ".equals(tipoARodar"
+		Boolean invokerContainsBool = true;
+
 		// ForEach Method from superclass.
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			if (methodName.contains(tipoARodar)) {
+			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
 				
+				invokerContainsBool = false;
+
 				break;
+			}
+		}
+		if(invokerContainsBool){
+			// ForEach Method from superclass.
+			for (java.lang.reflect.Method method : methods) {
+				String methodName = method.getName();
+				
+				if (methodName.contains(tipoARodar)) {
+					logger.logInfo(String.format("Invoking method %s... BY CONTAINS", methodName));
+					
+					response = (Boolean) method.invoke(scInstance, memFile, anoData, tipoExtrato, nomePortador, jDados, dbIOCont, logger);
+					
+					break;
+				}
 			}
 		}
 	} catch (Exception e2) {
@@ -217,16 +279,36 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 		// Get all Methods from superclass 'SC'.
 		java.lang.reflect.Method[] methods = sc.getDeclaredMethods();
 		
+		// Valida de rodou por ".equals(tipoARodar"
+		Boolean invokerContainsBool = true;
+
 		// ForEach Method from superclass.
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			if (methodName.contains(tipoARodar)) {
+			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
+				invokerContainsBool = false;
+
 				break;
+			}
+		}
+
+		if(invokerContainsBool){
+			// ForEach Method from superclass.
+			for (java.lang.reflect.Method method : methods) {
+				String methodName = method.getName();
+				
+				if (methodName.contains(tipoARodar)) {
+					logger.logInfo(String.format("Invoking method %s... BY CONTAINS", methodName));
+					
+					mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
+					
+					break;
+				}
 			}
 		}
 	} catch (Exception e2) {
@@ -254,16 +336,35 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 		// Get all Methods from superclass 'SC'.
 		java.lang.reflect.Method[] methods = sc.getDeclaredMethods();
 		
+		// Valida de rodou por ".equals(tipoARodar"
+		Boolean invokerContainsBool = true;
+
 		// ForEach Method from superclass.
 		for (java.lang.reflect.Method method : methods) {
 			String methodName = method.getName();
 			
-			if (methodName.contains(tipoARodar)) {
-				//logger.logInfoInfo(String.format("Invoking method %s...", methodName));
+			if (methodName.equals(tipoARodar)) {
+				logger.logInfo(String.format("Invoking method %s...", methodName));
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
 				
+				invokerContainsBool = false;
+
 				break;
+			}
+		}
+
+		if(invokerContainsBool){
+			for (java.lang.reflect.Method method : methods) {
+				String methodName = method.getName();
+				
+				if (methodName.contains(tipoARodar)) {
+					logger.logInfo(String.format("Invoking method %s... BY CONTAINS", methodName));
+					
+					mapaVariavel = ((HashMap) method.invoke(scInstance, lineParam, memFile, jDados, mapaVariavel, logger));
+
+					break;
+				}
 			}
 		}
 	} catch (Exception e2) {
