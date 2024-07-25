@@ -83,7 +83,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			}	
 		}
 	} catch (Exception e2) {
-		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo01 boolean'." + e2);
+		logger.logError("Error trying to invoke method 'Extrato/Cartao Tipo01 boolean'.", e2);
 	}
 	return response;
 }
@@ -146,7 +146,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			}
 		}
 	} catch (Exception e2) {
-		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo02 boolean'." + e2);
+		logger.logError("Error trying to invoke method 'Extrato/Cartao Tipo02 boolean'.", e2);
 	}
 	return response;
 }
@@ -204,7 +204,7 @@ public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String 
 			}
 		}
 	} catch (Exception e2) {
-		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo03 boolean'." + e2);
+		logger.logError("Error trying to invoke method 'Extrato/Cartao Tipo03 boolean'.", e2);
 	}
 	return response;
 }
@@ -312,7 +312,7 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			}
 		}
 	} catch (Exception e2) {
-		logger.logInfo("Error trying to invoke method 'Extrato/Cartao Tipo04 HashMap'." + e2);
+		logger.logError("Error trying to invoke method 'Extrato/Cartao Tipo04 HashMap'.", e2);
 	}
 	return mapaVariavel;
 }
@@ -368,7 +368,7 @@ public HashMap readExtratoECartao(String tipoARodar, String lineParam, MemoryFil
 			}
 		}
 	} catch (Exception e2) {
-		//logger.logInfoError("Error trying to invoke method 'Extrato/Cartao Tipo05 HashMap'.", e2);
+		logger.logError("Error trying to invoke method 'Extrato/Cartao Tipo05 HashMap'.", e2);
 	}
 	return mapaVariavel;
 }
