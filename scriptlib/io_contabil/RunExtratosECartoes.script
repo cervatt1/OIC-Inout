@@ -1546,6 +1546,23 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	
 	////// Extrato - UNICRED PDF ///////////////////////////////////////////////////////////
 	if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Unicred_PDF")){
+		if ((arquivoCompleto.contains("DATA|LANCAMENTOS|VALOR (R$)|SALDO (R$)") || arquivoCompleto.contains("DATA;LANCAMENTOS;VALOR (R$);SALDO (R$)")) &&
+			arquivoCompleto.contains("CENTRAL DE RELACIONAMENTO: CAPITAIS E REGIOES METROPOLITANAS:")){
+			
+				JSONObject jDados = new JSONObject();
+				jDados.put("LINE", line);
+				jDados.put("NOMEPORTADOR", nomePortador);
+				jDados.put("CODEMPRESA", codEmpresa);
+				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOUNICRED", "004"); 
+				if(variaveis.has("hasNewChave")){
+					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+				}
+
+				readExtratoECartao("readExtratoUnicredPDF", memFile, jDados, dbIOCont, logger);
+				variaveis.put("tipoRetorno",   "break");
+				return variaveis.toString();
+		}
 		if ((cabecalhoPlanilha.contains("COOPERATIVA") && cabecalhoPlanilha.contains("AGENCIA") &&
 				cabecalhoPlanilha.contains("COOPERADO")   && cabecalhoPlanilha.contains("USUARIO") &&
 				(cabecalhoPlanilha.contains("NO DOC") || cabecalhoPlanilha.contains("N DOC")) &&
@@ -1570,6 +1587,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 				jDados.put("NOMEPORTADOR", nomePortador);
 				jDados.put("CODEMPRESA", codEmpresa);
 				jDados.put("NOMEARQUIVO", nomeArquivo);
+				jDados.put("TIPOUNICRED", "002");
 				if(variaveis.has("hasNewChave")){
 					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
 				}
@@ -3936,7 +3954,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	}
 
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("FrancesinhaItau_PDF")) {
-		//logger.logInfo("Antees readFranc");
+		logger.logInfo("Antees readFranc");
 		if(variaveis.has("read") && variaveis.optString("read").equals("readExtratoItauPdfFrancesinha5")){
 			logger.logInfo("entrouread");
 			
@@ -4379,8 +4397,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	
 	////// EXTRATO - EFI PDF //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Efi_PDF")) {
-		if (cabecalhoPlanilha.contains("EFI S.A.") && cabecalhoPlanilha.contains("TIPO DE REGISTRO")
-		&& cabecalhoPlanilha.contains("EXTRATO FINANCEIRO") && cabecalhoPlanilha.contains("FILTROS DO")) {
+		if (arquivoCompleto.contains("EFI S.A.") && arquivoCompleto.contains("09.089.356/0001-18")) {
 			nomePortador = cutString(cabecalhoPlanilha, "CONTA: ", "FILTROS DO");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
@@ -4430,6 +4447,14 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			if (line.contains("AGENCIA") && line.contains("CONTA")) {
 				nomePortador = "CRESOL - " + cutString(line, "CONTA", line.length());
 			}
+		}
+		
+		if (arquivoCompleto.contains("CRESOL INTERNET BANKING") && arquivoCompleto.contains("INSTITUICAO FINANCEIRA") && 
+			arquivoCompleto.contains("CONFESOL.COM.BR")){
+			tipoExtrato = "003";
+			nomePortador2 = "CRESOL";
+			complemento02 = tipoExtrato;
+			variaveis.put("complemento02", complemento02);
 		}
 		
 		if(nomePortador.contains("CRESOL")){
@@ -4501,31 +4526,73 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			return variaveis.toString();
 		}
 	}
+	
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_ModoBank_PDF")) {
+		if (arquivoCompleto.contains("MODOBANK") && arquivoCompleto.contains("35.716.518/0001-00") //CNPJ DO BANCO
+		&& arquivoCompleto.contains("CLIENTE: ") && arquivoCompleto.contains("OUVIDORIA: ")) {
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
+			jDados.put("NOMEEMPRESA",    nomeEmpresa);
+			jDados.put("NOMEARQUIVO",    nomeArquivo);
+			jDados.put("TIPOPLANILHA",    tipoPlanilha);
+			readExtratoECartao("readExtratoModoBankPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
+			return variaveis.toString();
+		}
+	}
+		
+		
 	//#2309-014629
 	////// EXTRATO - OMIE CASH PDF //////////////////////////////////////////////////////////////////
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_OmieCash_PDF") && 
-		cabecalhoPlanilha.contains("OMIE.CASH") && cabecalhoPlanilha.contains("SITUACAO")) {
-		
-		tipoPlanilha = "EXTRATO-OMIECASH";
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_OmieCash_PDF")){
 		
 		if (cabecalhoPlanilha.contains("CONTA:") && cabecalhoPlanilha.contains("PERIODO DE") && cabecalhoPlanilha.contains("ATE")) {
 			nomePortador2 = cutString(cabecalhoPlanilha, "CONTA:", "PERIODO DE");
 			anoData = cutString(cabecalhoPlanilha, cabecalhoPlanilha.indexOf("PERIODO DE")+17, "ATE");	
 		}
-
-		JSONObject jDados = new JSONObject();
-		jDados.put("TIPOPLANILHA", tipoPlanilha);
-		jDados.put("CODEMPRESA", codEmpresa);
-		jDados.put("NOMEARQUIVO", nomeArquivo);
-		jDados.put("ANODATA", anoData);
-		if(variaveis.has("hasNewChave")){
-			if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+		
+		if(cabecalhoPlanilha.contains("OMIE.CASH") && cabecalhoPlanilha.contains("SITUACAO") && 
+		(arquivoCompleto.contains("CATEGORIA;ENTRADAS;SAIDAS;SALDO") || arquivoCompleto.contains("CATEGORIA|ENTRADAS|SAIDAS|SALDO"))) {
+			tipoPlanilha = "EXTRATO-OMIECASH";
+			JSONObject jDados = new JSONObject();
+			jDados.put("TIPOPLANILHA", tipoPlanilha);
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("ANODATA", anoData);
+			jDados.put("TIPOEXTRATO", "002");
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
+			jDados.put("LINE", line);
+			
+			readExtratoECartao("readExtratoOmieCashPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
+			return variaveis.toString();
 		}
-		jDados.put("LINE", line);
 
-		readExtratoECartao("readExtratoOmieCashPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
-		variaveis.put("tipoRetorno", "break");
-		return variaveis.toString();
+
+		if(cabecalhoPlanilha.contains("OMIE.CASH") && cabecalhoPlanilha.contains("SITUACAO") && 
+		(arquivoCompleto.contains("CATEGORIA;VALOR;SALDO") || arquivoCompleto.contains("CATEGORIA|VALOR|SALDO"))) {
+			
+			tipoPlanilha = "EXTRATO-OMIECASH";
+			JSONObject jDados = new JSONObject();
+			jDados.put("TIPOPLANILHA", tipoPlanilha);
+			jDados.put("CODEMPRESA", codEmpresa);
+			jDados.put("NOMEARQUIVO", nomeArquivo);
+			jDados.put("ANODATA", anoData);
+			jDados.put("TIPOEXTRATO", "001");
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
+			jDados.put("LINE", line);
+			
+			readExtratoECartao("readExtratoOmieCashPDF", memFile, nomePortador2, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
+			return variaveis.toString();
+		}
 	}
 	
 	////// EXTRATO - TARGET PDF //////////////////////////////////////////////////////////////////
@@ -5640,7 +5707,7 @@ public String validacaoXlsxTxt(String anoData, String complemento01, String comp
 		
 		////// EXTRATO - EFI EXCEL //////////////////////////////////////////////////////////////////
 		if(roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Efi_Excel")){
-			if(nomeArquivo.toUpperCase().contains("GERENCIANET")){
+			if(cabecalhoPlanilha.contains("TIPO|DATA|VALOR|PROTOCOLO") && line.toUpperCase().contains("SALDO DIARIO")){
 				JSONObject jDados = new JSONObject();
 				if(variaveis.has("hasNewChave")){
 					if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
