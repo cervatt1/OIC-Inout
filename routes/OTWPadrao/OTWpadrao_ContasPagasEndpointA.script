@@ -26718,7 +26718,7 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 			if((memFile.getFieldsSize() == 1) && 
 				!line.contains("SALDO DO DIA") && 
 				!memFile.getStringFieldRemoveEspCharsUpper(0).trim().matches(".*\\,\\d{2}")){
-				
+				logger.logInfo("TEM VALOR"+ line);
 				nomeOrigemAux1 = memFile.getStringFieldRemoveEspCharsUpper(0).trim();
 				continue;
 			}
@@ -26731,15 +26731,15 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
 			linhaProx = linhaProx.toUpperCase();
 
 			if((memFile.getFieldsSize() == 2) && 
-				/*linhaAnterior.contains("SALDO DO DIA") && */
+				!line.matches(".*\\d{4},.*") &&
 				!line.matches(".*\\,\\d{2}")){
 
 				nomeOrigemAux = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("\"","").replaceAll("\\?","").trim();
 			}
-			if(memFile.getFieldsSize() == 2) logger.logInfo("DE DUAS LINHAWS: " + line);
 			if((memFile.getFieldsSize() == 2) && 
 				memFile.getStringFieldRemoveEspCharsUpper(0).contains("?") && 
-				!memFile.getStringFieldRemoveEspCharsUpper(1).matches("\\d{4},")){
+				memFile.getStringFieldRemoveEspCharsUpper(0).matches(".*\\,\\d{2}") && 
+				!memFile.getStringFieldRemoveEspCharsUpper(1).matches(".*\\d{4},.*")){
 
 				nomeOrigemAux2 = memFile.getStringFieldRemoveEspCharsUpper(1).replaceAll("\"","").replaceAll("\\?","").trim();
 			}

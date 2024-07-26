@@ -11997,7 +11997,7 @@ public HashMap readExtratoItauPdfFrancesinha3(MemoryFile memFile, JSONObject jDa
 		if(line.contains("BANCO ITAU S.A.") && line.contains("TITULOS")) continue;
 		if(line.contains("CLIENTE") && line.contains("AGENCIA") && line.contains("CONTA")) continue;
 		if(line.contains("CART") && line.contains("NOSSO N") && line.contains("PAGADOR")) continue;
-		
+		logger.logInfo("NAOLEMAIS?: " + naoLeMais + " |LINE: " + line);
 		if (naoLeMais) continue;
 
 		numeroLancLinha = quantityOf(memFile.getStringFieldRemoveEspCharsUpper(0), " ") + 1;
