@@ -12193,14 +12193,13 @@ public HashMap readExtratoItauPdfFrancesinha3(MemoryFile memFile, JSONObject jDa
 		if(line.contains("BANCO ITAU S.A.") && line.contains("TITULOS")) continue;
 		if(line.contains("CLIENTE") && line.contains("AGENCIA") && line.contains("CONTA")) continue;
 		if(line.contains("CART") && line.contains("NOSSO N") && line.contains("PAGADOR")) continue;
-
+		
 		if (naoLeMais) continue;
 
 		numeroLancLinha = quantityOf(memFile.getStringFieldRemoveEspCharsUpper(0), " ") + 1;
 		String ano = cutString(nomeArquivo, nomeArquivo.lastIndexOf("-20")+1, nomeArquivo.lastIndexOf("-20")+5);
         
-
-		ivalorDocumento = memFile.getFieldsSize()-1;
+		
 		//Aparecem 2 ou 3 lacamentos na mesma linha
 		for(int y = 0; y < numeroLancLinha; y++){
 			cont++;
@@ -12427,7 +12426,6 @@ public HashMap readExtratoItauPdfFrancesinha3(MemoryFile memFile, JSONObject jDa
 						dataLote = DateUtil.dateToString(dt, "yyyy-MM");
 					} catch (Exception dt2) { dataMovimento = ""; }	
 				}
-				logger.logInfo("dataMOvimento - > " + dataMovimento + " |valorDocumento -> " + valorDocumento + " |no -> " + nomeOrigem);
 
 				if (dataMovimento.equals("")) continue;
 
