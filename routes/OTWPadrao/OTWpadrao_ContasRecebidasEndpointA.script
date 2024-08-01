@@ -12186,15 +12186,6 @@ public HashMap readExtratoItauPdfFrancesinha3(MemoryFile memFile, JSONObject jDa
         String line = memFile.nextLine();
         line = StringUtil.removeSpecialCharsToUC(line);
 		
-		ivalorDocumento	= memFile.getFieldsSize()-1;
-
-		if(memFile.getFieldsSize() < 10){
-			idataMovimento	= memFile.getFieldsSize()-4;
-			icomplemento01	= memFile.getFieldsSize()-2;
-		}else{
-			idataMovimento	= memFile.getFieldsSize()-6;
-			icomplemento01	= memFile.getFieldsSize()-4;
-		}
 			
 
 		if(line.contains("RESUMO") && line.contains("VALOR") && line.contains("COBRADO") && line.contains("PRINCIPAL")){
