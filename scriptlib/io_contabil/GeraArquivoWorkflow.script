@@ -242,7 +242,7 @@ public JSONArray sendToCloudONEFLOW(JSONObject objCloud, String tokenOneFlow, St
 		String uriIntegrador = String.format("%s%s","https://rest.oneflow.com.br", "/api/lancamentoscontabeis");
 		String response01	 = genericPostONEFLOW(uriIntegrador, objCloud, tokenOneFlow, logger);
 	} catch (Exception et) { 
-		logger.logDebug("Erro em 'post' pra integrador "+et.getMessage());
+		logger.logError("Erro em 'post' pra integrador ", et);
 	}
 	JSONArray toCloud = new JSONArray();
  	return toCloud;
@@ -13602,8 +13602,11 @@ public void GeraArquivoSIESCON(JSONObject jDadosLote, InoutLogger logger) throws
 
 					txt.append(StringUtil.rightPad(contaCredito.trim(), 14, " ")); //### CONTA CREDITO OU CNPJ/CPF
 				} else{
-					txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
-					txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
+					// txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
+					// txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
+					//Alteração solicitada no atendimento: 2407-044609
+					txt.append(StringUtil.rightPad(contaDebito.trim(), 7, " ")); //### CONTA DEBITO
+					txt.append(StringUtil.rightPad(contaCredito.trim(), 7, " ")); //### CONTA CREDITO
 				}
                 txt.append(StringUtil.leftPad(valorFinal.trim(), 13, "0")); //### VALOR
 				if(codigoHistorico.equals("")) txt.append("    ");
@@ -21698,7 +21701,6 @@ public void GeraArquivoCONSISANET(JSONObject jDadosLote, InoutLogger logger) thr
 				loteIdMovimento = cutString(loteIdMovimento, 0, "_");
 				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}*/
-            // 2407-044437 - Nao gera por lote
 			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
 				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
 				loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));

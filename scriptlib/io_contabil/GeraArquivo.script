@@ -1395,8 +1395,6 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                 if (nomeContabilidade.toUpperCase().contains("ELITECONSULTORIA")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("CUNHATAVARES")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("JJCHAVES")) historico = toDisplayCase(historico);
-				if (nomeContabilidade.toUpperCase().contains("PRIMECONTABILIDADENET")) historico = toDisplayCase(historico);
-
 
 
                 contaDebito  = contaDebito.replaceAll("\\.","");
@@ -3558,7 +3556,8 @@ public void GeraArquivoDominioPipeUnico(JSONObject jDadosLote, InoutLogger logge
                 if (nomeContabilidade.toUpperCase().contains("ELITECONSULTORIA")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("CUNHATAVARES")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("JJCHAVES")) historico = toDisplayCase(historico);
-                
+                if (nomeContabilidade.toUpperCase().contains("PRIMECONTABILIDADENET")) historico = toDisplayCase(historico);
+
 
                 contaDebito  = contaDebito.replaceAll("\\.","");
                 contaCredito = contaCredito.replaceAll("\\.","");
@@ -13565,8 +13564,11 @@ public void GeraArquivoSIESCON(JSONObject jDadosLote, InoutLogger logger) throws
 
 					txt.append(StringUtil.rightPad(contaCredito.trim(), 14, " ")); //### CONTA CREDITO OU CNPJ/CPF
 				} else{
-					txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
-					txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
+					// txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
+					// txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
+					//Alteração solicitada no atendimento: 2407-044609
+					txt.append(StringUtil.rightPad(contaDebito.trim(), 7, " ")); //### CONTA DEBITO
+					txt.append(StringUtil.rightPad(contaCredito.trim(), 7, " ")); //### CONTA CREDITO
 				}
                 txt.append(StringUtil.leftPad(valorFinal.trim(), 13, "0")); //### VALOR
 				if(codigoHistorico.equals("")) txt.append("    ");
@@ -21655,18 +21657,20 @@ public void GeraArquivoCONSISANET(JSONObject jDadosLote, InoutLogger logger) thr
 								cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 				// loteMovimento = cutString(loteMovimento, 0, "_") + cutString(loteMovimento, "_", "_") + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}
-			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
+			
+			/*if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
 				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
 				loteIdMovimento = cutString(loteIdMovimento, "id", loteMovimento.lastIndexOf("_"));
 				loteIdMovimento = cutString(loteIdMovimento, 0, "_");
 				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
-			}
-            // 2407-044437 - Nao gera por lote
+			}*/
+			// 2407-044437 - Nao gera por lote
 			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
 				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
 				loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));
 				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}
+			
 			// logger.logInfo("LOTEMOV2 " + loteMovimento);
 			
             if(totalRegistros > 0){				
