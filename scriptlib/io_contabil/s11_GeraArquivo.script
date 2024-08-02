@@ -1083,6 +1083,9 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
     String classificacao = "";
     String ERP           = "";                          //  <---<
     String complemento02 = "";
+    String codigoLcdpr   = "";
+    String contemLCDPR   = "";
+    String classificacaoPgRc = "";
 	HashMap mapaPlano   		= new HashMap();  
 
     Date dtAgora = new Date();
@@ -1108,11 +1111,16 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 
 		JSONObject recAux = new JSONObject();	//#20210126
 		recAux.put("cnpjContabilidade",	props.get("CONTABILIDADE_CNPJ"));
+		recAux.put("LCDPR",	            props.get(nomeEmpresa.toUpperCase()+"_EQUIPE_FECHAMENTO"));
 		recAux.put("cnpjEmpresa",		props.get(nomeEmpresa.toUpperCase()+"_CNPJ_EMPRESA"));
 		recAux.put("erpContabil",		props.get("ERP_CONTABILIDADE"));
 		recAux.put("lote",				loteMovimento);
 		recAux.put("codigoErp",			codEmpresa);
 		
+        if(recAux.optString("LCDPR").contains("LCDPR")){
+            contemLCDPR = "SIM";
+        }
+
         ERP = props.get("ERP_CONTABILIDADE");
 		
 		if (!ERP.equals(props.get(nomeEmpresa.toUpperCase() +"_ERP_EMPRESA"))) ERP = props.get(nomeEmpresa.toUpperCase() +"_ERP_EMPRESA");
@@ -1402,6 +1410,22 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 				// @sergio 202301-0024357 feito ajuste para trocar a conta anular por vazio 
 				contaDebito  = contaDebito.replaceAll("ANULAR","");
                 contaCredito = contaCredito.replaceAll("ANULAR","");
+
+                if(contemLCDPR.equals("SIM")){
+                    if (tipoLancamento.equals("PAGAR")) {
+						codigoLcdpr = cutString(contaDebito, "R");
+                        contaDebito = cutString(contaDebito, 0, "R");
+                        naturezaContabil = "C";
+                        classificacaoPgRc = "2";
+					}
+					if (tipoLancamento.equals("RECEBER")) {
+                        codigoLcdpr = cutString(contaCredito, "R");
+                        contaCredito = cutString(contaCredito, 0, "R");
+                        naturezaContabil = "D";
+                        classificacaoPgRc = "1";
+                    }
+                }
+
                 if (contaDebito.contains("E"))  contaDebito = contaDebito.substring(0, contaDebito.indexOf("E"));
                 if (contaCredito.contains("E")) contaCredito = contaCredito.substring(0, contaCredito.indexOf("E"));
 				
@@ -1454,10 +1478,10 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 					if (nomeEmpresa.toUpperCase().contains(empresaLcdpr))
 						fazLcdpr = true;
 				}
-				
+				// nao eh para funcionar por aqui LCDPR MODO ANTIGO
 				if (tipoMovimento.equals("CTB") && (nomeEmpresa.toUpperCase().contains("LOINIRGATTO") && nomeContabilidade.toUpperCase().contains("AQUARIUS")) || fazLcdpr) {
 					// logger.logDebug("CP02 " + complemento02);
-					String classificacaoPgRc = "1";
+					classificacaoPgRc = "1";
 					
 					if (tipoLancamento.equals("PAGAR")) {
 						naturezaContabil = "C";
@@ -1472,25 +1496,13 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                     txt.append(rn);
 				}
 
-                if (tipoMovimento.equals("CTB") && (contaCredito.contains("R") || contaDebito.contains("R"))) {
-                    String classificacaoPgRc = "1";
-                    String codigoLcdpr = "";
+                if (tipoMovimento.equals("CTB") && contemLCDPR.equals("SIM")) {
+                    String codigoParticipante = complemento02; 
 
-                    if (tipoLancamento.equals("PAGAR")) {
-						codigoLcdpr = cutString(contaDebito, "R");
-                        contaDebito = cutString(contaDebito, 0, "R");
-                        naturezaContabil = "C";
-						classificacaoPgRc = "2";
-					}
-					if (tipoLancamento.equals("RECEBER")) {
-                        codigoLcdpr = cutString(contaCredito, "R");
-                        contaCredito = cutString(contaCredito, 0, "R");
-                        naturezaContabil = "D";
-                    }
-                    linha = "|6140|" + classificacaoPgRc + "|" + documento + "|1|" + codigoLcdpr + "|1|" + naturezaContabil + "|";
+                    linha = "|6140|" + classificacaoPgRc + "|" + documento + "|1|" + codigoLcdpr + "|" + codigoParticipante + "|" + naturezaContabil + "|";
 					txt.append(linha);
                     txt.append(rn);
-					linha = "|6141|" + "1|" + valorFinal + "|";
+                    linha = "|6141|" + codigoParticipante + "|" + valorFinal + "|";
 					txt.append(linha);
                     txt.append(rn);
                 }
