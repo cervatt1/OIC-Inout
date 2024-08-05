@@ -2430,7 +2430,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
  			if (restoLinha == 0) putStatus(dirName, "03--Etapa 3 de 4 - " + String.valueOf(contRegra) + "--" + tipoLancamento + ".status", jStatus, logger);
 			
 			
-			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | TPLAN:"+ ttMov.tipoLancamento + " | DTMOV:" + ttMov.dataMovimento + " | NPORTADOR:"+ ttMov.nomePortador  + " | DEBCRED:" + ttMov.debitoCredito + " | VLRDCM:" + ttMov.valorDocumento + " | TPLC:" + ttMov.tipoLancamento +" | NORIGEM:"+ ttMov.nomeOrigem);
+			logger.logInfo("TRESDEQUATRO -> TPPLAN: " + ttMov.tipoPlanilha + " | TPLAN:"+ ttMov.tipoLancamento + " | DTMOV:" + ttMov.dataMovimento + " | NPORTADOR:"+ ttMov.nomePortador  + " | DEBCRED:" + ttMov.debitoCredito + " | VLRDCM:" + ttMov.valorDocumento + " | TPLC:" + ttMov.tipoLancamento +" | NORIGEM:"+ ttMov.nomeOrigem + " |DOCUMENTO: " + ttMov.documento);
 			// logger.logInfo("NOME_ARQUIVO -> "+ ttMov.nomeArquivo);
 			
 			// if(codEmpresa.equals("987789")) logger.logInfo("DATA == "+ttMov.dataMovimento+" | LOTEEE == "+ttMov.lote.replace("rodaconversor", "")+" | TP === "+ttMov.tipoPlanilha);
@@ -26809,7 +26809,7 @@ public boolean readExtratSantanderPDF(MemoryFile memFile, String nomePortador, J
             complemento01 = nomePortador.replaceAll("\\?","");
             boolean fieldAux = false;
 
-
+			logger.logInfo("LINE: "+ line);
             //Continue para nao cair nas validacoes abaixo
             if(line.contains("SALDO DO DIA")) continue;
 
