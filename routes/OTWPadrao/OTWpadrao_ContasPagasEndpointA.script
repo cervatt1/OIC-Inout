@@ -9536,8 +9536,8 @@ public boolean readExtratoSafraPDF(MemoryFile memFile, String nomePortador, JSON
     boolean naoLeMais2 = false;
 	boolean naoLeMaisMeio = false;
     boolean ignoraComplemento = false;
-	
-	
+	boolean nao_processou = false;
+	if(nomePortador.contains("CONTA VINCULADA LANCAMENTOS")) nao_processou = true;
 	
 
     // 11/12/2019|0000|13013|807 ESTORNO DE D?BITO|23.068|285,50 C|0,00 C |  -> 7
@@ -9615,8 +9615,16 @@ public boolean readExtratoSafraPDF(MemoryFile memFile, String nomePortador, JSON
                 idataMovimento	= 0;
                 idocumento      = 2;
                 inomeOrigem		= 1;
-                nomePortador = nomePortador.replaceAll("\\?","");
-                complemento01 = nomePortador.replaceAll("\\?","");
+				nomePortador = nomePortador.trim().replaceAll("\\?","").replaceAll(";","");
+				//SE CASO TemplateUtils.numberIndexOf NAO FOR APLICADA NA TemplateUtils DESCOMENTAR "if(nao_processou)" EM DIANTE
+                nomePortador = cutString(nomePortador, 0, TemplateUtils.numberIndexOf(nomePortador, " ", 3));
+				/*if(nao_processou) {
+					nomePortador = cutString(nomePortador, 0, nomePortador.lastIndexOf(" "));
+					nomePortador = cutString(nomePortador, 0, nomePortador.lastIndexOf(" "));
+					nomePortador = cutString(nomePortador, 0, nomePortador.lastIndexOf(" "));
+					nao_processou = false;
+				}*/
+				complemento01 = nomePortador;
                 debitoCreditoAux = memFile.getStringFieldRemoveEspCharsUpper(memFile.getFieldsSize()-1);
                 if (!debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-CREDITO";
                 if (debitoCreditoAux.contains("-")) debitoCredito = "EXTRATO-DEBITO";
