@@ -25156,7 +25156,7 @@ public boolean readExtratoItauPdf2(MemoryFile memFile, String nomePortador, JSON
 				line.contains("OS SALDOS ACIMA SAO BASEADOS NAS INFORMACOES"))
 			) break; 
 		
-		if(line.contains("SALDO")) continue;
+		if(line.contains("SALDO TOTAL") || line.contains("SALDO ANTERIOR")) continue;
         
         try {
             
