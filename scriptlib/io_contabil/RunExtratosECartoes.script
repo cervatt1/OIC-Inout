@@ -4022,6 +4022,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 		//2311-022659 - ITAU FRANCESINHA 3
 		if(cabecalhoPlanilha.contains("BANCO ITAU S.A.") && cabecalhoPlanilha.contains("MOVIMENTACAO") && cabecalhoPlanilha.contains("TITULOS")
 			&& cabecalhoPlanilha.contains("AGENCIA") && cabecalhoPlanilha.contains("CONTA") && cabecalhoPlanilha.contains("CARTEIRA")){
+				logger.logInfo("ENTROU ITAUFRANC3");
 
 			if(memFile.getStringFieldRemoveEspCharsUpper(2).contains("CONTA") && memFile.getStringFieldRemoveEspCharsUpper(2).contains("AGENCIA")){
 				nomePortador2 = memFile.getStringFieldRemoveEspCharsUpper(3);
@@ -4564,7 +4565,7 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			}
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
-			jDados.put("TIPOPLANILHA",    tipoPlanilha);
+			jDados.put("TIPOPLANILHA",    "EXTRATO-MODOBANK");
 			readExtratoECartao("readExtratoModoBankPDF", memFile, nomePortador, jDados, dbIOCont, logger);
 			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
@@ -5190,8 +5191,11 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 	
 	////// EXTRATO - BMG PDF //////////////////////////////////////////////////////////////////
 	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_BMG_PDF")) {
-		if (arquivoCompleto.contains("DISPONIVEL	+	VINCULADO	+	BLOQUEADO") && arquivoCompleto.contains("SALDO	DISPONIVEL	(EM") && arquivoCompleto.contains("SALDO	TOTAL	(EM")){
-			////logger.logInfoInfo("Entra na validacao do BMG Pdf");
+		
+		if ((arquivoCompleto.contains("DISPONIVEL	+	VINCULADO	+	BLOQUEADO") || arquivoCompleto.contains("DISPONIVEL + VINCULADO + BLOQUEADO")) && 
+			(arquivoCompleto.contains("SALDO	DISPONIVEL	(EM") || arquivoCompleto.contains("SALDO DISPONIVEL (EM")) && 
+			(arquivoCompleto.contains("SALDO	TOTAL	(EM") || arquivoCompleto.contains("SALDO TOTAL (EM"))){
+			logger.logInfo("Entra na validacao do BMG Pdf");
 			JSONObject jDados = new JSONObject();
 			jDados.put("CODEMPRESA", codEmpresa);
 			if(variaveis.has("hasNewChave")){
@@ -5214,6 +5218,7 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 			if(variaveis.has("hasNewChave")){
 				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
 			}
+			logger.logInfo("ENTROU NO RUN BMG PDF 2");
 			jDados.put("NOMEEMPRESA",    nomeEmpresa);
 			jDados.put("NOMEARQUIVO",    nomeArquivo);
 			jDados.put("TIPOPLANILHA",    tipoPlanilha);
