@@ -25180,7 +25180,8 @@ public boolean readExtratoItauPdf2(MemoryFile memFile, String nomePortador, JSON
                 try{
                     diaAuxiliar = cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), 0, " ");
 					mesAuxiliar = getMonth(cutString(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento), "/ ", ""));
-					dataMovimento = diaAuxiliar+"/"+mesAuxiliar+"/"+anoAuxiliar;
+					dataMovimento = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento));
+					if(dataMovimento.equals("")) dataMovimento = diaAuxiliar+"/"+mesAuxiliar+"/"+anoAuxiliar;
                     dataLote		  = getCampoDate(dataMovimento, "", "yyyy-MM");
                 }catch(Exception e){
                     continue;
