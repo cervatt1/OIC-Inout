@@ -884,7 +884,7 @@ public class TemplateUtils {
 				|| arquivoCompleto.contains("$*&-") || arquivoCompleto.contains("%$$&$$") || arquivoCompleto.contains("#$#%") || arquivoCompleto.contains("%&*")
 				|| arquivoCompleto.contains("*##%%") || arquivoCompleto.contains("##$%#&") || arquivoCompleto.contains("!\"#\"") || arquivoCompleto.contains("[!\"")
 				|| arquivoCompleto.contains("&<") || arquivoCompleto.contains("[!") || arquivoCompleto.contains(".%$$") || arquivoCompleto.contains("#!+")
-				|| arquivoCompleto.contains("++(0+0&") || arquivoCompleto.contains("*&+&") || arquivoCompleto.contains("*)%#\"")) {
+				|| arquivoCompleto.contains("++(0+0&") || arquivoCompleto.contains("*&+&") || /*ADICIONAR ->*/arquivoCompleto.contains("*)%#\"")) {
 			return true;
 		}
 		if (arquivoCompleto.equals("[]")) {
@@ -1128,6 +1128,28 @@ public class TemplateUtils {
 		}
 
 		return classificacao;
+	}
+
+	/**
+	 * Encontra a enésima ocorrência de uma substring dentro de uma string.
+	 * 
+	 * @param str a string na qual a busca será realizada
+	 * @param substr a substring a ser encontrada
+	 * @param n o número da ocorrência a ser encontrada (iniciando em 1)
+	 * @return o índice da enésima ocorrência da substring, ou -1 se a enésima ocorrência não for encontrada
+	 */
+	public static int numberIndexOf(String str, String substr, int n) {
+		int index = -1;
+		int count = 0;
+
+		while (count < n) {
+			index = str.indexOf(substr, index + 1);
+			if (index == -1) {
+				return -1; // Retorna -1 se a enésima ocorrência não for encontrada
+			}
+			count++;
+		}
+		return index;
 	}
 
 }
