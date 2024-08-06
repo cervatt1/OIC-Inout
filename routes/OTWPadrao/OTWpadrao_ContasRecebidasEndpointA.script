@@ -14657,7 +14657,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 			
 			if(idataMovimento == -1 || ivalorDocumento == -1 || idocumento == -1){
 				idocumento = 1;
-				idataMovimento = 5;
+				idataMovimento = 7;
 				icomplemento02	= 2;
 				ivalorDocumento = 8; 
 			}
@@ -14666,7 +14666,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 		// quantidade de espacamentos em um bloco na planilha
 		String pegaDataParaValidar = "";
 		int qtdLancPorColuna = -1;
-		idataMovimento = 5;
+		// idataMovimento = 5;
 		try{
 			pegaDataParaValidar = getCampoDate(memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).split(" ")[0]);
 			qtdLancPorColuna = memFile.getStringFieldRemoveEspCharsUpper(idataMovimento).split(" ").length;
