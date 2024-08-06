@@ -16583,7 +16583,7 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
                     historico = historico.replaceAll("INVERTECONTA","").trim();
                 }
                 String codigoFilial = "1";
-                String codigoHistorico = "0";
+                String codigoHistorico = "";
 
                 // ////// / /////////////// //
                 // FILIAL e CODIGOHISTORICO //
@@ -16663,7 +16663,7 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
 				txt.append(dataMovimento);
                 txt.append(separador);
                 txt.append(contaDebito);
-                txt.append(separador);;
+                txt.append(separador);
                 txt.append(contaCredito);
                 txt.append(separador);
                 txt.append(valorFinal);
@@ -16726,10 +16726,10 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
 
                 String dts = DateUtil.dateToString(dtAgora, "yyyyMMdd_HHmmss");
                 //String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".exp";
-				String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".xls";
+				String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".xlsx";
                 if(loteMovimento.toUpperCase().contains("OTTIMIZZA") && versaoPlataforma.equals("01_Conecta_Via_Ottimizza_FT") && !nomeEmpresa.toUpperCase().contains("OTTIMIZZAAUTOMACAO")) {
                     //filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".exp";
-					filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".xls";
+					filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".xlsx";
                 }
                 FileWriter writer = new FileWriter(filename);
                 writer.writeNewFile(txt.toString());
