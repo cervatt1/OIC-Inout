@@ -8,6 +8,8 @@
 {import: io_contabil.TemplateUtils};
 {import: io_contabil.OICUtils};
 {import: io_contabil.Classes.Extrato};
+import java.io.*;
+import java.net.*;
 
 import java.lang.reflect.Method;
 // TEMPLATE 15.03.2023
@@ -14750,7 +14752,7 @@ public HashMap readFrancesinhagrupoAilosPDF(MemoryFile memFile, JSONObject jDado
 
 				chaveExtrato = String.format("%.2f", valorDocumento) + String.format("%d", yix) + "-" + nomePortador + "-" + contLinhaExtrato + codEmpresa + "-" +  dataMovimento + "-" + nomeOrigem;
 				
-				 // --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
+				// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~
 				// --~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~--~  Criacao de Lote / Chave
 				contLinhaTexto = String.valueOf(cont);
 				contLinhaTexto = StringUtil.leftPad(contLinhaTexto, 04, "0");

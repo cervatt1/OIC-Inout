@@ -29,6 +29,34 @@
 	Extrato_Sicoob_PDF -> readExtratSicoobPDF
 
 */
+/*public void adicionaPadraoProcessado(String nomeReadProcessa) {
+    String hostName = "localhost";
+    int portNumber = 65432;
+
+    try {
+        Socket socket = new Socket(hostName, portNumber);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        
+        // Envia dados para o servidor Python
+        String userInput = nomeReadProcessa;
+        out.println(userInput);
+
+        // Recebe o resultado do servidor Python e exibe
+        String result = in.readLine();
+        //logger.logInfo("Resultado do servidor Python: " + result);
+
+        // Fechar recursos
+        out.close();
+        in.close();
+        socket.close();
+    } catch (UnknownHostException e) {
+        //logger.logError("Host desconhecido " + hostName, e);
+    } catch (IOException e) {
+        //logger.logError("Não foi possível obter E/S para a conexão com " + hostName, e);
+    }
+}
+*/
 public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) {
 
 	boolean response = false;
@@ -288,6 +316,9 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			
 			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
+				//logger.logInfo("Antes de chamar adicionaPadraoProcessado");
+				//adicionaPadraoProcessado(methodName);
+				//logger.logInfo("Depois de chamar adicionaPadraoProcessado");
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
