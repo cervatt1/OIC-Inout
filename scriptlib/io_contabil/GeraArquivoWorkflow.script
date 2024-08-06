@@ -242,7 +242,7 @@ public JSONArray sendToCloudONEFLOW(JSONObject objCloud, String tokenOneFlow, St
 		String uriIntegrador = String.format("%s%s","https://rest.oneflow.com.br", "/api/lancamentoscontabeis");
 		String response01	 = genericPostONEFLOW(uriIntegrador, objCloud, tokenOneFlow, logger);
 	} catch (Exception et) { 
-		logger.logError("Erro em 'post' pra integrador ", et);
+		logger.logDebug("Erro em 'post' pra integrador "+et.getMessage());
 	}
 	JSONArray toCloud = new JSONArray();
  	return toCloud;
@@ -1413,7 +1413,6 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                 if (nomeContabilidade.toUpperCase().contains("ELITECONSULTORIA")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("CUNHATAVARES")) historico = toDisplayCase(historico);
                 if (nomeContabilidade.toUpperCase().contains("JJCHAVES")) historico = toDisplayCase(historico);
-				if (nomeContabilidade.toUpperCase().contains("PRIMECONTABILIDADENET")) historico = toDisplayCase(historico);
 
 
                 contaDebito  = contaDebito.replaceAll("\\.","");
@@ -21695,15 +21694,10 @@ public void GeraArquivoCONSISANET(JSONObject jDadosLote, InoutLogger logger) thr
 								cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 				// loteMovimento = cutString(loteMovimento, 0, "_") + cutString(loteMovimento, "_", "_") + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}
-			/*if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
+			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
 				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
 				loteIdMovimento = cutString(loteIdMovimento, "id", loteMovimento.lastIndexOf("_"));
 				loteIdMovimento = cutString(loteIdMovimento, 0, "_");
-				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
-			}*/
-			if(loteMovimento.contains("_oud") && loteMovimento.contains("_id")){
-				String loteIdMovimento = cutString(loteMovimento, loteMovimento.indexOf("_id"));
-				loteIdMovimento = cutString(loteIdMovimento, "id", loteIdMovimento.lastIndexOf("_"));
 				loteMovimento = cutString(loteMovimento, 0, "_oud") + "_id" + loteIdMovimento + cutString(loteMovimento, loteMovimento.lastIndexOf("_"));
 			}
 			// logger.logInfo("LOTEMOV2 " + loteMovimento);
@@ -25372,8 +25366,6 @@ public void GeraArquivoPROSIS(JSONObject jDadosLote, InoutLogger logger) throws 
 				
 				String codigoParticipante = "";
 				
-				boolean campoParticipante = false;
-				
                 for (int xy=0;xy<20;xy++)
 					historico = historico.replaceAll("  "," ");
                 
@@ -25492,12 +25484,10 @@ public void GeraArquivoPROSIS(JSONObject jDadosLote, InoutLogger logger) throws 
                 if(contaDebito.toUpperCase().contains("P") ){
                     codigoParticipanteCP = contaDebito.replaceAll("P","").replaceAll("p","").trim();
                     contaDebito  = codigoParticipante;
-					campoParticipante = true;
                 }
                 if(contaCredito.toUpperCase().contains("P") ){
                     codigoParticipanteCR = contaCredito.replaceAll("P","").replaceAll("p","").trim();
                     contaCredito  = codigoParticipante;
-					campoParticipante = true;
                 }
 
                 // /////////// //
@@ -25538,18 +25528,6 @@ public void GeraArquivoPROSIS(JSONObject jDadosLote, InoutLogger logger) throws 
                 // txt.append("|");
 				// txt.append(classificacaoCredito);
                 // txt.append("|");
-				
-				//2406-041135
-				if(campoParticipante){
-					if (tipoLancamento.contains("PAGAR")) {
-						txt.append(codigoParticipanteCP);
-						txt.append("\t");
-					} else {
-						txt.append(codigoParticipanteCR);
-						txt.append("\t");
-					}				
-				}
-				
 				txt.append(rn);
 				
 
