@@ -30099,6 +30099,7 @@ public boolean readExtratBradesco2PDF(MemoryFile memFile, String nomePortador, J
 					nomeOrigem.startsWith("PIX QR CODE DINAMICO") || //#2401-026567
 					nomeOrigem.startsWith("PIX QR CODE ESTATICO") || //#2401-026567
 					nomeOrigem.startsWith("BAIXA OPERACAO DESCONTO") || //#2405-038124
+					nomeOrigem.startsWith("SAQUE DINHEIRO ATM") || //#2405-038124
 					(nomeOrigem.startsWith("ADI") && nomeOrigem.contains("MENTO") && nomeOrigem.contains("OPER D")) || //#2306-006148
 					// nomeOrigem.startsWith("CARGA CRT") || 
 					(nomeOrigem.startsWith("CHEQUE") && !nomeOrigemAnterior.startsWith("TARIFA")) ) nomeOrigemAnterior = nomeOrigem; 
