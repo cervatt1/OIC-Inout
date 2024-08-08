@@ -5027,11 +5027,17 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 	}
 	
 	////// EXTRATO - SQUID PDF //////////////////////////////////////////////////////////////////
-	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Squid_PDF") && nomeArquivo.toUpperCase().contains("SQUID")) {
-		if(cabecalhoPlanilha.contains("DATA") && cabecalhoPlanilha.contains("HISTORICO") && cabecalhoPlanilha.contains("CREDITO") 
-			&& cabecalhoPlanilha.contains("DEBITO") && cabecalhoPlanilha.contains("SALDO")){
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Squid_PDF")) {
+		if( arquivoCompleto.contains("DATA|HISTORICO|CREDITO (R$)|DEBITO (R$)|SALDO (R$)") &&
+			arquivoCompleto.contains("SALDO TOTAL EM") &&
+			arquivoCompleto.contains("TARIFAS PENDENTES") &&
+			arquivoCompleto.contains("SALDO TOTAL ATUAL") &&
+			arquivoCompleto.contains("SALDO DISPONIVEL EM") &&
+			arquivoCompleto.contains("SALDO BLOQUEADO ATUAL") &&
+			arquivoCompleto.contains("SALDO DISPONIVEL ATUAL") &&
+			arquivoCompleto.contains("SALDO BLOQUEADO EM")){
 
-			nomePortador2 = " AGENCIA/CONTA " + cutString(cabecalhoPlanilha, "AGENCIA", "EXTRATO DA CONTA").replaceAll("[a-zA-z]","").replaceAll("  ","");
+			nomePortador2 = "AGENCIA/CONTA " + cutString(arquivoCompleto, "AGENCIA", "EXTRATO DA CONTA").replaceAll("[^0-9-]", "").replaceAll("  ", "");
 
 			//logger.logInfoInfo("Nome Portador == " + nomePortador2);
 
