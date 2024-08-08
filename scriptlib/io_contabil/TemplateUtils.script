@@ -539,6 +539,10 @@ public class TemplateUtils {
 	}
 
 	public static boolean verificaConversorNovo(String arquivoCompleto) {
+		//#2407-047028
+		if(arquivoCompleto.contains("COMPRA|LANCAMENTO|NOME|HISTORICO|AUT.|COD. ORC.|PARC.|TAXA ADM.|VALOR")){
+			return true; // CARTAO VOLUS
+		}
 		//2405-040179
 		if(arquivoCompleto.contains("CONTA:") && arquivoCompleto.contains("EXTRATO POR PERIODO") &&
 				arquivoCompleto.contains("DATA MOV.") && arquivoCompleto.contains("NR.") && arquivoCompleto.contains("DOC.") &&
@@ -1129,7 +1133,7 @@ public class TemplateUtils {
 
 		return classificacao;
 	}
-
+	
 	/**
 	 * Encontra a enésima ocorrência de uma substring dentro de uma string.
 	 * 

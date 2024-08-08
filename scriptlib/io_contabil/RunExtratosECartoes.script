@@ -29,34 +29,6 @@
 	Extrato_Sicoob_PDF -> readExtratSicoobPDF
 
 */
-/*public void adicionaPadraoProcessado(String nomeReadProcessa) {
-    String hostName = "localhost";
-    int portNumber = 65432;
-
-    try {
-        Socket socket = new Socket(hostName, portNumber);
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        
-        // Envia dados para o servidor Python
-        String userInput = nomeReadProcessa;
-        out.println(userInput);
-
-        // Recebe o resultado do servidor Python e exibe
-        String result = in.readLine();
-        //logger.logInfo("Resultado do servidor Python: " + result);
-
-        // Fechar recursos
-        out.close();
-        in.close();
-        socket.close();
-    } catch (UnknownHostException e) {
-        //logger.logError("Host desconhecido " + hostName, e);
-    } catch (IOException e) {
-        //logger.logError("Não foi possível obter E/S para a conexão com " + hostName, e);
-    }
-}
-*/
 public boolean readExtratoECartao(String tipoARodar, MemoryFile memFile, String nomePortador, JSONObject jDados, DataBase dbIOCont, InoutLogger logger) {
 
 	boolean response = false;
@@ -316,9 +288,6 @@ public HashMap readExtratoECartao(String tipoARodar, MemoryFile memFile, JSONObj
 			
 			if (methodName.equals(tipoARodar)) {
 				logger.logInfo(String.format("Invoking method %s...", methodName));
-				//logger.logInfo("Antes de chamar adicionaPadraoProcessado");
-				//adicionaPadraoProcessado(methodName);
-				//logger.logInfo("Depois de chamar adicionaPadraoProcessado");
 				
 				mapaVariavel = ((HashMap) method.invoke(scInstance, memFile, jDados, mapaVariavel, logger));
 				
@@ -3703,14 +3672,14 @@ public String validacaoPDF(String anoData, String complemento01, String compleme
 			JSONObject jDados = new JSONObject();
 			if(cabecalhoPlanilha.contains("ULTIMOS LANCAMENTOS")){ //2311-021100
 				nomePortador2 = "SICOOB-PDF - "+cutString(cabecalhoPlanilha, "CORRENTE:", "EXTRATO").trim();
-				// logger.logInfo("1 NP2 = "+nomePortador2);
+				logger.logInfo("1 NP2 = "+nomePortador2);
 			} else{
-				nomePortador2 = "SICOOB-PDF - " + cutString(cabecalhoPlanilha, "CONTA:", cabecalhoPlanilha.indexOf("CONTA:")+17);
-				// logger.logInfo("2 NP2 = "+nomePortador2);
+				nomePortador2 = "SICOOB-PDF - " + cutString(arquivoCompleto, "CONTA:", arquivoCompleto.indexOf("CONTA:")+17);
+				logger.logInfo("2 NP2 = "+nomePortador2);
 			}
 			if (nomePortador2.contains("EXTRATO C") && cabecalhoPlanilha.contains("HORA:") && cabecalhoPlanilha.contains("DATA")){
 				nomePortador2 = "SICOOB-PDF - " + cutString(cutString(cabecalhoPlanilha, "HORA:", "DATA"), 9, 19);
-				// logger.logInfo("3 NP2 = "+nomePortador2);
+				logger.logInfo("3 NP2 = "+nomePortador2);
 			}
 
 			if (cabecalhoPlanilha.contains("PERIODO:") && cabecalhoPlanilha.contains("HISTORICO"))
@@ -5647,6 +5616,24 @@ if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Civia_PDF") ) {
 
 			mapaVariavel = readExtratoECartao("readItauComprovantesPDF", memFile, jDados, mapaVariavel, logger);
 			variaveis.put("tipoRetorno",   "break");
+			return variaveis.toString();
+		}
+	}
+	
+	//BANPARA PDF
+	if (roteiroCRM.optString("Planilhas_Padroes").contains("Extrato_Banpara_PDF")) {
+		if (arquivoCompleto.contains("BANPARA") && arquivoCompleto.contains("UNIDADE") //CNPJ DO BANCO
+		&& arquivoCompleto.contains("SAC DEFICIENTE AUDITIVO") && arquivoCompleto.contains("BANPARANET")) {
+			JSONObject jDados = new JSONObject();
+			jDados.put("CODEMPRESA", codEmpresa);
+			if(variaveis.has("hasNewChave")){
+				if(variaveis.optBoolean("hasNewChave")) jDados.put("TIPOLANCAMENTO", tipoLancamento);
+			}
+			jDados.put("NOMEEMPRESA",    nomeEmpresa);
+			jDados.put("NOMEARQUIVO",    nomeArquivo);
+			jDados.put("TIPOPLANILHA",    "EXTRATO-MODOBANK");
+			readExtratoECartao("readExtratoBanparaPDF", memFile, nomePortador, jDados, dbIOCont, logger);
+			variaveis.put("tipoRetorno", "break");
 			return variaveis.toString();
 		}
 	}
