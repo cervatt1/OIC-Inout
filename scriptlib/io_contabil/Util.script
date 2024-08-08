@@ -1402,7 +1402,7 @@ public String getCampoDate(String dataString, String patternIn, String patternOu
 
 
                 }else {
-                    if(dataString.length() == 7) patternIn = "MM/yyyy";
+                    if(dataString.length() == 7 && isValidPatternMMyyyy(dataString)) patternIn = "MM/yyyy";
                     if(dataString.length() == 5) patternIn = "MM/yy";
                 }
                 //validacao de campos texto
@@ -1483,6 +1483,59 @@ public String getDateSeparator(String dataString) {
     if (separator.length() == 1) return separator;
 
     return "";
+}
+
+
+/**
+ * Valida uma string de data para verificar se está no formato "MM/yyyy".
+ * 
+ * A função realiza uma verificação manual da string para determinar se ela
+ * corresponde ao formato esperado "MM/yyyy". A data é considerada válida se:
+ * - A string tiver exatamente 7 caracteres.
+ * - Houver uma barra ('/') na 3ª posição.
+ * - O mês for um valor válido (entre 1 e 12).
+ * - O ano for um valor válido dentro de um intervalo específico.
+ *
+ * @param dateStr A string que representa a data a ser validada.
+ *                Exemplo de entrada válida: "12/2024".
+ *                Exemplo de entradas inválidas: "13/2024", "2024/12", "2024-12".
+ * @return Retorna `true` se a data for válida. Retorna `false` se a data for inválida.
+ * 
+ * @throws NumberFormatException Se a string contiver caracteres não numéricos
+ *         nas posições onde os números (mês ou ano) são esperados.
+ */
+private static boolean isValidPatternMMyyyy(String dateStr) {
+    // Verificar se a string tem exatamente 7 caracteres e a barra na 3ª posição
+    if (dateStr.length() == 7 && dateStr.charAt(2) == '/') {
+        String[] parts = dateStr.split("/");
+        
+        if (parts.length != 2) return false;
+        
+        String monthStr = parts[0];
+        String yearStr = parts[1];
+        
+        // Verificar se o mês tem 2 dígitos e está no intervalo válido (1-12)
+        if (monthStr.length() == 2) {
+            try {
+                int month = Integer.parseInt(monthStr);
+                if (month < 1 || month > 12) return false;
+                
+                // Verificar se o ano tem exatamente 4 dígitos e está em um intervalo válido
+                if (yearStr.length() == 4) {
+                    int year = Integer.parseInt(yearStr);
+                    if (year >= 1900 && year <= 2100) {
+                        // Data válida
+                        return true;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                // Se ocorrer uma exceção ao converter os números, a data é inválida
+                return false;
+            }
+        }
+    }
+    
+    return false;  // Data inválida
 }
 
 
