@@ -1101,6 +1101,9 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
     String classificacao = "";
     String ERP           = "";                          //  <---<
     String complemento02 = "";
+    String codigoLcdpr   = "";
+    String contemLCDPR   = "";
+    String classificacaoPgRc = "";
 	HashMap mapaPlano   		= new HashMap();  
 
     Date dtAgora = new Date();
@@ -1126,11 +1129,16 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 
 		JSONObject recAux = new JSONObject();	//#20210126
 		recAux.put("cnpjContabilidade",	props.get("CONTABILIDADE_CNPJ"));
+		recAux.put("LCDPR",	            props.get(nomeEmpresa.toUpperCase()+"_EQUIPE_FECHAMENTO"));
 		recAux.put("cnpjEmpresa",		props.get(nomeEmpresa.toUpperCase()+"_CNPJ_EMPRESA"));
 		recAux.put("erpContabil",		props.get("ERP_CONTABILIDADE"));
 		recAux.put("lote",				loteMovimento);
 		recAux.put("codigoErp",			codEmpresa);
 		
+        if(recAux.optString("LCDPR").contains("LCDPR")){
+            contemLCDPR = "SIM";
+        }
+
         ERP = props.get("ERP_CONTABILIDADE");
 		
 		if (!ERP.equals(props.get(nomeEmpresa.toUpperCase() +"_ERP_EMPRESA"))) ERP = props.get(nomeEmpresa.toUpperCase() +"_ERP_EMPRESA");
@@ -1420,6 +1428,22 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 				// @sergio 202301-0024357 feito ajuste para trocar a conta anular por vazio 
 				contaDebito  = contaDebito.replaceAll("ANULAR","");
                 contaCredito = contaCredito.replaceAll("ANULAR","");
+
+                if(contemLCDPR.equals("SIM")){
+                    if (tipoLancamento.equals("PAGAR")) {
+						codigoLcdpr = cutString(contaDebito, "R");
+                        contaDebito = cutString(contaDebito, 0, "R");
+                        naturezaContabil = "C";
+                        classificacaoPgRc = "2";
+					}
+					if (tipoLancamento.equals("RECEBER")) {
+                        codigoLcdpr = cutString(contaCredito, "R");
+                        contaCredito = cutString(contaCredito, 0, "R");
+                        naturezaContabil = "D";
+                        classificacaoPgRc = "1";
+                    }
+                }
+
                 if (contaDebito.contains("E"))  contaDebito = contaDebito.substring(0, contaDebito.indexOf("E"));
                 if (contaCredito.contains("E")) contaCredito = contaCredito.substring(0, contaCredito.indexOf("E"));
 				
@@ -1472,10 +1496,10 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 					if (nomeEmpresa.toUpperCase().contains(empresaLcdpr))
 						fazLcdpr = true;
 				}
-				
+				// nao eh para funcionar por aqui LCDPR MODO ANTIGO
 				if (tipoMovimento.equals("CTB") && (nomeEmpresa.toUpperCase().contains("LOINIRGATTO") && nomeContabilidade.toUpperCase().contains("AQUARIUS")) || fazLcdpr) {
 					// logger.logDebug("CP02 " + complemento02);
-					String classificacaoPgRc = "1";
+					classificacaoPgRc = "1";
 					
 					if (tipoLancamento.equals("PAGAR")) {
 						naturezaContabil = "C";
@@ -1490,25 +1514,13 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                     txt.append(rn);
 				}
 
-                if (tipoMovimento.equals("CTB") && (contaCredito.contains("R") || contaDebito.contains("R"))) {
-                    String classificacaoPgRc = "1";
-                    String codigoLcdpr = "";
+                if (tipoMovimento.equals("CTB") && contemLCDPR.equals("SIM")) {
+                    String codigoParticipante = complemento02; 
 
-                    if (tipoLancamento.equals("PAGAR")) {
-						codigoLcdpr = cutString(contaDebito, "R");
-                        contaDebito = cutString(contaDebito, 0, "R");
-                        naturezaContabil = "C";
-						classificacaoPgRc = "2";
-					}
-					if (tipoLancamento.equals("RECEBER")) {
-                        codigoLcdpr = cutString(contaCredito, "R");
-                        contaCredito = cutString(contaCredito, 0, "R");
-                        naturezaContabil = "D";
-                    }
-                    linha = "|6140|" + classificacaoPgRc + "|" + documento + "|1|" + codigoLcdpr + "|1|" + naturezaContabil + "|";
+                    linha = "|6140|" + classificacaoPgRc + "|" + documento + "|1|" + codigoLcdpr + "|" + codigoParticipante + "|" + naturezaContabil + "|";
 					txt.append(linha);
                     txt.append(rn);
-					linha = "|6141|" + "1|" + valorFinal + "|";
+                    linha = "|6141|" + codigoParticipante + "|" + valorFinal + "|";
 					txt.append(linha);
                     txt.append(rn);
                 }
@@ -1569,8 +1581,6 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 			if (!loteMovimento.contains("OTTIMIZZA") || loteMovimento.contains("OTTIMIZZAAUTOMACAO")) {	//#20210126
 				// //toCloud = sendToCloud(toCloud, recAux, -1, apiWeb, logger);
 			}
-			
-			logger.logInfo("LM " + loteMovimento + " | " + totalRegistros);
 			
             if (totalRegistros > 0) {
 
@@ -1989,9 +1999,6 @@ public void GeraArquivoQuestor(JSONObject jDadosLote, InoutLogger logger) throws
                     tamData = 10;
                 }
                 if (nomeContabilidade.toUpperCase().equals("WOELFER")){
-                    separador = ",";
-                }
-				if (nomeContabilidade.toUpperCase().equals("CONTPLANCONTABILIDADE")) {
                     separador = ",";
                 }
 				
@@ -7236,9 +7243,7 @@ public void GeraArquivoCordilheira(JSONObject jDadosLote, InoutLogger logger) th
 
                 String historico25 = "";
 
-                String dataMovimentoFormatada = dataMovimento.replaceAll("/","");
-
-                linha = "L" + dataMovimentoFormatada + contaDebito + contaCredito + StringUtil.leftPad(codigoHistorico, 3, "0") + StringUtil.rightPad(historico25,25, " ") +
+                linha = "L" + dataMovimento + contaDebito + contaCredito + StringUtil.leftPad(codigoHistorico, 3, "0") + StringUtil.rightPad(historico25,25, " ") +
                     StringUtil.leftPad(valorFinal, 15, "0") + StringUtil.leftPad(centroCusto3, 3, "0") + StringUtil.leftPad(" ", 28, " ") +
                     contadorS + StringUtil.leftPad(" ", 91, " ") + StringUtil.leftPad(centroCusto6, 6, "0");
                 txt.append(linha);
@@ -7582,9 +7587,6 @@ public void GeraArquivoWk(JSONObject jDadosLote, InoutLogger logger) throws Exce
                     contaDebito             = contaCredito.replaceAll("INVERTE","");
                     contaCredito            = contaInvertida.replaceAll("INVERTE","");
                 }
-				
-				contaDebito  = contaDebito.replaceAll("ANULAR","");
-                contaCredito = contaCredito.replaceAll("ANULAR","");
 
                 if (nomeContabilidade.toUpperCase().equals("REIMER")){
                     separador = "|";
@@ -13601,11 +13603,8 @@ public void GeraArquivoSIESCON(JSONObject jDadosLote, InoutLogger logger) throws
 
 					txt.append(StringUtil.rightPad(contaCredito.trim(), 14, " ")); //### CONTA CREDITO OU CNPJ/CPF
 				} else{
-					// txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
-					// txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
-					//Alteração solicitada no atendimento: 2407-044609
-					txt.append(StringUtil.rightPad(contaDebito.trim(), 7, " ")); //### CONTA DEBITO
-					txt.append(StringUtil.rightPad(contaCredito.trim(), 7, " ")); //### CONTA CREDITO
+					txt.append(StringUtil.rightPad(contaDebito.trim(), 6, " ")); //### CONTA DEBITO
+					txt.append(StringUtil.rightPad(contaCredito.trim(), 6, " ")); //### CONTA CREDITO
 				}
                 txt.append(StringUtil.leftPad(valorFinal.trim(), 13, "0")); //### VALOR
 				if(codigoHistorico.equals("")) txt.append("    ");
@@ -16583,7 +16582,7 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
                     historico = historico.replaceAll("INVERTECONTA","").trim();
                 }
                 String codigoFilial = "1";
-                String codigoHistorico = "";
+                String codigoHistorico = "0";
 
                 // ////// / /////////////// //
                 // FILIAL e CODIGOHISTORICO //
@@ -16663,7 +16662,7 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
 				txt.append(dataMovimento);
                 txt.append(separador);
                 txt.append(contaDebito);
-                txt.append(separador);
+                txt.append(separador);;
                 txt.append(contaCredito);
                 txt.append(separador);
                 txt.append(valorFinal);
@@ -16726,10 +16725,10 @@ public void GeraArquivoDATACEMPRO(JSONObject jDadosLote, InoutLogger logger) thr
 
                 String dts = DateUtil.dateToString(dtAgora, "yyyyMMdd_HHmmss");
                 //String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".exp";
-				String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".xlsx";
+				String filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/" + loteMovimento + ".xls";
                 if(loteMovimento.toUpperCase().contains("OTTIMIZZA") && versaoPlataforma.equals("01_Conecta_Via_Ottimizza_FT") && !nomeEmpresa.toUpperCase().contains("OTTIMIZZAAUTOMACAO")) {
                     //filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".exp";
-					filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".xlsx";
+					filename = RouteEngine.INOUT_HOME + "/Contabil/" + nomeContabilidade + "/Arquivos/Processado/" + loteMovimento + ".xls";
                 }
                 FileWriter writer = new FileWriter(filename);
                 writer.writeNewFile(txt.toString());

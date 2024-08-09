@@ -409,7 +409,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 					
 					if (nomeArquivo.contains("_id")) nomeArquivoProtocolo = nomeArquivo;
 					
-					logger.logInfo("TEMPLATE NOME ARQUIVO == "+nomeArquivo);
+					logger.logInfo("TEMPLATE NOME ARQUIVO == "+nomeArquivo + " | TPLILHA: " + tipoPlanilha);
 					
 					if (nomeArquivo.toUpperCase().startsWith("ABA_")) {
 						
@@ -749,6 +749,11 @@ public JSONArray run(InoutLogger logger) throws Exception {
 						icpfCnpj		= getIndice("cpfCnpj", icpfCnpj, roteiroCRM);
 						
 						zerar 			= !Boolean.parseBoolean(roteiroCRM.optString("naoZerarValores").toLowerCase().trim());
+						logger.logInfo("INDICES : "	+ inomeOrigem
+													+ " | " + idataMovimento
+													+ " | " + inomePortador
+													+ " | " + idocumento
+													+ " | " + ivalorDocumento);
 					}
 					jStatus = new JSONObject();
 					// logger.logDebug("PUTSTATUS 524 " + nomeArquivo + " | " + cont + " | " + apagaArquivo + " | " + porAba + " | " + memFile.getTotalValidLines());
@@ -1208,7 +1213,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 								lerAposPrincipal = roteiroCRM.optString("lerAposPrincipal").toUpperCase();
 
 								// #DOCUMENTACAO
-								// ignorar antes
+								// ignorar antes O QUE É ISSO
 								if (!roteiroCRM.optString("tipoArquivo").toUpperCase().contains("ARQUIVO TEXTO")) {
 
 									histobj.put("nomeOrigem", getCampoString(nomeOrigem, inomeOrigem, line, zerar, roteiroCRM.optString("fornecedor").toUpperCase(), memFile, logger)).put("documento", getCampoString(documento, idocumento, line, zerar, roteiroCRM.optString("documentoNF").toUpperCase(), memFile, logger)).put("complemento01", getCampoString(complemento01,	icomplemento01, line, zerar, roteiroCRM.optString("complemento01").toUpperCase(), memFile, logger)).put("complemento02", getCampoString(complemento02,	icomplemento02, line, zerar, roteiroCRM.optString("complemento02").toUpperCase(), memFile, logger)).put("complemento03", getCampoString(complemento03,	icomplemento03, line, zerar, roteiroCRM.optString("complemento03").toUpperCase(), memFile, logger)).put("complemento04", getCampoString(complemento04,	icomplemento04, line, zerar, roteiroCRM.optString("complemento04").toUpperCase(), memFile, logger)).put("complemento05", getCampoString(complemento05,	icomplemento05, line, zerar, roteiroCRM.optString("complemento05").toUpperCase(), memFile, logger)).put("complemento06", getCampoString(complemento06,	icomplemento06, line, zerar, roteiroCRM.optString("complemento06").toUpperCase(), memFile, logger)).put("nomePortador", getCampoString(nomePortador,	inomePortador, line, zerar, roteiroCRM.optString("portador").toUpperCase(), memFile, logger)).put("dataMovimento", "").put("mesAnoAnterior", "").put("mesAno2Anterior", "").put("mesAnoAtual", "").put("contaMovimento", "").put("contaPortador", "").put("contaDebito", "").put("contaCredito", "").put("contaJuros", contaJuros).put("contaDesconto", contaDesconto)
@@ -1238,6 +1243,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 
 								}
 
+								logger.logInfo("TIPOPLANILHA: " + tipoPlanilha);
 								if (naoLeMais) continue;
 								if (tipoPlanilha.equals("")) continue;
 								
@@ -1444,7 +1450,7 @@ public JSONArray run(InoutLogger logger) throws Exception {
 										}
 									}
 									
-									 // if(codEmpresa.contains("406")) logger.logInfo("TP = "+tipoPlanilha+" | IV = "+ivalorDocumento+" | V = "+valorDocumento+" | ID = "+idataMovimento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem+" | NP = "+nomePortador);
+									logger.logInfo("TP = "+tipoPlanilha+" | IV = "+ivalorDocumento+" | V = "+valorDocumento+" | ID = "+idataMovimento+" | DT = "+dataMovimento+" | NO = "+nomeOrigem+" | NP = "+nomePortador);
 									
 									
 									if(logs && cont <= 200){
