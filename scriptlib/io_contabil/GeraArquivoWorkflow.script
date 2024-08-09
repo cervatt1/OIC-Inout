@@ -1429,7 +1429,7 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
 				contaDebito  = contaDebito.replaceAll("ANULAR","");
                 contaCredito = contaCredito.replaceAll("ANULAR","");
 
-                if(contemLCDPR.equals("SIM")){
+                if(contemLCDPR.equals("SIM") && contaDebito.contains("R")){
                     if (tipoLancamento.equals("PAGAR")) {
 						codigoLcdpr = cutString(contaDebito, "R");
                         contaDebito = cutString(contaDebito, 0, "R");
@@ -1442,6 +1442,8 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                         naturezaContabil = "D";
                         classificacaoPgRc = "1";
                     }
+                }else{
+                    codigoLcdpr = "";
                 }
 
                 if (contaDebito.contains("E"))  contaDebito = contaDebito.substring(0, contaDebito.indexOf("E"));
@@ -1514,7 +1516,7 @@ public void GeraArquivoDominioPipe(JSONObject jDadosLote, InoutLogger logger) th
                     txt.append(rn);
 				}
 
-                if (tipoMovimento.equals("CTB") && contemLCDPR.equals("SIM")) {
+                if (tipoMovimento.equals("CTB") && contemLCDPR.equals("SIM") && !codigoLcdpr.equals("")) {
                     String codigoParticipante = complemento02; 
 
                     linha = "|6140|" + classificacaoPgRc + "|" + documento + "|1|" + codigoLcdpr + "|" + codigoParticipante + "|" + naturezaContabil + "|";
